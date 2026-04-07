@@ -54,9 +54,9 @@
 	troll hscript is simply a library in case it ever makes major breaking changes
 	we will update these accordingly if need be.
 	-->
-	<haxelib name="discord_rpc" if="cpp" path="_libDependencies/linc_discord-rpc"/>
-	<haxelib name="thscript" if="cpp" path="_libDependencies/t-hscript"/>
-	<haxedef name="hscriptPos" if="thscript" />
+	<haxelib name="discord_rpc" if="cpp" path="_dependencies/linc_discord-rpc"/>
+	<haxelib name="t-hscript" if="cpp" path="_dependencies/t-hscript"/>
+	<haxedef name="hscriptPos" if="t-hscript" />
 
 	<!--<haxelib name="hxcpp-debug-server" if="cpp debug"/>-->
 

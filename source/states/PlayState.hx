@@ -1286,7 +1286,7 @@ class PlayState extends MusicBeatState
 		var gottaHits:Array<Note> = notes.members.filter(function(nt:Note):Bool return nt != null && nt.canBeHit && !nt.isSustainNote && nt.noteData == key);
 		gottaHits.sort(function(a:Note, b:Note):Int return Std.int(a.strumTime - b.strumTime));
 		holdInputs[key] = true;
-		
+
 		if (gottaHits.length != 0)
 		{
 			goodNoteHit(gottaHits[0]);
@@ -1404,7 +1404,7 @@ class PlayState extends MusicBeatState
 			totalNotesHit += EtternaFunctions.wife3(noteDiff, Conductor.timeScale);
 		else
 			totalNotesHit += daNote.judgement.accuracy;
-		// health += judgementData.getHealthBonus(daNote.judgement.name);
+		health += judgementData.getHealthBonus(daNote.judgement.name);
 		daNote.judgement.hits++;
 		songScore += Math.round(score);
 		if (daNote.judgement.comboBreak == true)

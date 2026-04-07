@@ -1,10 +1,19 @@
 Kade Engine 1.4.2 fork because I was bored.
 
+you might wanna use `--recurse-submodules` when cloning this repository since it has some local ones that are needed for the game to compile.
+
+```
+git clone --recurse-submodules https://github.com/asmadeuxs/KadeFork.git
+```
+or with ssh
+```
+git clone --recurse-submodules git@github.com:asmadeuxs/KadeFork.git
+```
+
 todo (this is more for myself @asmadeuxs than anything.):
 - repo:
 	- write real readme
 	- write new issue templates
-	- turn the repos inside _libDependencies into submodules (*might not do it.*)
 - libs:
 	- replace chart parser with [moonchart](https://github.com/MaybeMaru/moonchart)
 	- add [flixel-animate](https://github.com/MaybeMaru?tab=repositories) support
