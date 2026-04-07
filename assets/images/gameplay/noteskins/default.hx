@@ -1,0 +1,20 @@
+var directions = ["left", "down", "up", "right"];
+
+function generateStrum(strum, noteData)
+{
+	var direction = directions[noteData];
+	strum.frames = Paths.getSparrowAtlas('gameplay/noteskins/NOTE_assets');
+	strum.animation.addByPrefix('static', 'arrow' + direction.toUpperCase());
+	strum.animation.addByPrefix('pressed', direction + ' press', 24, false);
+	strum.animation.addByPrefix('confirm', direction + ' confirm', 24, false);
+	strum.setGraphicSize(Std.int(strum.width * 0.7));
+	strum.antialiasing = true;
+	// transition, re-add later.
+	/*if (!isStoryMode)
+		{
+			strum.y -= 10;
+			strum.alpha = 0;
+			FlxTween.tween(strum, {y: strum.y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
+	}*/
+	strum.playAnim('static', true);
+}

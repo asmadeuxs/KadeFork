@@ -1,0 +1,26 @@
+{
+  "name": "Boyfriend",
+  "singDuration": 4.0,
+  "defaultFramerate": 24,
+  "singAnimations": [
+    "left",
+    "down",
+    "up",
+    "right"
+  ],
+  "animationTimers": {
+    "hey": 1.0
+  },
+  "animations": {
+    "idle": "BF idle dance0",
+    "hey": "BF HEY!!",
+    "left": "BF NOTE LEFT0",
+    "down": "BF NOTE DOWN0",
+    "up": "BF NOTE UP0",
+    "right": "BF NOTE RIGHT0",
+    "missleft": "BF NOTE LEFT MISS",
+    "missdown": "BF NOTE DOWN MISS",
+    "missup": "BF NOTE UP MISS",
+    "missright": "BF NOTE RIGHT MISS"
+  }
+}
