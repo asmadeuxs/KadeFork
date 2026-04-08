@@ -1,12 +1,12 @@
 package menus;
 
+import data.Option;
+import data.Preferences;
 import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import flixel.FlxSprite;
-import data.Preferences;
-import data.Option;
 
 using flixel.util.FlxSpriteUtil;
 

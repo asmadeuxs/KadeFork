@@ -1,21 +1,22 @@
 package;
 
-import openfl.display.BlendMode;
-import openfl.text.TextFormat;
-import openfl.display.Application;
-import flixel.util.FlxColor;
 import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxState;
+import flixel.util.FlxColor;
 import openfl.Assets;
 import openfl.Lib;
+import openfl.display.Application;
+import openfl.display.BlendMode;
 import openfl.display.FPS;
 import openfl.display.Sprite;
 import openfl.events.Event;
+import openfl.text.TextFormat;
 
 class Main extends Sprite
 {
-	public static var initialState:Class<FlxState> = TitleState; // The FlxState the game starts with.
+	public static var initialState:Class<FlxState> = menus.TitleState; // The FlxState the game starts with.
+
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.

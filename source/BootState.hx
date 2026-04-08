@@ -1,7 +1,10 @@
 package;
 
 import flixel.FlxG;
+import menus.StoryMenuState;
 
+// This is just a class to initialise variables
+// Preferably only mess with it if you need to do some save-file related stuff
 class BootState extends flixel.FlxState
 {
 	override function create()
@@ -18,7 +21,7 @@ class BootState extends flixel.FlxState
 		#end
 
 		data.Preferences.load();
-		Highscore.load();
+		data.Highscore.load();
 
 		if (FlxG.save.data.weekUnlocked != null)
 		{
@@ -32,9 +35,9 @@ class BootState extends flixel.FlxState
 				StoryMenuState.weekUnlocked[0] = true;
 		}
 		#if FREEPLAY
-		FlxG.switchState(new FreeplayState());
+		FlxG.switchState(new menus.FreeplayState());
 		#elseif CHARTING
-		FlxG.switchState(new ChartingState());
+		FlxG.switchState(new editor.ChartingState());
 		#else
 		FlxG.switchState(Type.createInstance(Main.initialState, []));
 		#end

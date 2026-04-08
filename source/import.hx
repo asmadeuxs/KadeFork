@@ -1,2 +1,2 @@
+import data.Paths;
 import data.Preferences;
-import Paths;

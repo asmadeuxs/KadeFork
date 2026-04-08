@@ -1,8 +1,8 @@
 package data;
 
-import hscript.*;
 import flixel.FlxG;
 import haxe.io.Path;
+import hscript.*;
 
 typedef HScriptFunction =
 {

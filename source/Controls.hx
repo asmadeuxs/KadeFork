@@ -1,8 +1,8 @@
 package;
 
 import flixel.FlxG;
-import openfl.events.KeyboardEvent;
 import flixel.input.keyboard.FlxKey;
+import openfl.events.KeyboardEvent;
 
 typedef ActionMap = Map<String, Array<FlxKey>>;
 

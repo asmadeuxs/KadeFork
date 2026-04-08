@@ -1,8 +1,8 @@
 package;
 
-import lime.utils.Assets;
 import flixel.FlxObject;
 import flixel.util.FlxAxes;
+import lime.utils.Assets;
 
 using StringTools;
 

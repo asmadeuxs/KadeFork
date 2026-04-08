@@ -5,7 +5,6 @@ import flixel.group.FlxSpriteGroup;
 import gameplay.FunkinSprite;
 import data.ScriptLoader;
 
-// Strum class below this one
 class Strumline extends FlxTypedSpriteGroup<FunkinSprite>
 {
 	public var keyCount:Int = 4;

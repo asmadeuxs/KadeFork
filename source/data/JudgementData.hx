@@ -85,8 +85,8 @@ class JudgementData
 	public function getClearFlag():String
 	{
 		// made these static JUST for this btw :friendly_hearts:
-		var breaks:Int = states.PlayState.comboBreaks;
-		var misses:Int = states.PlayState.misses;
+		var breaks:Int = gameplay.PlayState.comboBreaks;
+		var misses:Int = gameplay.PlayState.misses;
 
 		var clearFlag:String = "N/A";
 		var sicks:Int = activeList[0].hits;
