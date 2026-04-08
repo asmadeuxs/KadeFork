@@ -984,7 +984,6 @@ class PlayState extends MusicBeatState {
 	var endingSong:Bool = false;
 	var hits:Array<Float> = [];
 
-	var timeShown = 0;
 	var currentTimingShown:FlxText = null;
 
 	var showJudgement:Bool = true;
@@ -1027,10 +1026,12 @@ class PlayState extends MusicBeatState {
 		var msTiming = FlxMath.roundDecimal(noteDiff, 3);
 
 		if (currentTimingShown != null)
+		{
+			FlxTween.cancelTweensOf(currentTimingShown, ['alpha']);
 			comboDisplay.remove(currentTimingShown);
+		}
 
 		currentTimingShown = new FlxText(0, 0, 0, "0ms");
-		timeShown = 0;
 		currentTimingShown.color = daNote.judgement.color;
 		currentTimingShown.borderStyle = OUTLINE;
 		currentTimingShown.borderSize = 1.5;
@@ -1038,8 +1039,7 @@ class PlayState extends MusicBeatState {
 		currentTimingShown.text = msTiming + "ms";
 		currentTimingShown.size = 20;
 
-		if (currentTimingShown.alpha != 1)
-			currentTimingShown.alpha = 1;
+		currentTimingShown.alpha = 1;
 
 		comboDisplay.add(currentTimingShown);
 
@@ -1124,22 +1124,25 @@ class PlayState extends MusicBeatState {
 		coolText.text = Std.string(seperatedScore);
 		FlxTween.tween(rating, {alpha: 0}, 0.2, {
 			startDelay: Conductor.crochet * 0.001,
-			onUpdate: function(tween:FlxTween) {
-				if (currentTimingShown != null)
-					currentTimingShown.alpha -= 0.02;
-				timeShown++;
-			}
+			onComplete: function(tween:FlxTween) {
+				rating.destroy();
+			},
+		});
+
+		FlxTween.tween(currentTimingShown, {alpha: 0}, 0.2, {
+			startDelay: Conductor.crochet * 0.001,
+			onComplete: function(tween:FlxTween) {
+				if (currentTimingShown != null) {
+					comboDisplay.remove(currentTimingShown);
+					currentTimingShown = null;
+				}
+			},
 		});
 
 		FlxTween.tween(comboSpr, {alpha: 0}, 0.2, {
 			onComplete: function(tween:FlxTween) {
 				coolText.destroy();
 				comboSpr.destroy();
-				if (currentTimingShown != null && timeShown >= 20) {
-					comboDisplay.remove(currentTimingShown);
-					currentTimingShown = null;
-				}
-				rating.destroy();
 			},
 			startDelay: Conductor.crochet * 0.001
 		});
