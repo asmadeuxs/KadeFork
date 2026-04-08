@@ -16,7 +16,7 @@ class OptionsMenu extends MusicBeatSubstate {
 		"Preferences" => [
 			{
 				type: "number",
-				name: "FPS",
+				name: "Framerate",
 				variable: "frameRate",
 				description: "How many times the game is updated and drawn to your screen",
 				numberStep: 1,
@@ -79,7 +79,7 @@ class OptionsMenu extends MusicBeatSubstate {
 			},
 			{
 				name: "Note Splashes",
-				description: "Hitting a sick and above spawns a funny splash that gives you a boner",
+				description: "Hitting a sick and above spawns a funny splash that gives you a boner", // thanks josh -asmadeuxs
 				variable: "noteSplashes",
 			},
 			{
@@ -94,9 +94,14 @@ class OptionsMenu extends MusicBeatSubstate {
 				choices: Locale.list(),
 			},*/
 			{
+				type: "number",
 				name: "Interface Dim",
 				description: "Enables a background behind the strums or stage",
-				variable: "strumUnderlay"
+				variable: "strumUnderlay",
+				// displayStyle: "{}%",
+				numberStep: 1.0,
+				numberBoundLeft: 0,
+				numberBoundRight: 100
 			},
 			{
 				name: "Dim Type",
@@ -174,26 +179,48 @@ class OptionsMenu extends MusicBeatSubstate {
 	}
 
 	var closing:Bool = false;
+	var keyTimer:Float = 1.0;
 
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 		if (closing)
 			return;
+		var up:Bool = controls.UP_P;
+		if (up || controls.DOWN_P)
+			changeSelection((up ? -1 : 1) * (FlxG.keys.pressed.SHIFT ? 5 : 1));
+		var leftp:Bool = controls.LEFT_P;
+		var rightp:Bool = controls.RIGHT_P;
+		var lefth:Bool = controls.LEFT;
+		var righth:Bool = controls.RIGHT;
+		if (leftp || rightp || lefth || righth) {
+			var change:Bool = false;
+			if (leftp || rightp)
+				change = true;
+			else if (lefth || righth) {
+				// TODO: implement keyRepeat in Controls so I don't have to do this shit manually -asmadeuxs
+				keyTimer += 0.1;
+				if (keyTimer >= 1.0) {
+					change = true;
+					keyTimer = 0.0;
+				}
+			}
+			if (change) {
+				var inc:Int = 1;
+				if (FlxG.keys.pressed.SHIFT)
+					inc = 4;
+				var left:Bool = leftp || lefth;
+				curCatOptions[curSelected].change(left ? -inc : inc);
+				catOptions.members[curSelected * 2 + 1].text = curCatOptions[curSelected].valueString();
+				FlxG.sound.play(Paths.sound('scrollMenu'));
+			}
+		} else if (controls.LEFT_R || controls.RIGHT_R)
+			keyTimer = 0.0;
 		var leftCat:Bool = FlxG.keys.justPressed.Q;
 		if (leftCat || FlxG.keys.justPressed.E) {
 			catSelected = flixel.math.FlxMath.wrap(catSelected + (leftCat ? -1 : 1), 0, categoryOrder.length - 1);
 			FlxG.sound.play(Paths.sound('scrollMenu'));
 			currentCat = categoryOrder[catSelected];
 			updateCat();
-		}
-		var up:Bool = controls.UP_P;
-		if (up || controls.DOWN_P)
-			changeSelection((up ? -1 : 1) * (FlxG.keys.pressed.SHIFT ? 5 : 1));
-		var left:Bool = controls.LEFT_P;
-		if (left || controls.RIGHT_P) {
-			curCatOptions[curSelected].change(left ? -1 : 1);
-			catOptions.members[curSelected * 2 + 1].text = curCatOptions[curSelected].valueString();
-			FlxG.sound.play(Paths.sound('scrollMenu'));
 		}
 		if (controls.BACK_P) {
 			closing = true;

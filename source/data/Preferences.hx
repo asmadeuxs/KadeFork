@@ -22,7 +22,7 @@ private enum abstract StrumUnderlayType(Int) from Int to Int {
 	// Scroll Speed.
 	var scrollSpeed:Float = 1.0; // Overrides the chart's scroll speed with your own (applies if it's not set to 1)
 	// Visuals & Accessibility
-	var strumUnderlay:Bool = false; // Enables a background behind the strums or stage
+	var strumUnderlay:Int = 0; // Enables a background behind the strums or stage (goes from 0 - 100)
 	var strumUnderlayType:Int = StrumUnderlayType.ON_STRUMS; // Where should the underlay be layered on
 	var accuracyDisplay:Bool = true; // Shows Misses and Accuracy in the Score Text
 	var showSongPosition:Bool = false; // Shows a progress bar for the song in the HUD

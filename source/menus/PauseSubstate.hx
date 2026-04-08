@@ -14,6 +14,8 @@ import flixel.util.FlxColor;
 import gameplay.PlayState;
 import menus.GenericMenu.SimpleMenuButton;
 
+using CoolUtil;
+
 class PauseSubstate extends MusicBeatSubstate {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
@@ -40,9 +42,9 @@ class PauseSubstate extends MusicBeatSubstate {
 
 		FlxG.sound.list.add(pauseMusic);
 
-		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
-		bg.alpha = 0;
+		var bg:FlxSprite = new FlxSprite().makeScaledGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		bg.scrollFactor.set();
+		bg.alpha = 0;
 		add(bg);
 
 		var levelInfo:FlxText = new FlxText(20, 15, 0, "", 32);

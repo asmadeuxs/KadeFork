@@ -1,7 +1,9 @@
 package;
 
 import flixel.FlxObject;
+import flixel.FlxSprite;
 import flixel.util.FlxAxes;
+import flixel.util.FlxColor;
 import lime.utils.Assets;
 
 using StringTools;
@@ -9,6 +11,16 @@ using StringTools;
 class CoolUtil {
 	public static var pixelScale:Float = 6;
 	public static var difficultyArray:Array<String> = ['EASY', "NORMAL", "HARD"];
+
+	public static function makeScaledGraphic(sprite:FlxSprite, x:Float, y:Float, color:FlxColor = FlxColor.WHITE, ?updateHitbox:Bool = true):FlxSprite {
+		if (sprite == null)
+			sprite = new FlxSprite();
+		sprite.makeGraphic(1, 1, color);
+		sprite.scale.set(x, y);
+		if (updateHitbox)
+			sprite.updateHitbox();
+		return sprite;
+	}
 
 	public static function objectCenter(o1:FlxObject, o2:FlxObject, centerType:FlxAxes = FlxAxes.XY) {
 		if (centerType == X || centerType == XY)
