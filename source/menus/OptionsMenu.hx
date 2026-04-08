@@ -15,6 +15,16 @@ class OptionsMenu extends MusicBeatSubstate {
 	public var optionStash:Map<String, Array<Option>> = [
 		"Preferences" => [
 			{
+				type: "number",
+				name: "FPS",
+				variable: "frameRate",
+				description: "How many times the game is updated and drawn to your screen",
+				numberStep: 1,
+				numberBoundLeft: 30,
+				numberBoundRight: 360,
+				setFunc: Preferences.setFPSCap
+			},
+			{
 				type: "choice",
 				name: "Scroll Type",
 				variable: "scrollType",
@@ -41,7 +51,7 @@ class OptionsMenu extends MusicBeatSubstate {
 				name: "Scroll Speed",
 				variable: "scrollSpeed",
 				description: "Overrides the chart's scroll speed with your own\napplies if it's not set to 1",
-				numberStep: 0.01,
+				numberStep: 0.1,
 				numberBoundLeft: 0.1,
 				numberBoundRight: 10.0
 			}
@@ -173,7 +183,7 @@ class OptionsMenu extends MusicBeatSubstate {
 		}
 		var up:Bool = controls.UP_P;
 		if (up || controls.DOWN_P)
-			changeSelection(up ? -1 : 1);
+			changeSelection((up ? -1 : 1) * (FlxG.keys.pressed.SHIFT ? 5 : 1));
 		var left:Bool = controls.LEFT_P;
 		if (left || controls.RIGHT_P) {
 			curCatOptions[curSelected].change(left ? -1 : 1);

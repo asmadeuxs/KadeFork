@@ -20,6 +20,8 @@ class BootState extends flixel.FlxState {
 		data.Preferences.load();
 		data.Highscore.load();
 
+		Preferences.setFPSCap(Preferences.user.frameRate);
+
 		if (FlxG.save.data.weekUnlocked != null) { // FIX LATER!!!
 			// WEEK UNLOCK PROGRESSION!!
 			// StoryMenuState.weekUnlocked = FlxG.save.data.weekUnlocked;
