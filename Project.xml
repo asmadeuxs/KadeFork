@@ -3,15 +3,7 @@
 	<!-- _________________________ Application Settings _________________________ -->
 
 	<!-- If you're looking for "version" I moved it to Main.hx -->
-	<app title="Friday Night Funkin' (Kade Engine)" file="HalenKade" packageName="com.funkincrew.funkin" package="com.funkincrew.funkin" main="Main" company="asmadeuxs" />
-
-	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file
-		or you can set the actual size of your file manually at "FlxPreloaderBase-onUpdate-bytesTotal"-->
-	<!-- <app preloader="Preloader" resizable="true" /> -->
-	<app preloader="flixel.system.FlxPreloader" />
-
-	<!--Minimum without FLX_NO_GAMEPAD: 11.8, without FLX_NO_NATIVE_CURSOR: 11.2-->
-	<set name="SWF_VERSION" value="11.8" />
+	<app title="Friday Night Funkin' (DEKA! Engine)" file="DekaEngine" packageName="com.funkincrew.funkin" package="com.funkincrew.funkin" main="Main" company="asmadeuxs" />
 
 	<!-- ____________________________ Window Settings ___________________________ -->
 
@@ -92,7 +84,7 @@
 	<!--Enable this for Nape release builds for a serious peformance improvement-->
 	<haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
 
-	<haxedef name="message.reporting" value="pretty" />
+	<!--<haxedef name="message.reporting" value="pretty" />-->
 
 	<!-- _________________________________ Custom _______________________________ -->
 

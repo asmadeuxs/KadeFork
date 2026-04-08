@@ -1,7 +1,7 @@
 package menus;
 
 import data.Highscore;
-import data.Song;
+import data.song.Song;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.transition.FlxTransitionableState;

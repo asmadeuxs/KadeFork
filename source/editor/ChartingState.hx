@@ -36,8 +36,8 @@ import gameplay.PlayState;
 import ui.HealthIcon;
 import gameplay.Character;
 import gameplay.Note;
-import data.Section;
-import data.Song;
+import data.song.Section;
+import data.song.Song;
 
 using StringTools;
 
