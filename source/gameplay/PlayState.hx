@@ -892,15 +892,15 @@ class PlayState extends MusicBeatState {
 	function updateScoreText():Void {
 		var layout:String;
 		if (Preferences.user.showNps)
-			layout = 'NPS:$nps | ';
+			layout = '$nps NPS | ';
 		else
 			layout = '';
 		if (Preferences.user.accuracyDisplay) {
-			layout += 'Score:$songScore';
-			layout += ' | Misses:$misses';
-			layout += ' | Accuracy:${FlxMath.roundDecimal(accuracy, 2)} % | ${generateRanking()}';
+			layout += 'Score: $songScore';
+			layout += ' | Misses: $misses';
+			layout += ' | Accuracy: ${FlxMath.roundDecimal(accuracy, 2)}% | ${generateRanking()}';
 		} else
-			layout += 'Score:$songScore';
+			layout += 'Score: $songScore';
 		scoreTxt.text = layout;
 	}
 
