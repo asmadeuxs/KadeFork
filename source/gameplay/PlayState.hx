@@ -968,6 +968,10 @@ class PlayState extends MusicBeatState {
 	var timeShown = 0;
 	var currentTimingShown:FlxText = null;
 
+	var showJudgement:Bool = true;
+	var showComboNumbers:Bool = true;
+	var showComboSprite:Bool = false;
+
 	private function popUpScore(daNote:Note):Void {
 		var noteDiff:Float = Math.abs(Conductor.songPosition - daNote.strumTime);
 		var placement:String = Std.string(combo);
@@ -1034,6 +1038,8 @@ class PlayState extends MusicBeatState {
 		comboSpr.velocity.x += FlxG.random.int(1, 10);
 		currentTimingShown.velocity.x += comboSpr.velocity.x;
 		comboDisplay.add(rating);
+		if (showComboSprite)
+			comboDisplay.add(comboSpr);
 
 		var ratingSprScale:Float = 0.65;
 
@@ -1245,8 +1251,10 @@ class PlayState extends MusicBeatState {
 		health += judgementData.getHealthBonus(daNote.judgement.name);
 		daNote.judgement.hits++;
 		songScore += Math.round(score);
-		if (daNote.judgement.comboBreak == true)
+		if (daNote.judgement.comboBreak == true) {
 			comboBreaks++; // unused until I figure something out
+			combo = 0;
+		}
 	}
 
 	override function stepHit() {

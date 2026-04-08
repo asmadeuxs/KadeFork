@@ -28,6 +28,8 @@ using StringTools;
 		"choice"
 	];
 
+	@:optional public var setFunc:(value:Dynamic) -> Void;
+
 	public var name:String = null;
 	public var description:String = null;
 	public var variable:String = null;
@@ -98,6 +100,8 @@ using StringTools;
 					Reflect.setField(Preferences.user, this.variable, choices[index]);
 				}
 		}
+		if (setFunc != null)
+			setFunc(Reflect.field(Preferences.user, this.variable));
 		return value;
 	}
 }

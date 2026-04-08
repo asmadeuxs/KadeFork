@@ -22,6 +22,7 @@ import Discord.DiscordClient;
 
 class FreeplayState extends MusicBeatState {
 	var songs:Array<SongMetadata> = [];
+	var difficulties:Array<String> = ['EASY', 'MEDIUM', 'HARD'];
 
 	var seslector:FlxText;
 	var curSelected:Int = 0;
@@ -162,14 +163,7 @@ class FreeplayState extends MusicBeatState {
 			curDifficulty = 0;
 
 		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
-		switch (curDifficulty) {
-			case 0:
-				diffText.text = "EASY";
-			case 1:
-				diffText.text = 'NORMAL';
-			case 2:
-				diffText.text = "HARD";
-		}
+		diffText.text = difficulties[curDifficulty];
 	}
 
 	function changeSelection(change:Int = 0) {

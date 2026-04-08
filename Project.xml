@@ -92,6 +92,8 @@
 	<!--Enable this for Nape release builds for a serious peformance improvement-->
 	<haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
 
+	<haxedef name="message.reporting" value="pretty" />
+
 	<!-- _________________________________ Custom _______________________________ -->
 
 	<icon path="art/icon16.png" size='16'/>

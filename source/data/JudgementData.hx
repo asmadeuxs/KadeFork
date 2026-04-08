@@ -2,6 +2,7 @@ package data;
 
 @:structInit class Judgement {
 	public var name:String = "Unknown";
+	public var image:String = "combo";
 	public var hitWindow:Float = 0.0;
 
 	@:optional public var comboBreak:Bool = false;
@@ -24,25 +25,36 @@ class JudgementData {
 	public function getDefaultJudgements():Array<Judgement> {
 		return [
 			{
+				name: "kino",
+				image: "kino",
+				hitWindow: 22.5,
+				accuracy: 1.0,
+				score: 500
+			},
+			{
 				name: "sick",
+				image: "sick",
 				hitWindow: 45.0,
 				accuracy: 1.0,
 				score: 350
 			},
 			{
 				name: "good",
+				image: "good",
 				hitWindow: 90.0,
 				accuracy: 0.75,
 				score: 200
 			},
 			{
 				name: "bad",
+				image: "bad",
 				hitWindow: 135.0,
 				accuracy: 0.50,
 				score: 0
 			},
 			{
 				name: "shit",
+				image: "shit",
 				hitWindow: 180.0,
 				accuracy: 0.25,
 				score: -300,
