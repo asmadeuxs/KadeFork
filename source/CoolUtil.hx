@@ -10,7 +10,7 @@ using StringTools;
 
 class CoolUtil {
 	public static var pixelScale:Float = 6;
-	public static var difficultyArray:Array<String> = ['EASY', "NORMAL", "HARD"];
+	public static var defaultDifficulties:Array<String> = ['EASY', "NORMAL", "HARD"];
 
 	public static function makeScaledGraphic(sprite:FlxSprite, x:Float, y:Float, color:FlxColor = FlxColor.WHITE, ?updateHitbox:Bool = true):FlxSprite {
 		if (sprite == null)
@@ -31,13 +31,24 @@ class CoolUtil {
 	}
 
 	public static function difficultyString(difficulty:Int):String
-		return difficultyArray[difficulty];
+		return defaultDifficulties[difficulty];
 
 	public static function numberArray(max:Int, ?min = 0):Array<Int>
 		return [for (i in min...max) i];
 
+	private var commentStarters = ["//", "#", "--"];
+
 	public static function coolTextFile(path:String):Array<String> {
 		var daList:Array<String> = Paths.getText(path).trim().split('\n');
+		for (i => t in daList) {
+			t = t.trim();
+			if (t.length == 0
+				|| t.startsWith("#")
+				|| t.startsWith("//")
+				|| t.startsWith("--")
+				|| (t.startsWith("/*") && t.endsWith("*/")))
+				daList.remove(t);
+		}
 		return [for (i in 0...daList.length) daList[i] = daList[i].trim()];
 	}
 

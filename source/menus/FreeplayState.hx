@@ -2,6 +2,7 @@ package menus;
 
 import data.Highscore;
 import data.song.Song;
+import data.song.SongMetadata;
 import flash.text.TextField;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -12,7 +13,6 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import gameplay.PlayState;
 import lime.utils.Assets;
-import data.song.SongMetadata;
 import ui.AlphabetMenu;
 import ui.HealthIcon;
 
@@ -24,12 +24,12 @@ import Discord.DiscordClient;
 
 class FreeplayState extends MusicBeatState {
 	var songs:Array<SongMetadata> = [];
-	var difficulties:Array<String> = ['EASY', 'MEDIUM', 'HARD'];
+	var lastDifficultyArray:Array<String> = null;
 	var grpSongs:AlphabetMenu;
 
 	var seslector:FlxText;
 	var curSelected:Int = 0;
-	var curDifficulty:Int = 1;
+	var curDifficulty:Int = 0;
 
 	var scoreText:FlxText;
 	var diffText:FlxText;
@@ -44,7 +44,10 @@ class FreeplayState extends MusicBeatState {
 
 		for (i in 0...initSonglist.length) {
 			var data:Array<String> = initSonglist[i].split(':');
-			songs.push(new SongMetadata(data[0], data[1], data[2]));
+			var diffs:Array<String> = null;
+			if (data.length > 2 && data[3].length > 0)
+				diffs = data[3].split(",");
+			songs.push(new SongMetadata(data[0], data[1], data[2], diffs));
 		}
 
 		#if discord_rpc
@@ -79,7 +82,6 @@ class FreeplayState extends MusicBeatState {
 		add(scoreText);
 
 		changeSelection();
-		changeDiff();
 
 		super.create();
 	}
@@ -97,7 +99,7 @@ class FreeplayState extends MusicBeatState {
 		if (Math.abs(lerpScore - intendedScore) <= 10)
 			lerpScore = intendedScore;
 
-		scoreText.text = "PERSONAL BEST:" + lerpScore;
+		scoreText.text = 'PERSONAL BEST:$lerpScore';
 
 		var upP = controls.UP_P;
 		var downP = controls.DOWN_P;
@@ -123,28 +125,32 @@ class FreeplayState extends MusicBeatState {
 	}
 
 	function changeDiff(change:Int = 0) {
-		curDifficulty += change;
-
-		if (curDifficulty < 0)
-			curDifficulty = 2;
-		if (curDifficulty > 2)
-			curDifficulty = 0;
-
+		var difficulties:Array<String> = CoolUtil.defaultDifficulties;
+		if (songs[curSelected].difficulties != null && songs[curSelected].difficulties.length > 0)
+			difficulties = songs[curSelected].difficulties;
+		if (difficulties != CoolUtil.defaultDifficulties) {
+			// check to prevent null difficulties
+			if (lastDifficultyArray != difficulties) {
+				lastDifficultyArray = difficulties;
+				if (difficulties.length > 2)
+					curDifficulty = Math.round(difficulties.length / 2);
+				else
+					curDifficulty = difficulties.length - 1;
+			}
+		}
+		trace(difficulties);
+		curDifficulty = FlxMath.wrap(curDifficulty + change, 0, difficulties.length - 1);
 		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
-		diffText.text = difficulties[curDifficulty];
+		diffText.text = difficulties[curDifficulty].toUpperCase();
+		trace(difficulties[curDifficulty]);
 	}
 
 	function changeSelection(change:Int = 0) {
 		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 
-		curSelected += change;
-
-		if (curSelected < 0)
-			curSelected = songs.length - 1;
-		if (curSelected >= songs.length)
-			curSelected = 0;
-
+		curSelected = FlxMath.wrap(curSelected + change, 0, songs.length - 1);
 		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
+		changeDiff();
 
 		var bullShit:Int = 0;
 
