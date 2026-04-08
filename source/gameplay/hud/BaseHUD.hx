@@ -3,11 +3,11 @@ package gameplay.hud;
 import flixel.group.FlxSpriteGroup;
 
 class BaseHUD extends FlxSpriteGroup {
-	public function new():Void {
+	override public function new():Void {
 		super();
 	}
 
-	public function update(elapsed:Float):Void {
+	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 	}
 
