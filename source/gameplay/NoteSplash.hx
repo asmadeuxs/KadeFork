@@ -4,12 +4,9 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import haxe.io.Path;
 
-//TODO: rewrite these, it's all hardcode hell
-
-class NoteSplash extends FlxSprite
-{
-	public function new(x:Float, y:Float, noteData:Int = 0):Void
-	{
+// TODO: rewrite these, it's all hardcode hell
+class NoteSplash extends FlxSprite {
+	public function new(x:Float, y:Float, noteData:Int = 0):Void {
 		super(x, y);
 
 		frames = Paths.getSparrowAtlas('gameplay/noteskins/noteSplashes');
@@ -28,8 +25,7 @@ class NoteSplash extends FlxSprite
 		// alpha = 0.75;
 	}
 
-	public function setupNoteSplash(x:Float, y:Float, noteData:Int = 0)
-	{
+	public function setupNoteSplash(x:Float, y:Float, noteData:Int = 0) {
 		setPosition(x, y);
 		alpha = 0.6;
 
@@ -40,8 +36,7 @@ class NoteSplash extends FlxSprite
 		offset.set(width * 0.3, height * 0.3);
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		if (animation.curAnim.finished)
 			kill();
 

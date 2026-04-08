@@ -672,12 +672,13 @@ class PlayState extends MusicBeatState {
 		} else
 			currentFrames++;
 
-		if (FlxG.keys.justPressed.NINE) {
+		// TODO: restore this
+		/*if (FlxG.keys.justPressed.NINE) {
 			if (iconP1.animation.curAnim.name == 'bf-old')
 				iconP1.animation.play(SONG.player1);
 			else
 				iconP1.animation.play('bf-old');
-		}
+		}*/
 
 		super.update(elapsed);
 
@@ -706,15 +707,16 @@ class PlayState extends MusicBeatState {
 		iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01) - iconOffset);
 		iconP2.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) - (iconP2.width - iconOffset);
 
-		if (healthBar.percent < 20)
-			iconP1.animation.curAnim.curFrame = 1;
-		else
-			iconP1.animation.curAnim.curFrame = 0;
-
-		if (healthBar.percent > 80)
-			iconP2.animation.curAnim.curFrame = 1;
-		else
-			iconP2.animation.curAnim.curFrame = 0;
+		if (healthBar.percent < 20) {
+			iconP1.switchState("losing");
+			iconP2.switchState("winning");
+		} else if (healthBar.percent > 80) {
+			iconP1.switchState("winning");
+			iconP2.switchState("losing");
+		} else {
+			iconP1.switchState("idle");
+			iconP2.switchState("idle");
+		}
 
 		if (startingSong) {
 			if (startedCountdown) {
@@ -1001,8 +1003,7 @@ class PlayState extends MusicBeatState {
 		var daRating:String = daNote.judgement.name;
 		var rating:FlxSprite = new FlxSprite();
 
-		if (daNote.judgement.splash && Preferences.user.noteSplashes)
-		{
+		if (daNote.judgement.splash && Preferences.user.noteSplashes) {
 			var noteSplash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
 			noteSplash.setupNoteSplash(daNote.x, daNote.y, daNote.noteData);
 			// new NoteSplash(daNote.x, daNote.y, daNote.noteData);

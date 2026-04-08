@@ -70,8 +70,6 @@ class Main extends Sprite {
 		addChild(fpsCounter);
 		toggleFPS(true);
 		#end
-
-		
 	}
 
 	var game:FlxGame;

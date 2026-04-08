@@ -8,7 +8,7 @@ using StringTools;
 class FunkinSprite extends FlxSprite {
 	public var animOffsets:Map<String, Array<Dynamic>>;
 
-	public function new(x:Float, y:Float) {
+	public function new(x:Float, y:Float):Void {
 		super(x, y);
 		animOffsets = new Map<String, Array<Dynamic>>();
 	}
@@ -22,6 +22,6 @@ class FunkinSprite extends FlxSprite {
 		//	offset.set(0, 0);
 	}
 
-	public function addOffset(name:String, x:Float = 0, y:Float = 0)
+	public function addOffset(name:String, x:Float = 0, y:Float = 0):Void
 		animOffsets[name] = [x, y];
 }

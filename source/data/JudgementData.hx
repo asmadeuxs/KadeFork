@@ -1,4 +1,5 @@
 package data;
+
 import flixel.util.FlxColor;
 
 @:structInit class Judgement {

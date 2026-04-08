@@ -5,7 +5,7 @@ import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxMath;
 
 class AlphabetMenu extends FlxTypedSpriteGroup<Alphabet> {
-	public var spacingBetweenItems:Int = 160;
+	public var spacingBetweenItems:Int = 130;
 	public var items:Array<String> = null;
 
 	public function new(x:Float, y:Float, ?list:Array<String>):Void {
@@ -34,7 +34,7 @@ class AlphabetMenu extends FlxTypedSpriteGroup<Alphabet> {
 		if (members.length != 0) {
 			var fps:Int = Preferences.user.frameRate;
 			for (i in members) {
-				if (i.y < -10 || i.y > FlxG.height) {
+				if (i.y < -30 || i.y > FlxG.height + 30) {
 					i.active = false;
 					i.visible = false;
 				} else {
