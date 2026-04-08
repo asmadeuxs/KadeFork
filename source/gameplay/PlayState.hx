@@ -678,8 +678,8 @@ class PlayState extends MusicBeatState {
 				openSubState(new menus.PauseSubstate(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 		}
 
-		iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.50)));
-		iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.50)));
+		iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, elapsed * 2)));
+		iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, elapsed * 2)));
 
 		iconP1.updateHitbox();
 		iconP2.updateHitbox();
