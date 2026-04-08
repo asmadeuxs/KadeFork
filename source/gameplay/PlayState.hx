@@ -1005,12 +1005,7 @@ class PlayState extends MusicBeatState {
 
 		currentTimingShown = new FlxText(0, 0, 0, "0ms");
 		timeShown = 0;
-		currentTimingShown.color = switch (daRating) {
-			case 'shit' | 'bad': FlxColor.RED;
-			case 'good': FlxColor.GREEN;
-			case 'sick': FlxColor.CYAN;
-			case _: FlxColor.WHITE;
-		}
+		currentTimingShown.color = FlxColor.fromString("0xFF" + daNote.judgement.color);
 		currentTimingShown.borderStyle = OUTLINE;
 		currentTimingShown.borderSize = 1;
 		currentTimingShown.borderColor = FlxColor.BLACK;
@@ -1023,6 +1018,7 @@ class PlayState extends MusicBeatState {
 		comboDisplay.add(currentTimingShown);
 
 		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image('gameplay/ui/score/combo'));
+		comboSpr.color = FlxColor.fromString("0xFF" + daNote.judgement.color);
 		comboSpr.screenCenter();
 		comboSpr.x = rating.x;
 		comboSpr.y = rating.y + 100;
@@ -1072,6 +1068,7 @@ class PlayState extends MusicBeatState {
 			var numScoreScale:Float = 0.5;
 			for (i in seperatedScore) {
 				var numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image('gameplay/ui/score/num${Std.int(i)}'));
+				numScore.color = FlxColor.fromString("0xFF" + daNote.judgement.color);
 				numScore.screenCenter();
 				numScore.x = rating.x + (43 * daLoop) - 50;
 				numScore.y = rating.y + 100;
