@@ -2,18 +2,9 @@
   "name": "Boyfriend",
   "singDuration": 4.0,
   "defaultFramerate": 24,
-  "singAnimations": [
-    "left",
-    "down",
-    "up",
-    "right"
-  ],
-  "missingAnimations": [
-    "missleft",
-    "missdown",
-    "missup",
-    "missright"
-  ],
+  "idleAnimations": [ "idle" ],
+  "singAnimations": [ "left", "down", "up", "right" ],
+  "missAnimations": [ "missleft", "missdown", "missup", "missright" ],
   "animationTimers": {
     "hey": 1.0
   },

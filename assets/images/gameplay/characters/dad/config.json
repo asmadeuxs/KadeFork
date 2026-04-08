@@ -1,0 +1,19 @@
+{
+	"name": "Daddy Dearest",
+	"singDuration": 6.1,
+	"defaultFramerate": 24,
+	"animations": {
+		"idle": "Dad idle dance",
+		"singLEFT": "Dad Sing Note LEFT",
+		"singDOWN": "Dad Sing Note DOWN",
+		"singUP": "Dad Sing Note UP",
+		"singRIGHT": "Dad Sing Note RIGHT"
+	},
+	"offsets": {
+		"idle": [ 0, 0 ],
+		"singLEFT": [ -10, 10 ],
+		"singDOWN": [ 0, -30 ],
+		"singUP": [ -6, 50 ],
+		"singRIGHT": [ 0, 27 ]
+	}
+}

@@ -60,7 +60,7 @@ class Character extends FlxSprite {
 
 			case 'dad':
 				// DAD ANIMATION LOADING CODE
-				frames = Paths.getSparrowAtlas('gameplay/characters/enemies/dad');
+				frames = Paths.getSparrowAtlas('gameplay/characters/dad/dad');
 				animation.addByPrefix('idle', 'Dad idle dance', 24);
 				animation.addByPrefix('singUP', 'Dad Sing Note UP', 24);
 				animation.addByPrefix('singRIGHT', 'Dad Sing Note RIGHT', 24);
