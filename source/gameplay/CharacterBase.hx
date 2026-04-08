@@ -51,7 +51,8 @@ class CharacterBase extends gameplay.FunkinSprite {
 		if (field is String) {
 			var minmax:Array<String> = field.split("...");
 			indices = CoolUtil.numberArray(Std.parseInt(minmax[0]), Std.parseInt(minmax[1]));
-		}
+		} else if (field is Array)
+			indices = field;
 		return indices;
 	}
 
