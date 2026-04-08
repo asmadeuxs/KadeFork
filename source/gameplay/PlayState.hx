@@ -105,6 +105,7 @@ class PlayState extends MusicBeatState {
 	public var noteSpawnIndex:Int = 0;
 
 	public var strumlines:FlxTypedSpriteGroup<Strumline>;
+	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 	public var camFollow:FlxObject;
 
 	private static var prevCamFollow:FlxObject;
@@ -294,6 +295,19 @@ class PlayState extends MusicBeatState {
 		notes = new FlxTypedGroup<Note>();
 		notes.camera = camHUD;
 		add(notes);
+
+		// fake notesplash cache type deal so that it loads in the graphic?
+		// so basically ninjamuffin's method for this sucks ass so
+		// TODO: revise all this
+
+		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
+
+		var noteSplash:NoteSplash = new NoteSplash(100, 100, 0);
+		grpNoteSplashes.add(noteSplash);
+		noteSplash.alpha = 0.1;
+
+		add(grpNoteSplashes);
+		grpNoteSplashes.camera = camHUD;
 
 		generateSong(SONG.song);
 
@@ -686,6 +700,9 @@ class PlayState extends MusicBeatState {
 
 		var iconOffset:Int = 26;
 
+		if (health > 2)
+			health = 2;
+
 		iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01) - iconOffset);
 		iconP2.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) - (iconP2.width - iconOffset);
 
@@ -985,6 +1002,14 @@ class PlayState extends MusicBeatState {
 		var daRating:String = daNote.judgement.name;
 		var rating:FlxSprite = new FlxSprite();
 
+		if (daNote.judgement.splash && Preferences.user.noteSplashes)
+		{
+			var noteSplash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
+			noteSplash.setupNoteSplash(daNote.x, daNote.y, daNote.noteData);
+			// new NoteSplash(daNote.x, daNote.y, daNote.noteData);
+			grpNoteSplashes.add(noteSplash);
+		}
+
 		rating.loadGraphic(Paths.image('gameplay/ui/score/$daRating'));
 		rating.screenCenter();
 		rating.y -= 50;
@@ -1005,9 +1030,9 @@ class PlayState extends MusicBeatState {
 
 		currentTimingShown = new FlxText(0, 0, 0, "0ms");
 		timeShown = 0;
-		currentTimingShown.color = FlxColor.fromString("0xFF" + daNote.judgement.color);
+		currentTimingShown.color = daNote.judgement.color;
 		currentTimingShown.borderStyle = OUTLINE;
-		currentTimingShown.borderSize = 1;
+		currentTimingShown.borderSize = 1.5;
 		currentTimingShown.borderColor = FlxColor.BLACK;
 		currentTimingShown.text = msTiming + "ms";
 		currentTimingShown.size = 20;
@@ -1018,7 +1043,7 @@ class PlayState extends MusicBeatState {
 		comboDisplay.add(currentTimingShown);
 
 		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image('gameplay/ui/score/combo'));
-		comboSpr.color = FlxColor.fromString("0xFF" + daNote.judgement.color);
+		comboSpr.color = daNote.judgement.color;
 		comboSpr.screenCenter();
 		comboSpr.x = rating.x;
 		comboSpr.y = rating.y + 100;
@@ -1030,6 +1055,7 @@ class PlayState extends MusicBeatState {
 		currentTimingShown.y = rating.y + 100;
 		currentTimingShown.acceleration.y = 600;
 		currentTimingShown.velocity.y -= 150;
+		currentTimingShown.moves = true;
 
 		comboSpr.velocity.x += FlxG.random.int(1, 10);
 		currentTimingShown.velocity.x += comboSpr.velocity.x;
@@ -1068,7 +1094,7 @@ class PlayState extends MusicBeatState {
 			var numScoreScale:Float = 0.5;
 			for (i in seperatedScore) {
 				var numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image('gameplay/ui/score/num${Std.int(i)}'));
-				numScore.color = FlxColor.fromString("0xFF" + daNote.judgement.color);
+				numScore.color = daNote.judgement.color;
 				numScore.screenCenter();
 				numScore.x = rating.x + (43 * daLoop) - 50;
 				numScore.y = rating.y + 100;

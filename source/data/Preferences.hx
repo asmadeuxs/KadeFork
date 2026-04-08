@@ -26,6 +26,7 @@ private enum abstract StrumUnderlayType(Int) from Int to Int {
 	var strumUnderlayType:Int = StrumUnderlayType.ON_STRUMS; // Where should the underlay be layered on
 	var accuracyDisplay:Bool = true; // Shows Misses and Accuracy in the Score Text
 	var showSongPosition:Bool = false; // Shows a progress bar for the song in the HUD
+	var noteSplashes:Bool = false; // Shows a funny note splash that gives you a boner
 	var showNps:Bool = false; // Shows a NPS counter on the Score Text
 	var etternaMode:Bool = true; // Changes the accuracy system to use Wife3
 

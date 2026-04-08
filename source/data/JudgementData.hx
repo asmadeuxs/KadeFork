@@ -1,4 +1,5 @@
 package data;
+import flixel.util.FlxColor;
 
 @:structInit class Judgement {
 	public var name:String = "Unknown";
@@ -9,7 +10,8 @@ package data;
 	@:optional public var accuracy:Float = 0.0;
 	@:optional public var score:Int = 0;
 	@:optional public var hits:Int = 0;
-	@:optional public var color:String = "FFFFFF";
+	@:optional public var color:FlxColor = 0xFFFFFFFF;
+	@:optional public var splash:Bool = false;
 }
 
 class JudgementData {
@@ -28,7 +30,8 @@ class JudgementData {
 			{
 				name: "kino",
 				image: "kino",
-				color: "97FFFF",
+				splash: true,
+				color: 0xFF97FFFF,
 				hitWindow: 22.5,
 				accuracy: 1.0,
 				score: 500
@@ -36,7 +39,8 @@ class JudgementData {
 			{
 				name: "sick",
 				image: "sick",
-				color: "EAFF74",
+				splash: true,
+				color: 0xFFEAFF74,
 				hitWindow: 45.0,
 				accuracy: 0.95,
 				score: 350
@@ -44,7 +48,7 @@ class JudgementData {
 			{
 				name: "good",
 				image: "good",
-				color: "97FF9F",
+				color: 0xFF97FF9F,
 				hitWindow: 90.0,
 				accuracy: 0.75,
 				score: 200
@@ -52,7 +56,7 @@ class JudgementData {
 			{
 				name: "bad",
 				image: "bad",
-				color: "DC7487",
+				color: 0xFFDC7487,
 				hitWindow: 135.0,
 				accuracy: 0.50,
 				score: 0
@@ -60,7 +64,7 @@ class JudgementData {
 			{
 				name: "shit",
 				image: "shit",
-				color: "E02447",
+				color: 0xFFE02447,
 				hitWindow: 180.0,
 				accuracy: 0.25,
 				score: -300,

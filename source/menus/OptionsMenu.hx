@@ -78,6 +78,11 @@ class OptionsMenu extends MusicBeatSubstate {
 				variable: "accuracyDisplay"
 			},
 			{
+				name: "Note Splashes",
+				description: "Hitting a sick and above spawns a funny splash that gives you a boner",
+				variable: "noteSplashes",
+			},
+			{
 				name: "Distractions",
 				description: "Disables certain sounds and effects that may be distracting.",
 				variable: "distractions"
