@@ -3,10 +3,13 @@ package menus;
 import data.Option;
 import data.Preferences;
 import flixel.FlxG;
+import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
+import ui.FunkinCamera;
 
 using flixel.util.FlxSpriteUtil;
 
@@ -121,9 +124,11 @@ class OptionsMenu extends MusicBeatSubstate {
 
 	var catNameText:FlxText;
 	var descriptionThingy:FlxText;
-	var catOptions:FlxTypedGroup<FlxText>;
+	var catOptions:FlxTypedSpriteGroup<FlxText>;
 	var catFrame:FlxSprite;
 
+	var camScroll:FunkinCamera;
+	var camFollow:FlxObject;
 	var optionsFont = Paths.font("vcr");
 	var parent:MusicBeatState;
 
@@ -153,17 +158,31 @@ class OptionsMenu extends MusicBeatSubstate {
 		catNameText.scrollFactor.set();
 		add(catNameText);
 
+		var panelWidth:Int = Std.int(FlxG.width * 0.45);
+		var panelHeight:Int = Std.int(FlxG.height * 0.5);
+
 		catFrame = new FlxSprite(0, 50).makeGraphic(1, 1, 0xFF000000);
 		// scaling it up instead of passing width and height on makeGraphic directly
 		// because of the way flixel generates rectangles, its *worse* to do it on makeGraphic
 		// scaling is generally better for memory usage
-		catFrame.scale.set(FlxG.width * 0.45, FlxG.height * 0.5);
+		catFrame.scale.set(panelWidth, panelHeight);
 		catFrame.scrollFactor.set();
 		catFrame.updateHitbox();
 		catFrame.screenCenter();
 		add(catFrame);
 
-		catOptions = new FlxTypedGroup<FlxText>();
+		camScroll = new FunkinCamera(catFrame.x, catFrame.y, panelWidth, panelHeight);
+		camScroll.antialiasing = true;
+		camScroll.bgColor.alpha = 0;
+		FlxG.cameras.add(camScroll, false);
+
+		camFollow = new FlxObject();
+		camScroll.follow(camFollow, null, 0.60 * (60 / Preferences.user.frameRate));
+		add(camFollow);
+
+		catOptions = new FlxTypedSpriteGroup<FlxText>();
+		catOptions.scrollFactor.set(0, 0.8);
+		catOptions.camera = camScroll;
 		add(catOptions);
 
 		descriptionThingy = new FlxText(catFrame.x, 0, catFrame.width, "");
@@ -188,20 +207,28 @@ class OptionsMenu extends MusicBeatSubstate {
 		var up:Bool = controls.UP_P;
 		if (up || controls.DOWN_P)
 			changeSelection((up ? -1 : 1) * (FlxG.keys.pressed.SHIFT ? 5 : 1));
+
+		// I genuinely hate this entire block of code
+		// and I'll probably change it later on -asmadeuxs
 		var leftp:Bool = controls.LEFT_P;
 		var rightp:Bool = controls.RIGHT_P;
 		var lefth:Bool = controls.LEFT;
 		var righth:Bool = controls.RIGHT;
+		var curOption:Option = curCatOptions[curSelected];
 		if (leftp || rightp || lefth || righth) {
-			var change:Bool = false;
-			if (leftp || rightp)
-				change = true;
-			else if (lefth || righth) {
-				// TODO: implement keyRepeat in Controls so I don't have to do this shit manually -asmadeuxs
-				keyTimer += 0.1;
-				if (keyTimer >= 1.0) {
+			var change:Bool = curOption.type != "number";
+			if (curOption.type != "number" && (lefth || righth))
+				change = false;
+			if (curOption.type == "number") {
+				if (leftp || rightp)
 					change = true;
-					keyTimer = 0.0;
+				else if (lefth || righth) {
+					// TODO: implement keyRepeat in Controls so I don't have to do this shit manually -asmadeuxs
+					keyTimer += 0.1;
+					if (keyTimer >= 1.0) {
+						change = true;
+						keyTimer = 0.0;
+					}
 				}
 			}
 			if (change) {
@@ -210,11 +237,13 @@ class OptionsMenu extends MusicBeatSubstate {
 					inc = 4;
 				var left:Bool = leftp || lefth;
 				curCatOptions[curSelected].change(left ? -inc : inc);
-				catOptions.members[curSelected * 2 + 1].text = curCatOptions[curSelected].valueString();
+				catOptions.members[curSelected * 2 + 1].text = curOption.valueString();
 				FlxG.sound.play(Paths.sound('scrollMenu'));
 			}
 		} else if (controls.LEFT_R || controls.RIGHT_R)
 			keyTimer = 0.0;
+
+		// rest of the controls
 		var leftCat:Bool = FlxG.keys.justPressed.Q;
 		if (leftCat || FlxG.keys.justPressed.E) {
 			catSelected = flixel.math.FlxMath.wrap(catSelected + (leftCat ? -1 : 1), 0, categoryOrder.length - 1);
@@ -235,6 +264,7 @@ class OptionsMenu extends MusicBeatSubstate {
 				}
 			});
 		}
+		updateScroll();
 	}
 
 	public function changeSelection(next:Int = 0, ?playSound:Bool = true) {
@@ -251,6 +281,11 @@ class OptionsMenu extends MusicBeatSubstate {
 		}
 	}
 
+	public function updateScroll() {
+		var scrollOffset:Float = 140;
+		camFollow.y = catOptions.members[curSelected].y + scrollOffset;
+	}
+
 	public function updateCat() {
 		curSelected = 0;
 		if (catNameText != null)
@@ -262,12 +297,10 @@ class OptionsMenu extends MusicBeatSubstate {
 		var i:Int = 0;
 		curCatOptions = optionStash.get(currentCat);
 		for (option in curCatOptions) {
-			var nameText = new FlxText(catFrame.x + 20, catFrame.y + 50 + i * 40, 0, option.name, 24);
-			var valText = new FlxText(catFrame.x + catFrame.width - 100, nameText.y, 0, option.valueString(), 24);
-			valText.scrollFactor.set();
+			var nameText = new FlxText(20, 50 + i * 40, 0, option.name, 24);
+			var valText = new FlxText(catFrame.width - 100, nameText.y, 0, option.valueString(), 24);
 			valText.font = optionsFont;
 			valText.alignment = RIGHT;
-			nameText.scrollFactor.set();
 			nameText.font = optionsFont;
 			valText.ID = i;
 			nameText.ID = i;

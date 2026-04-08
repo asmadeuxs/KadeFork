@@ -222,6 +222,7 @@ class PlayState extends MusicBeatState {
 		camGame = FlxG.camera;
 		camHUD = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
+		camHUD.antialiasing = true;
 		FlxG.cameras.add(camHUD);
 
 		persistentUpdate = true;
@@ -245,25 +246,25 @@ class PlayState extends MusicBeatState {
 				defaultCamZoom = 0.9;
 				curStage = 'stage';
 				var bg:FlxSprite = new FlxSprite(-600, -200).loadGraphic(Paths.image('stages/week1/stageback'));
-				bg.antialiasing = true;
 				bg.scrollFactor.set(0.9, 0.9);
+				bg.antialiasing = true;
 				bg.active = false;
 				add(bg);
 
 				var stageFront:FlxSprite = new FlxSprite(-650, 600).loadGraphic(Paths.image('stages/week1/stagefront'));
 				stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
+				stageFront.scrollFactor.set(0.9, 0.9);
 				stageFront.updateHitbox();
 				stageFront.antialiasing = true;
-				stageFront.scrollFactor.set(0.9, 0.9);
 				stageFront.active = false;
 				add(stageFront);
 
 				if (!Preferences.user.lowQualityMode) { // the fuck else am i supposed to hide? -asmadeuxs
 					var stageCurtains:FlxSprite = new FlxSprite(-500, -300).loadGraphic(Paths.image('stages/week1/stagecurtains'));
 					stageCurtains.setGraphicSize(Std.int(stageCurtains.width * 0.9));
+					stageCurtains.scrollFactor.set(1.3, 1.3);
 					stageCurtains.updateHitbox();
 					stageCurtains.antialiasing = true;
-					stageCurtains.scrollFactor.set(1.3, 1.3);
 					stageCurtains.active = false;
 					add(stageCurtains);
 				}
@@ -293,14 +294,13 @@ class PlayState extends MusicBeatState {
 		Conductor.songPosition = -5000;
 
 		var underlay:FlxSprite = null;
-		if (Preferences.user.strumUnderlay > 0) {
-			// always creating it if its supposed to be visible for the sake adding it for both cases.
-			underlay = new FlxSprite().makeScaledGraphic(1, FlxG.height, 0xFF000000);
+		if (Preferences.user.strumUnderlay > 0) { // always creating it if its supposed to be visible for the sake adding it for both cases.
+			var width:Int = Preferences.user.strumUnderlayType == 1 ? FlxG.width : 1;
+			underlay = new FlxSprite().makeScaledGraphic(width, FlxG.height, 0xFF000000);
+			underlay.camera = camHUD; // always on camHUD so it renders properly
 			underlay.alpha = Preferences.user.strumUnderlay * 0.01;
-			if (Preferences.user.strumUnderlayType == 1) {
-				underlay.scale.x = FlxG.width; // fill whole screen
+			if (Preferences.user.strumUnderlayType == 1)
 				add(underlay);
-			}
 		}
 
 		currentHUD = new Kade(); // switch? SONG.hudStyle? a script? idfk. replace later -asmadeuxs
@@ -324,7 +324,7 @@ class PlayState extends MusicBeatState {
 
 		var strumY:Float = 30;
 		if (Preferences.user.scrollType == 1)
-			strumY = FlxG.height - 145;
+			strumY = FlxG.height - 185;
 		opponentStrums = new Strumline(0, strumY);
 		playerStrums = new Strumline(0, strumY);
 
@@ -337,7 +337,6 @@ class PlayState extends MusicBeatState {
 		if (underlay != null && Preferences.user.strumUnderlayType == 0) {
 			underlay.scale.x = playerStrums.width; // fill strumline region
 			underlay.objectCenter(playerStrums, X); // move to last strum
-			underlay.camera = camHUD;
 			add(underlay);
 		}
 
@@ -972,9 +971,7 @@ class PlayState extends MusicBeatState {
 
 		if (!curStage.startsWith('school')) {
 			rating.setGraphicSize(Std.int(rating.width * ratingSprScale));
-			rating.antialiasing = true;
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * ratingSprScale));
-			comboSpr.antialiasing = true;
 		} else {
 			rating.setGraphicSize(Std.int(rating.width * CoolUtil.pixelScale * ratingSprScale));
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * CoolUtil.pixelScale * ratingSprScale));
@@ -1005,10 +1002,9 @@ class PlayState extends MusicBeatState {
 				numScore.y = rating.y + 100;
 				numScore.cameras = [camHUD];
 
-				if (!curStage.startsWith('school')) {
-					numScore.antialiasing = true;
+				if (!curStage.startsWith('school'))
 					numScore.setGraphicSize(Std.int(numScore.width * numScoreScale));
-				} else
+				else
 					numScore.setGraphicSize(Std.int(numScore.width * CoolUtil.pixelScale * numScoreScale));
 				numScore.updateHitbox();
 
@@ -1221,6 +1217,8 @@ class PlayState extends MusicBeatState {
 			camHUD.zoom += 0.03;
 		}
 
+		if (currentHUD != null)
+			currentHUD.beatHit(curBeat);
 		characterDance(curBeat);
 		if (curBeat % 8 == 7 && curSong == 'Bopeebo')
 			boyfriend.playAnim('hey', true);

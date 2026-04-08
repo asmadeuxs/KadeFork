@@ -37,6 +37,7 @@ class MainMenuState extends MusicBeatState {
 			{
 				name: 'options',
 				func: () -> {
+					this.active = false;
 					tweenItemsBackIn();
 					openSubState(new menus.OptionsMenu(this));
 				}
@@ -146,6 +147,7 @@ class MainMenuState extends MusicBeatState {
 	}
 
 	public function tweenItemsBackIn() {
+		this.active = true;
 		menuItems.forEach(function(spr:FlxSprite) {
 			spr.revive();
 			FlxTween.tween(spr, {alpha: 1}, 0.3, {ease: FlxEase.quadIn});
