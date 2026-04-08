@@ -1,6 +1,6 @@
-package data;
+package data.song;
 
-import data.Section;
+import data.song.Section;
 import haxe.Json;
 import haxe.format.JsonParser;
 import lime.utils.Assets;

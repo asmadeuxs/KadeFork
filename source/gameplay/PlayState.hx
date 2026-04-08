@@ -2,8 +2,8 @@ package gameplay;
 
 import data.Highscore;
 import data.JudgementData;
-import data.Section;
-import data.Song;
+import data.song.Section;
+import data.song.Song;
 import effects.WiggleEffect;
 import flixel.FlxBasic;
 import flixel.FlxCamera;

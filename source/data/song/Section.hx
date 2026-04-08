@@ -1,4 +1,4 @@
-package data;
+package data.song;
 
 typedef SwagSection = {
 	var sectionNotes:Array<Dynamic>;

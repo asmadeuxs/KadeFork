@@ -1,6 +1,6 @@
 package;
 
-import data.Song.SwagSong;
+import data.song.Song.SwagSong;
 import flixel.FlxG;
 
 /**

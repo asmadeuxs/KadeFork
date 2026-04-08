@@ -16,7 +16,6 @@ class Highscore {
 
 	public static function saveWeekScore(week:Int = 1, score:Int = 0, ?diff:Int = 0):Void {
 		var daWeek:String = formatSong('week' + week, diff);
-
 		if (songScores.exists(daWeek)) {
 			if (songScores.get(daWeek) < score)
 				setScore(daWeek, score);
@@ -27,7 +26,8 @@ class Highscore {
 	/**
 	 * YOU SHOULD FORMAT SONG WITH formatSong() BEFORE TOSSING IN SONG VARIABLE
 	 */
-	static function setScore(song:String, score:Int):Void { // Reminder that I don't need to format this song, it should come formatted!
+	static function setScore(song:String, score:Int):Void {
+		// Reminder that I don't need to format this song, it should come formatted!
 		songScores.set(song, score);
 		var company:String = lime.app.Application.current.meta["file"];
 		var appName:String = lime.app.Application.current.meta["company"];
