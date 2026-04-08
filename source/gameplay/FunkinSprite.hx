@@ -5,18 +5,15 @@ import flixel.FlxSprite;
 
 using StringTools;
 
-class FunkinSprite extends FlxSprite
-{
+class FunkinSprite extends FlxSprite {
 	public var animOffsets:Map<String, Array<Dynamic>>;
 
-	public function new(x:Float, y:Float)
-	{
+	public function new(x:Float, y:Float) {
 		super(x, y);
 		animOffsets = new Map<String, Array<Dynamic>>();
 	}
 
-	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
-	{
+	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void {
 		animation.play(AnimName, Force, Reversed, Frame);
 		var daOffset = animOffsets.get(AnimName);
 		if (animOffsets.exists(AnimName))

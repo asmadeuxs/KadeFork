@@ -20,8 +20,7 @@ using StringTools;
 import Discord.DiscordClient;
 #end
 
-class FreeplayState extends MusicBeatState
-{
+class FreeplayState extends MusicBeatState {
 	var songs:Array<SongMetadata> = [];
 
 	var seslector:FlxText;
@@ -38,12 +37,10 @@ class FreeplayState extends MusicBeatState
 
 	private var iconArray:Array<HealthIcon> = [];
 
-	override function create()
-	{
+	override function create() {
 		var initSonglist = CoolUtil.coolTextFile(Paths.txt('freeplaySonglist'));
 
-		for (i in 0...initSonglist.length)
-		{
+		for (i in 0...initSonglist.length) {
 			var data:Array<String> = initSonglist[i].split(':');
 			songs.push(new SongMetadata(data[0], Std.parseInt(data[2]), data[1]));
 		}
@@ -58,8 +55,7 @@ class FreeplayState extends MusicBeatState
 		grpSongs = new FlxTypedGroup<Alphabet>();
 		add(grpSongs);
 
-		for (i in 0...songs.length)
-		{
+		for (i in 0...songs.length) {
 			var songText:Alphabet = new Alphabet(0, (70 * i) + 30, songs[i].songName, true, false);
 			songText.isMenuItem = true;
 			songText.targetY = i;
@@ -92,19 +88,16 @@ class FreeplayState extends MusicBeatState
 		super.create();
 	}
 
-	public function addSong(songName:String, weekNum:Int, songCharacter:String)
-	{
+	public function addSong(songName:String, weekNum:Int, songCharacter:String) {
 		songs.push(new SongMetadata(songName, weekNum, songCharacter));
 	}
 
-	public function addWeek(songs:Array<String>, weekNum:Int, ?songCharacters:Array<String>)
-	{
+	public function addWeek(songs:Array<String>, weekNum:Int, ?songCharacters:Array<String>) {
 		if (songCharacters == null)
 			songCharacters = ['bf'];
 
 		var num:Int = 0;
-		for (song in songs)
-		{
+		for (song in songs) {
 			addSong(song, weekNum, songCharacters[num]);
 
 			if (songCharacters.length != 1)
@@ -112,12 +105,10 @@ class FreeplayState extends MusicBeatState
 		}
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (FlxG.sound.music.volume < 0.7)
-		{
+		if (FlxG.sound.music.volume < 0.7) {
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 		}
 
@@ -132,12 +123,10 @@ class FreeplayState extends MusicBeatState
 		var downP = controls.DOWN_P;
 		var accepted = controls.ACCEPT;
 
-		if (upP)
-		{
+		if (upP) {
 			changeSelection(-1);
 		}
-		if (downP)
-		{
+		if (downP) {
 			changeSelection(1);
 		}
 
@@ -146,13 +135,11 @@ class FreeplayState extends MusicBeatState
 		if (controls.RIGHT_P)
 			changeDiff(1);
 
-		if (controls.BACK)
-		{
+		if (controls.BACK) {
 			FlxG.switchState(new menus.MainMenuState());
 		}
 
-		if (accepted)
-		{
+		if (accepted) {
 			var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
 
 			trace(poop);
@@ -166,8 +153,7 @@ class FreeplayState extends MusicBeatState
 		}
 	}
 
-	function changeDiff(change:Int = 0)
-	{
+	function changeDiff(change:Int = 0) {
 		curDifficulty += change;
 
 		if (curDifficulty < 0)
@@ -175,12 +161,8 @@ class FreeplayState extends MusicBeatState
 		if (curDifficulty > 2)
 			curDifficulty = 0;
 
-		#if !switch
 		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
-		#end
-
-		switch (curDifficulty)
-		{
+		switch (curDifficulty) {
 			case 0:
 				diffText.text = "EASY";
 			case 1:
@@ -190,8 +172,7 @@ class FreeplayState extends MusicBeatState
 		}
 	}
 
-	function changeSelection(change:Int = 0)
-	{
+	function changeSelection(change:Int = 0) {
 		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 
 		curSelected += change;
@@ -203,18 +184,13 @@ class FreeplayState extends MusicBeatState
 
 		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
 
-		#if PRELOAD_ALL
-		// FlxG.sound.playMusic(Paths.inst(songs[curSelected].songName), 0);
-		#end
-
 		var bullShit:Int = 0;
 
 		for (i in 0...iconArray.length)
 			iconArray[i].alpha = 0.6;
 		iconArray[curSelected].alpha = 1;
 
-		for (item in grpSongs.members)
-		{
+		for (item in grpSongs.members) {
 			item.targetY = bullShit - curSelected;
 			bullShit++;
 
@@ -225,14 +201,12 @@ class FreeplayState extends MusicBeatState
 	}
 }
 
-class SongMetadata
-{
+class SongMetadata {
 	public var songName:String = "";
 	public var week:Int = 0;
 	public var songCharacter:String = "";
 
-	public function new(song:String, week:Int, songCharacter:String)
-	{
+	public function new(song:String, week:Int, songCharacter:String) {
 		this.songName = song;
 		this.week = week;
 		this.songCharacter = songCharacter;

@@ -13,8 +13,7 @@ import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.text.TextFormat;
 
-class Main extends Sprite
-{
+class Main extends Sprite {
 	public static var initialState:Class<FlxState> = menus.TitleState; // The FlxState the game starts with.
 
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
@@ -33,8 +32,7 @@ class Main extends Sprite
 	public static function main():Void
 		Lib.current.addChild(new Main());
 
-	public function new()
-	{
+	public function new() {
 		super();
 
 		if (stage != null)
@@ -43,15 +41,13 @@ class Main extends Sprite
 			addEventListener(Event.ADDED_TO_STAGE, init);
 	}
 
-	private function init(?E:Event):Void
-	{
+	private function init(?E:Event):Void {
 		if (hasEventListener(Event.ADDED_TO_STAGE))
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 		setupGame();
 	}
 
-	private function setupGame():Void
-	{
+	private function setupGame():Void {
 		/*
 			var stageWidth:Int = Lib.current.stage.stageWidth;
 			var stageHeight:Int = Lib.current.stage.stageHeight;

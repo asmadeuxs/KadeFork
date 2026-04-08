@@ -5,14 +5,12 @@ import flixel.group.FlxSpriteGroup;
 import gameplay.FunkinSprite;
 import data.ScriptLoader;
 
-class Strumline extends FlxTypedSpriteGroup<FunkinSprite>
-{
+class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 	public var keyCount:Int = 4;
 
 	private var noteScript:Script;
 
-	public function new(x:Float = 0, y:Float = 0, ?keyCount:Int = 4):Void
-	{
+	public function new(x:Float = 0, y:Float = 0, ?keyCount:Int = 4):Void {
 		super(x, y);
 		this.keyCount = keyCount;
 		var skin:String = 'default'; // hardcoded for now
@@ -22,11 +20,9 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite>
 		generateStrums();
 	}
 
-	public function generateStrums():Void
-	{
+	public function generateStrums():Void {
 		var spacing:Float = 160;
-		for (i in 0...this.keyCount)
-		{
+		for (i in 0...this.keyCount) {
 			var strum:FunkinSprite = new FunkinSprite(0, 0);
 			if (noteScript != null)
 				noteScript.callFunc("generateStrum", [strum, i]);
@@ -36,13 +32,10 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite>
 		}
 	}
 
-	public function playAnim(direction:Int = 0, animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0):Void
-	{
+	public function playAnim(direction:Int = 0, animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0):Void {
 		var strum:FunkinSprite = this.members[direction];
-		if (strum != null)
-		{
-			if (noteScript != null && noteScript.hasFunction("onPlayAnim"))
-			{
+		if (strum != null) {
+			if (noteScript != null && noteScript.hasFunction("onPlayAnim")) {
 				var ret = noteScript.callFunc("onPlayAnim", [strum, direction, animName, force, reversed, frame]);
 				if (ret.value == ScriptLoader.STOP_FUNC)
 					return;

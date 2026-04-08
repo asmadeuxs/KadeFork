@@ -15,18 +15,15 @@ using StringTools;
  * wafer thin layers that fill my complex. If the word 'hate' was engraved on each nanoangstrom of those hundreds of millions of
  * miles it would not equal one one-billionth of the hate I feel for humans at this micro-instant. For you. Hate. Hate.
  */
-class Paths
-{
+class Paths {
 	static private var cachingContext:String = "global:";
 	static private var textureCache:Map<String, FlxGraphic> = [];
 	static private var soundCache:Map<String, Sound> = [];
 
 	static private var avoidClearing:Array<String> = ["global:assets/images/ui/alphabet.png"];
 
-	static public function clearGlobalTextureCache()
-	{
-		for (i in textureCache.keys())
-		{
+	static public function clearGlobalTextureCache() {
+		for (i in textureCache.keys()) {
 			if (avoidClearing.contains(i))
 				continue;
 			var texture:FlxGraphic = textureCache.get(i);
@@ -40,10 +37,8 @@ class Paths
 		}
 	}
 
-	static public function clearGlobalSoundCache()
-	{
-		for (i in soundCache.keys())
-		{
+	static public function clearGlobalSoundCache() {
+		for (i in soundCache.keys()) {
 			if (avoidClearing.contains(i))
 				continue;
 			var sound:Sound = soundCache.get(i);
@@ -52,8 +47,7 @@ class Paths
 		}
 	}
 
-	static public function changeCacheContext(newContext:String)
-	{
+	static public function changeCacheContext(newContext:String) {
 		resetCacheContext();
 		if (!newContext.endsWith(":"))
 			newContext += ":";
@@ -63,18 +57,14 @@ class Paths
 	static public function resetCacheContext()
 		return cachingContext = "global:";
 
-	public static function getPath(file:String, ?type:AssetType):Dynamic
-	{
+	public static function getPath(file:String, ?type:AssetType):Dynamic {
 		var path:String = 'assets/$file';
 		var cacheKey:String = cachingContext + path;
 
-		switch type
-		{
+		switch type {
 			case IMAGE:
-				if (textureCache.get(cacheKey) == null)
-				{
-					if (!Paths.fileExists(path))
-					{
+				if (textureCache.get(cacheKey) == null) {
+					if (!Paths.fileExists(path)) {
 						FlxG.log.warn('Texture not found at path "$path"');
 						trace('Texture not found at path "$path"');
 						return GraphicLogo;
@@ -139,11 +129,9 @@ class Paths
 	inline static public function getPackerAtlas(key:String)
 		return FlxAtlasFrames.fromSpriteSheetPacker(image(key), file('images/$key.txt'));
 
-	inline static public function font(key:String)
-	{
+	inline static public function font(key:String) {
 		var start:String = getPath('/fonts/$key');
-		if (!key.endsWith(".ttf") && !key.endsWith(".otf"))
-		{
+		if (!key.endsWith(".ttf") && !key.endsWith(".otf")) {
 			if (Paths.fileExists(start + ".otf"))
 				start = start + ".otf";
 			else

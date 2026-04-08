@@ -5,11 +5,8 @@ import menus.StoryMenuState;
 
 // This is just a class to initialise variables
 // Preferably only mess with it if you need to do some save-file related stuff
-class BootState extends flixel.FlxState
-{
-	override function create()
-	{
-		// new controls system
+class BootState extends flixel.FlxState {
+	override function create() { // new controls system
 		new Controls(Controls.defaultActions.copy());
 		/*\#if sys
 			if (!sys.FileSystem.exists(Sys.getCwd() + "/assets/replays"))
@@ -23,9 +20,7 @@ class BootState extends flixel.FlxState
 		data.Preferences.load();
 		data.Highscore.load();
 
-		if (FlxG.save.data.weekUnlocked != null)
-		{
-			// FIX LATER!!!
+		if (FlxG.save.data.weekUnlocked != null) { // FIX LATER!!!
 			// WEEK UNLOCK PROGRESSION!!
 			// StoryMenuState.weekUnlocked = FlxG.save.data.weekUnlocked;
 			if (StoryMenuState.weekUnlocked.length < 4)

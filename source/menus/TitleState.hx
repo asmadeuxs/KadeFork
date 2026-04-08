@@ -32,8 +32,7 @@ import Discord.DiscordClient;
 import sys.thread.Thread;
 #end
 
-class TitleState extends MusicBeatState
-{
+class TitleState extends MusicBeatState {
 	static var initialized:Bool = false;
 
 	var blackScreen:FlxSprite;
@@ -45,8 +44,7 @@ class TitleState extends MusicBeatState
 	var curWacky:Array<String> = [];
 	var wackyImage:FlxSprite;
 
-	override public function create():Void
-	{
+	override public function create():Void {
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 		super.create();
 		new FlxTimer().start(1, function(tmr:FlxTimer) startIntro());
@@ -57,18 +55,16 @@ class TitleState extends MusicBeatState
 	var danceLeft:Bool = false;
 	var titleText:FlxSprite;
 
-	function startIntro()
-	{
-		if (!initialized)
-		{
+	function startIntro() {
+		if (!initialized) {
 			var diamond:FlxGraphic = FlxGraphic.fromClass(GraphicTransTileDiamond);
 			diamond.persist = true;
 			diamond.destroyOnNoUse = false;
 
 			FlxTransitionableState.defaultTransIn = new TransitionData(FADE, FlxColor.BLACK, 1, new FlxPoint(0, -1), {asset: diamond, width: 32, height: 32},
 				new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
-			FlxTransitionableState.defaultTransOut = new TransitionData(FADE, FlxColor.BLACK, 0.7, new FlxPoint(0, 1),
-				{asset: diamond, width: 32, height: 32}, new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
+			FlxTransitionableState.defaultTransOut = new TransitionData(FADE, FlxColor.BLACK, 0.7, new FlxPoint(0, 1), {asset: diamond, width: 32, height: 32},
+				new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
 
 			transIn = FlxTransitionableState.defaultTransIn;
 			transOut = FlxTransitionableState.defaultTransOut;
@@ -154,10 +150,8 @@ class TitleState extends MusicBeatState
 
 		if (initialized)
 			skipIntro();
-		else
-		{
-			new FlxTimer().start(0.05, (_) ->
-			{
+		else {
+			new FlxTimer().start(0.05, (_) -> {
 				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 				FlxG.sound.music.fadeIn(4, 0, 0.7);
 			});
@@ -165,8 +159,7 @@ class TitleState extends MusicBeatState
 		}
 	}
 
-	function getIntroTextShit():Array<Array<String>>
-	{
+	function getIntroTextShit():Array<Array<String>> {
 		var fullText:String = Assets.getText(Paths.txt('introText'));
 		var firstArray:Array<String> = fullText.split('\n');
 		var swagGoodArray:Array<Array<String>> = [];
@@ -177,17 +170,14 @@ class TitleState extends MusicBeatState
 
 	var transitioning:Bool = false;
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER;
 
 		#if mobile
-		for (touch in FlxG.touches.list)
-		{
-			if (touch.justPressed)
-			{
+		for (touch in FlxG.touches.list) {
+			if (touch.justPressed) {
 				pressedEnter = true;
 			}
 		}
@@ -195,8 +185,7 @@ class TitleState extends MusicBeatState
 
 		var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
 
-		if (gamepad != null)
-		{
+		if (gamepad != null) {
 			if (gamepad.justPressed.START)
 				pressedEnter = true;
 
@@ -206,8 +195,7 @@ class TitleState extends MusicBeatState
 			#end
 		}
 
-		if (pressedEnter && !transitioning && skippedIntro)
-		{
+		if (pressedEnter && !transitioning && skippedIntro) {
 			titleText.animation.play('press');
 
 			transitioning = true;
@@ -216,18 +204,15 @@ class TitleState extends MusicBeatState
 			new FlxTimer().start(2, function(tmr:FlxTimer) FlxG.switchState(new menus.MainMenuState()));
 		}
 
-		if (pressedEnter && !skippedIntro)
-		{
+		if (pressedEnter && !skippedIntro) {
 			skipIntro();
 		}
 
 		super.update(elapsed);
 	}
 
-	function createCoolText(textArray:Array<String>)
-	{
-		for (i in 0...textArray.length)
-		{
+	function createCoolText(textArray:Array<String>) {
+		for (i in 0...textArray.length) {
 			var money:Alphabet = new Alphabet(0, 0, textArray[i], true, false);
 			money.screenCenter(X);
 			money.y += (i * 60) + 200;
@@ -236,8 +221,7 @@ class TitleState extends MusicBeatState
 		}
 	}
 
-	function addMoreText(text:String)
-	{
+	function addMoreText(text:String) {
 		var coolText:Alphabet = new Alphabet(0, 0, text, true, false);
 		coolText.screenCenter(X);
 		coolText.y += (textGroup.length * 60) + 200;
@@ -245,17 +229,14 @@ class TitleState extends MusicBeatState
 		textGroup.add(coolText);
 	}
 
-	function deleteCoolText()
-	{
-		while (textGroup.members.length > 0)
-		{
+	function deleteCoolText() {
+		while (textGroup.members.length > 0) {
 			credGroup.remove(textGroup.members[0], true);
 			textGroup.remove(textGroup.members[0], true);
 		}
 	}
 
-	override function beatHit()
-	{
+	override function beatHit() {
 		super.beatHit();
 
 		logoBl.animation.play('bump');
@@ -268,8 +249,7 @@ class TitleState extends MusicBeatState
 
 		FlxG.log.add(curBeat);
 
-		switch (curBeat)
-		{
+		switch (curBeat) {
 			case 1:
 				createCoolText(['The Funkin Crew Inc']);
 			case 3:
@@ -303,10 +283,8 @@ class TitleState extends MusicBeatState
 
 	var skippedIntro:Bool = false;
 
-	function skipIntro():Void
-	{
-		if (!skippedIntro)
-		{
+	function skipIntro():Void {
+		if (!skippedIntro) {
 			remove(ngSpr);
 			FlxG.camera.flash(FlxColor.WHITE, 4);
 			remove(credGroup);

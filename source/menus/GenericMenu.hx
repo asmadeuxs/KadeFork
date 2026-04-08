@@ -1,7 +1,13 @@
 package menus;
 
-class GenericMenu extends MusicBeatState
-{
+import flixel.FlxG;
+
+typedef SimpleMenuButton = {
+	name:String,
+	func:() -> Void
+}
+
+class GenericMenu extends MusicBeatState {
 	public var curSelected:Int = 0;
 
 	public var minSelections:Int = 0;
@@ -11,17 +17,15 @@ class GenericMenu extends MusicBeatState
 	public var onAcceptPressed:Void->Void;
 	public var onBackPressed:Void->Void;
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
-		if (Controls.justPressed("ui_cancel") && onBackPressed != null)
+		if (controls.BACK_P && onBackPressed != null)
 			onBackPressed();
-		if (Controls.justPressed("ui_accept") && onAcceptPressed != null)
+		if (controls.ACCEPT_P && onAcceptPressed != null)
 			onAcceptPressed();
 	}
 
-	public function changeSelection(next:Int = 0, ?playScrollSound:Bool = true)
-	{
+	public function changeSelection(next:Int = 0, ?playScrollSound:Bool = true) {
 		curSelected = flixel.math.FlxMath.wrap(curSelected + next, minSelections, maxSelections);
 		if (next != 0 && playScrollSound)
 			FlxG.sound.play(Paths.sound("scrollMenu"));

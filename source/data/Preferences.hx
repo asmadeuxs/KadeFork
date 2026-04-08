@@ -3,21 +3,17 @@ package data;
 import flixel.FlxG;
 
 // this is just for code formatting.
-private enum abstract ScrollType(Int) from Int to Int
-{
+private enum abstract ScrollType(Int) from Int to Int {
 	final UP = 0;
 	final DOWN = 1;
 }
 
-private enum abstract StrumUnderlayType(Int) from Int to Int
-{
+private enum abstract StrumUnderlayType(Int) from Int to Int {
 	final ON_STRUMS = 0;
 	final ON_STAGE = 1;
 }
 
-@:publicFields class Save
-{
-	// General Gameplay
+@:publicFields class Save { // General Gameplay
 	var frameRate:Int = 120; // How many frames per second the game runs at
 	var scrollType:Int = ScrollType.UP; // Changes where the notes scroll to
 	var centerStrums:Bool = false; // Centers your strums and hides the opponent's
@@ -62,37 +58,28 @@ private enum abstract StrumUnderlayType(Int) from Int to Int
 	 */
 	var distractions:Bool = true;
 
-	public function new():Void
-	{
-	}
+	public function new():Void {}
 }
 
-class Preferences
-{
+class Preferences {
 	public static final deft:Save = new Save();
 	public static var user:Save = new Save();
 
-	public static function setFPSCap(newFramerate:Int)
-	{
-		if (newFramerate > FlxG.drawFramerate)
-		{
+	public static function setFPSCap(newFramerate:Int) {
+		if (newFramerate > FlxG.drawFramerate) {
 			FlxG.updateFramerate = newFramerate;
 			FlxG.drawFramerate = newFramerate;
-		}
-		else
-		{
+		} else {
 			FlxG.drawFramerate = newFramerate;
 			FlxG.updateFramerate = newFramerate;
 		}
 	}
 
-	public static function save()
-	{
+	public static function save() {
 		var company:String = lime.app.Application.current.meta["file"];
 		var appName:String = lime.app.Application.current.meta["company"];
 		FlxG.save.bind('$appName/settings', company);
-		for (_ => pref in Reflect.fields(user))
-		{
+		for (_ => pref in Reflect.fields(user)) {
 			var value:Dynamic = Reflect.field(Preferences.user, pref);
 			if (value == null)
 				value = Reflect.field(Preferences.deft, pref);
@@ -101,14 +88,12 @@ class Preferences
 		FlxG.save.flush();
 	}
 
-	public static function load()
-	{
+	public static function load() {
 		FlxG.autoPause = false;
 		var company:String = lime.app.Application.current.meta["file"];
 		var appName:String = lime.app.Application.current.meta["company"];
 		FlxG.save.bind('$appName/settings', company);
-		for (_ => pref in Reflect.fields(user))
-		{
+		for (_ => pref in Reflect.fields(user)) {
 			var value:Dynamic = Reflect.field(FlxG.save.data, pref);
 			if (value == null)
 				value = Reflect.field(Preferences.deft, pref);

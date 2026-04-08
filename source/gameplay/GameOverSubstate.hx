@@ -8,19 +8,16 @@ import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import gameplay.PlayState;
 
-class GameOverSubstate extends MusicBeatSubstate
-{
+class GameOverSubstate extends MusicBeatSubstate {
 	var bf:Character;
 	var camFollow:FlxObject;
 
 	var stageSuffix:String = "";
 
-	public function new(x:Float, y:Float)
-	{
+	public function new(x:Float, y:Float) {
 		var daStage = PlayState.curStage;
 		var daBf:String = '';
-		switch (daStage)
-		{
+		switch (daStage) {
 			case 'school':
 				stageSuffix = '-pixel';
 				daBf = 'bf-pixel-dead';
@@ -52,15 +49,13 @@ class GameOverSubstate extends MusicBeatSubstate
 		bf.playAnim('firstDeath');
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
 		if (controls.ACCEPT)
 			endBullshit();
 
-		if (controls.BACK)
-		{
+		if (controls.BACK) {
 			FlxG.sound.music.stop();
 			if (PlayState.isStoryMode)
 				FlxG.switchState(new menus.StoryMenuState());
@@ -78,8 +73,7 @@ class GameOverSubstate extends MusicBeatSubstate
 			Conductor.songPosition = FlxG.sound.music.time;
 	}
 
-	override function beatHit()
-	{
+	override function beatHit() {
 		super.beatHit();
 		if (bf.animation.curAnim.name == 'firstDeath' && bf.animation.curAnim.finished)
 			bf.playAnim('deathLoop');
@@ -87,18 +81,14 @@ class GameOverSubstate extends MusicBeatSubstate
 
 	var isEnding:Bool = false;
 
-	function endBullshit():Void
-	{
-		if (!isEnding)
-		{
+	function endBullshit():Void {
+		if (!isEnding) {
 			isEnding = true;
 			bf.playAnim('deathConfirm', true);
 			FlxG.sound.music.stop();
 			FlxG.sound.play(Paths.music('gameOverEnd' + stageSuffix));
-			new FlxTimer().start(0.7, function(tmr:FlxTimer)
-			{
-				FlxG.camera.fade(FlxColor.BLACK, 2, false, function()
-				{
+			new FlxTimer().start(0.7, function(tmr:FlxTimer) {
+				FlxG.camera.fade(FlxColor.BLACK, 2, false, function() {
 					FlxG.switchState(new gameplay.PlayState());
 				});
 			});

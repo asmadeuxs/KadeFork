@@ -13,20 +13,17 @@ import haxe.Json;
 import flixel.input.keyboard.FlxKey;
 import openfl.utils.Dictionary;
 
-typedef KeyPress =
-{
+typedef KeyPress = {
 	public var time:Float;
 	public var key:String;
 }
 
-typedef KeyRelease =
-{
+typedef KeyRelease = {
 	public var time:Float;
 	public var key:String;
 }
 
-typedef ReplayJSON =
-{
+typedef ReplayJSON = {
 	public var replayGameVer:String;
 	public var timestamp:Date;
 	public var songName:String;
@@ -35,15 +32,13 @@ typedef ReplayJSON =
 	public var keyReleases:Array<KeyRelease>;
 }
 
-class Replay
-{
+class Replay {
 	public static var version:String = "1.0"; // replay file version
 
 	public var path:String = "";
 	public var replay:ReplayJSON;
 
-	public function new(path:String)
-	{
+	public function new(path:String) {
 		this.path = path;
 		replay = {
 			songName: "Tutorial",
@@ -55,20 +50,22 @@ class Replay
 		};
 	}
 
-	public static function LoadReplay(path:String):Replay
-	{
+	public static function LoadReplay(path:String):Replay {
 		var rep:Replay = new Replay(path);
 
 		rep.LoadFromJSON();
 
-		trace('basic replay data:\nSong Name: ' + rep.replay.songName + '\nSong Diff: ' + rep.replay.songDiff + '\nKeys Length: '
+		trace('basic replay data:\nSong Name: '
+			+ rep.replay.songName
+			+ '\nSong Diff: '
+			+ rep.replay.songDiff
+			+ '\nKeys Length: '
 			+ rep.replay.keyPresses.length);
 
 		return rep;
 	}
 
-	public function SaveReplay()
-	{
+	public function SaveReplay() {
 		var json = {
 			"songName": PlayState.SONG.song.toLowerCase(),
 			"songDiff": PlayState.storyDifficulty,
@@ -85,17 +82,14 @@ class Replay
 		#end
 	}
 
-	public function LoadFromJSON()
-	{
+	public function LoadFromJSON() {
 		#if sys
 		trace('loading ' + Sys.getCwd() + 'assets/replays/' + path + ' replay...');
-		try
-		{
+		try {
 			var repl:ReplayJSON = cast Json.parse(File.getContent(Sys.getCwd() + "assets/replays/" + path));
 			replay = repl;
 		}
-		catch (e)
-		{
+		catch (e) {
 			trace('failed!\n' + e.message);
 		}
 		#end

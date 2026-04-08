@@ -10,8 +10,7 @@ using StringTools;
 	Number(min:Float, max:Float, step:Float),
 	Choice(choices:Array<String>)
 }*/
-@:structInit class Option
-{
+@:structInit class Option {
 	public static final supportedOptionTypes:Array<String> = [
 		// Boolean
 		"bool",
@@ -49,11 +48,9 @@ using StringTools;
 			this.description = description;
 	}*/
 	//
-	public function valueString():String
-	{
+	public function valueString():String {
 		var value:Dynamic = Reflect.field(Preferences.user, this.variable);
-		switch validateType(this.type)
-		{
+		switch validateType(this.type) {
 			case "checkmark":
 				return value == true ? "ON" : "OFF";
 			case "number":
@@ -68,21 +65,17 @@ using StringTools;
 		}
 	}
 
-	public function validateType(type:String):String
-	{
-		return switch type.toLowerCase().trim()
-		{
+	public function validateType(type:String):String {
+		return switch type.toLowerCase().trim() {
 			case "float", "number", "int": "number";
 			case "list", "map", "array", "choice": "choice";
 			case _: "checkmark";
 		}
 	}
 
-	public function change(byThisMuch:Int = 0):Dynamic
-	{
+	public function change(byThisMuch:Int = 0):Dynamic {
 		var value:Dynamic = Reflect.field(Preferences.user, this.variable);
-		switch validateType(this.type)
-		{
+		switch validateType(this.type) {
 			case "checkmark":
 				if (byThisMuch != 0)
 					Reflect.setField(Preferences.user, this.variable, !value);
@@ -91,17 +84,13 @@ using StringTools;
 				newVal = Math.min(this.numberBoundRight, Math.max(this.numberBoundLeft, newVal));
 				Reflect.setField(Preferences.user, this.variable, newVal);
 			case "choice":
-				if (Std.isOfType(value, Int))
-				{
+				if (Std.isOfType(value, Int)) {
 					var newValue:Int = wrap(value + byThisMuch, 0, choices.length - 1);
 					Reflect.setField(Preferences.user, this.variable, newValue);
-				}
-				else
-				{
+				} else {
 					var index:Int = 0;
 					for (i in 0...choices.length)
-						if (choices[i] == value)
-						{
+						if (choices[i] == value) {
 							index = i;
 							break;
 						}

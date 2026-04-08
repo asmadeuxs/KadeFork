@@ -1,7 +1,6 @@
 package data;
 
-@:structInit class Judgement
-{
+@:structInit class Judgement {
 	public var name:String = "Unknown";
 	public var hitWindow:Float = 0.0;
 
@@ -11,21 +10,18 @@ package data;
 	@:optional public var hits:Int = 0;
 }
 
-class JudgementData
-{
+class JudgementData {
 	public var maxHitWindow:Float = 200.0;
 	public var activeList:Array<Judgement>;
 
-	public function new(?maxHitWindow:Null<Float>):Void
-	{
+	public function new(?maxHitWindow:Null<Float>):Void {
 		activeList = getDefaultJudgements();
 		// maybe I need a miss judgement
 		if (maxHitWindow != null && maxHitWindow > 0.0)
 			this.maxHitWindow = maxHitWindow;
 	};
 
-	public function getDefaultJudgements():Array<Judgement>
-	{
+	public function getDefaultJudgements():Array<Judgement> {
 		return [
 			{
 				name: "sick",
@@ -55,11 +51,9 @@ class JudgementData
 		];
 	}
 
-	public function getHealthBonus(judgementName:String)
-	{
+	public function getHealthBonus(judgementName:String) {
 		var health:Float = 0.0;
-		switch (judgementName)
-		{
+		switch (judgementName) {
 			case 'shit':
 				health -= 0.2;
 			case 'bad':
@@ -74,17 +68,14 @@ class JudgementData
 		return health;
 	}
 
-	public function judgeTime(noteDiff:Float):Null<Judgement>
-	{
+	public function judgeTime(noteDiff:Float):Null<Judgement> {
 		for (judgement in activeList)
 			if (noteDiff <= judgement.hitWindow)
 				return judgement;
 		return activeList[activeList.length - 1];
 	}
 
-	public function getClearFlag():String
-	{
-		// made these static JUST for this btw :friendly_hearts:
+	public function getClearFlag():String { // made these static JUST for this btw :friendly_hearts:
 		var breaks:Int = gameplay.PlayState.comboBreaks;
 		var misses:Int = gameplay.PlayState.misses;
 
@@ -93,17 +84,14 @@ class JudgementData
 		var goods:Int = activeList[1].hits;
 		var bads:Int = activeList[2].hits;
 		var shits:Int = activeList[3].hits;
-		if (misses == 0)
-		{
+		if (misses == 0) {
 			if (bads == 0 && shits == 0 && goods == 0) // Marvelous (SICK) Full Combo
 				clearFlag = "MFC";
 			else if (bads == 0 && shits == 0 && goods >= 1) // White Flag / Good Full Combo (Nothing but Goods & Sicks)
 				clearFlag = goods == 1 ? "WF" : "GFC";
 			else
 				clearFlag = breaks > 0 ? "NM" : "FC"; // No Misses / Full Combo
-		}
-		else
-		{
+		} else {
 			if (misses == 1)
 				clearFlag = "MF"; // Miss Flag
 			else if (misses < 10)

@@ -1,7 +1,6 @@
 var directions = ["left", "down", "up", "right"];
 
-function generateStrum(strum, noteData)
-{
+function generateStrum(strum, noteData) {
 	var direction = directions[noteData];
 	strum.frames = Paths.getSparrowAtlas('gameplay/noteskins/NOTE_assets');
 	strum.animation.addByPrefix('static', 'arrow' + direction.toUpperCase());

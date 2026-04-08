@@ -10,8 +10,7 @@ import gameplay.PlayState;
 
 using StringTools;
 
-class Note extends FlxSprite
-{
+class Note extends FlxSprite {
 	public var strumTime:Float = 0;
 	public var prevNote:Note;
 
@@ -39,8 +38,7 @@ class Note extends FlxSprite
 
 	var colorArray:Array<String> = ["purple", "blue", "green", "red"];
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false)
-	{
+	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false) {
 		super(0, 4000);
 
 		if (prevNote == null)
@@ -55,8 +53,7 @@ class Note extends FlxSprite
 
 		var daStage:String = PlayState.curStage;
 
-		switch (daStage)
-		{
+		switch (daStage) {
 			default:
 				frames = Paths.getSparrowAtlas('gameplay/noteskins/NOTE_assets');
 
@@ -88,8 +85,7 @@ class Note extends FlxSprite
 		if (Preferences.user.scrollType == 1 && sustainNote)
 			flipY = true;
 
-		if (isSustainNote && prevNote != null)
-		{
+		if (isSustainNote && prevNote != null) {
 			alpha = 0.6;
 			x += width / 2;
 			animation.play(colorArray[noteData] + 'holdend');
@@ -99,8 +95,7 @@ class Note extends FlxSprite
 			if (PlayState.curStage.startsWith('school'))
 				x += 30;
 
-			if (prevNote.isSustainNote)
-			{
+			if (prevNote.isSustainNote) {
 				prevNote.animation.play(colorArray[noteData] + 'hold');
 				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.8 * Preferences.user.scrollSpeed;
 				// prevNote.updateHitbox();
@@ -108,33 +103,26 @@ class Note extends FlxSprite
 		}
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (mustPress)
-		{
+		if (mustPress) {
 			var safeZone:Null<Float> = PlayState.judgementData.maxHitWindow;
-			if (safeZone != null)
-			{
+			if (safeZone != null) {
 				var pos:Float = Conductor.songPosition;
-				if (!wasGoodHit)
-				{
+				if (!wasGoodHit) {
 					canBeHit = strumTime >= pos - (safeZone * hitMultiplier[0]) && strumTime <= pos + (safeZone * hitMultiplier[1]);
 					if (strumTime < pos - safeZone)
 						tooLate = true;
 				}
 			}
-		}
-		else
-		{
+		} else {
 			canBeHit = false;
 			if (strumTime <= Conductor.songPosition)
 				wasGoodHit = true;
 		}
 
-		if (tooLate)
-		{
+		if (tooLate) {
 			if (alpha > 0.3)
 				alpha = 0.3;
 		}

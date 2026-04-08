@@ -6,8 +6,7 @@ import openfl.events.KeyboardEvent;
 
 typedef ActionMap = Map<String, Array<FlxKey>>;
 
-class Controls
-{
+class Controls {
 	public static final defaultActions:ActionMap = [
 		// Gameplay
 		"note_left" => [FlxKey.A, FlxKey.LEFT],
@@ -31,24 +30,19 @@ class Controls
 	// instance stuff
 	public var actions:ActionMap;
 
-	public function new(actions:ActionMap):Void
-	{
+	public function new(actions:ActionMap):Void {
 		Controls.connected.push(this);
 		if (Controls.current == null)
 			Controls.current = Controls.connected[0];
 		this.actions = actions;
 	}
 
-	public function justPressed(action:String):Bool
-	{
+	public function justPressed(action:String):Bool {
 		var state:Bool = false;
-		if (actions.exists(action))
-		{
+		if (actions.exists(action)) {
 			var actions:Array<FlxKey> = actions[action];
-			for (i => key in actions)
-			{
-				if (FlxG.keys.checkStatus(key, JUST_PRESSED))
-				{
+			for (i => key in actions) {
+				if (FlxG.keys.checkStatus(key, JUST_PRESSED)) {
 					state = true;
 					break;
 				}
@@ -57,16 +51,12 @@ class Controls
 		return state;
 	}
 
-	public function pressed(action:String):Bool
-	{
+	public function pressed(action:String):Bool {
 		var state:Bool = false;
-		if (actions.exists(action))
-		{
+		if (actions.exists(action)) {
 			var actions:Array<FlxKey> = actions[action];
-			for (i => key in actions)
-			{
-				if (FlxG.keys.checkStatus(key, PRESSED))
-				{
+			for (i => key in actions) {
+				if (FlxG.keys.checkStatus(key, PRESSED)) {
 					state = true;
 					break;
 				}
@@ -75,16 +65,12 @@ class Controls
 		return state;
 	}
 
-	public function justReleased(action:String):Bool
-	{
+	public function justReleased(action:String):Bool {
 		var state:Bool = false;
-		if (actions.exists(action))
-		{
+		if (actions.exists(action)) {
 			var actions:Array<FlxKey> = actions[action];
-			for (i => key in actions)
-			{
-				if (FlxG.keys.checkStatus(key, JUST_RELEASED))
-				{
+			for (i => key in actions) {
+				if (FlxG.keys.checkStatus(key, JUST_RELEASED)) {
 					state = true;
 					break;
 				}

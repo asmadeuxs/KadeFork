@@ -11,8 +11,7 @@ import flixel.util.FlxColor;
 using flixel.util.FlxSpriteUtil;
 
 // I JUST MADE SOME BULLLLLLLLLLLLLLLLLLSHIT -asmadeuxs
-class OptionsMenu extends MusicBeatSubstate
-{
+class OptionsMenu extends MusicBeatSubstate {
 	public var optionStash:Map<String, Array<Option>> = [
 		"Preferences" => [
 			{
@@ -108,14 +107,12 @@ class OptionsMenu extends MusicBeatSubstate
 	var optionsFont = Paths.font("vcr");
 	var parent:MusicBeatState;
 
-	public function new(parent:MusicBeatState)
-	{
+	public function new(parent:MusicBeatState) {
 		this.parent = parent;
 		super();
 	}
 
-	override function create():Void
-	{
+	override function create():Void {
 		super.create();
 		currentCat = categoryOrder[catSelected];
 
@@ -163,14 +160,12 @@ class OptionsMenu extends MusicBeatSubstate
 
 	var closing:Bool = false;
 
-	override function update(elapsed:Float):Void
-	{
+	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 		if (closing)
 			return;
 		var leftCat:Bool = FlxG.keys.justPressed.Q;
-		if (leftCat || FlxG.keys.justPressed.E)
-		{
+		if (leftCat || FlxG.keys.justPressed.E) {
 			catSelected = flixel.math.FlxMath.wrap(catSelected + (leftCat ? -1 : 1), 0, categoryOrder.length - 1);
 			FlxG.sound.play(Paths.sound('scrollMenu'));
 			currentCat = categoryOrder[catSelected];
@@ -180,22 +175,18 @@ class OptionsMenu extends MusicBeatSubstate
 		if (up || controls.DOWN_P)
 			changeSelection(up ? -1 : 1);
 		var left:Bool = controls.LEFT_P;
-		if (left || controls.RIGHT_P)
-		{
+		if (left || controls.RIGHT_P) {
 			curCatOptions[curSelected].change(left ? -1 : 1);
 			catOptions.members[curSelected * 2 + 1].text = curCatOptions[curSelected].valueString();
 			FlxG.sound.play(Paths.sound('scrollMenu'));
 		}
-		if (controls.BACK_P)
-		{
+		if (controls.BACK_P) {
 			closing = true;
 			close();
 			Preferences.save();
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			new flixel.util.FlxTimer().start(0.5, (_) ->
-			{
-				if (parent is MainMenuState)
-				{
+			new flixel.util.FlxTimer().start(0.5, (_) -> {
+				if (parent is MainMenuState) {
 					var menu:MainMenuState = cast parent;
 					menu.selectedSomethin = false;
 					menu.tweenItemsBackIn();
@@ -204,8 +195,7 @@ class OptionsMenu extends MusicBeatSubstate
 		}
 	}
 
-	public function changeSelection(next:Int = 0, ?playSound:Bool = true)
-	{
+	public function changeSelection(next:Int = 0, ?playSound:Bool = true) {
 		curSelected = flixel.math.FlxMath.wrap(curSelected + next, 0, curCatOptions.length - 1);
 		if (next != 0 && playSound)
 			FlxG.sound.play(Paths.sound('scrollMenu'));
@@ -213,15 +203,13 @@ class OptionsMenu extends MusicBeatSubstate
 		if (catOptions.members.length > 0)
 			for (entry in catOptions)
 				entry.alpha = entry.ID == curSelected ? 1.0 : 0.6;
-		if (curCatOptions != null)
-		{
+		if (curCatOptions != null) {
 			descriptionThingy.text = curCatOptions[curSelected].description;
 			descriptionThingy.y = catFrame.y + catFrame.height + 10;
 		}
 	}
 
-	public function updateCat()
-	{
+	public function updateCat() {
 		curSelected = 0;
 		if (catNameText != null)
 			catNameText.text = 'Viewing: $currentCat\nPress Q/E to change category\nPress Left/Right to change option';
@@ -231,8 +219,7 @@ class OptionsMenu extends MusicBeatSubstate
 
 		var i:Int = 0;
 		curCatOptions = optionStash.get(currentCat);
-		for (option in curCatOptions)
-		{
+		for (option in curCatOptions) {
 			var nameText = new FlxText(catFrame.x + 20, catFrame.y + 50 + i * 40, 0, option.name, 24);
 			var valText = new FlxText(catFrame.x + catFrame.width - 100, nameText.y, 0, option.valueString(), 24);
 			valText.scrollFactor.set();
