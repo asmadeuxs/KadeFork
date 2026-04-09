@@ -9,10 +9,10 @@ typedef ActionMap = Map<String, Array<FlxKey>>;
 class Controls {
 	public static final defaultActions:ActionMap = [
 		// Gameplay
-		"note_left" => [FlxKey.A, FlxKey.LEFT],
-		"note_down" => [FlxKey.S, FlxKey.DOWN],
-		"note_up" => [FlxKey.W, FlxKey.UP],
-		"note_right" => [FlxKey.D, FlxKey.RIGHT],
+		"note_left" => [FlxKey.D, FlxKey.LEFT],
+		"note_down" => [FlxKey.F, FlxKey.DOWN],
+		"note_up" => [FlxKey.J, FlxKey.UP],
+		"note_right" => [FlxKey.K, FlxKey.RIGHT],
 		"reset" => [FlxKey.R],
 		// UI
 		"ui_left" => [FlxKey.A, FlxKey.LEFT],

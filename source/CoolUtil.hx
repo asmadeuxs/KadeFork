@@ -10,7 +10,7 @@ using StringTools;
 
 class CoolUtil {
 	public static var pixelScale:Float = 6;
-	public static var defaultDifficulties:Array<String> = ['EASY', "NORMAL", "HARD"];
+	public static var defaultDifficulties:Array<String> = ['easy', "normal", "hard"];
 
 	public static function makeScaledGraphic(sprite:FlxSprite, x:Float, y:Float, color:FlxColor = FlxColor.WHITE, ?updateHitbox:Bool = true):FlxSprite {
 		if (sprite == null)
@@ -29,9 +29,6 @@ class CoolUtil {
 			o2.y = o2.y + (o2.height - o1.height) * 0.5;
 		return o1;
 	}
-
-	public static function difficultyString(difficulty:Int):String
-		return defaultDifficulties[difficulty];
 
 	public static function numberArray(max:Int, ?min = 0):Array<Int>
 		return [for (i in min...max) i];

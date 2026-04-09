@@ -86,7 +86,6 @@ class PlayState extends MusicBeatState {
 	public static var isStoryMode:Bool = false;
 	public static var storyWeek:Int = 0;
 	public static var storyPlaylist:Array<String> = [];
-	public static var storyDifficulty:Int = 1;
 
 	// okay seriously we really need to replace this
 	// I'm thinking some shit like this
@@ -104,7 +103,7 @@ class PlayState extends MusicBeatState {
 	// level info end
 	public static var judgementData:JudgementData;
 	public static var invalidSession:Bool = false;
-	public static var storyDifficultyText:String = "";
+	public static var difficultyName:String = "";
 
 	#if discord_rpc
 	// Discord RPC variables
@@ -146,7 +145,13 @@ class PlayState extends MusicBeatState {
 	// Score shit | TODO: move this to a class so we can save and load
 	// probably after highscore rewrite -asmadeuxs
 	public static var songScore:Int = 0;
-	public static var misses:Int = 0;
+
+	// keeping this variable around just for compatibility sake
+	public static var misses(get, never):Int;
+
+	static function get_misses():Int
+		return judgementData.getMiss().hits ?? 0;
+
 	public static var comboBreaks:Int = 0;
 	public static var combo:Int = 0;
 
@@ -192,7 +197,6 @@ class PlayState extends MusicBeatState {
 		totalNotesHit = 0;
 		totalPlayed = 0;
 		accuracy = 0;
-		misses = 0;
 	}
 
 	override public function create() {
@@ -203,13 +207,6 @@ class PlayState extends MusicBeatState {
 
 		resetScoring();
 		judgementData = new JudgementData();
-
-		storyDifficultyText = switch (storyDifficulty) {
-			case 0: "Easy";
-			case 1: "Normal";
-			case 2: "Hard";
-			case _: "UnknownDifficulty";
-		}
 
 		#if discord_rpc
 		iconRPC = SONG.player2;
@@ -228,14 +225,14 @@ class PlayState extends MusicBeatState {
 		detailsPausedText = 'Paused - $detailsText';
 
 		// Updating Discord Rich Presence.
-		DiscordClient.changePresence(detailsText + ' ${SONG.song} ($storyDifficultyText)' iconRPC);
+		DiscordClient.changePresence(detailsText + ' ${SONG.song} ($difficultyName)' iconRPC);
 		#end
 
 		camGame = FlxG.camera;
 		camHUD = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
 		camHUD.antialiasing = true;
-		FlxG.cameras.add(camHUD);
+		FlxG.cameras.add(camHUD, false);
 
 		persistentUpdate = true;
 		persistentDraw = true;
@@ -416,6 +413,7 @@ class PlayState extends MusicBeatState {
 				case 0:
 					FlxG.sound.play(Paths.sound('intro3' + altSuffix), 0.6);
 				case 1:
+					FlxG.sound.play(Paths.sound('intro2' + altSuffix), 0.6);
 					var ready:FlxSprite = new FlxSprite().loadGraphic(Paths.image(introPath + introAlts[0]));
 					ready.screenCenter();
 					add(ready);
@@ -423,8 +421,8 @@ class PlayState extends MusicBeatState {
 						onComplete: function(twn:FlxTween) ready.destroy(),
 						ease: FlxEase.cubeInOut
 					});
-					FlxG.sound.play(Paths.sound('intro2' + altSuffix), 0.6);
 				case 2:
+					FlxG.sound.play(Paths.sound('intro1' + altSuffix), 0.6);
 					var set:FlxSprite = new FlxSprite().loadGraphic(Paths.image(introPath + introAlts[1]));
 					set.screenCenter();
 					add(set);
@@ -432,19 +430,15 @@ class PlayState extends MusicBeatState {
 						onComplete: function(twn:FlxTween) set.destroy(),
 						ease: FlxEase.cubeInOut
 					});
-					FlxG.sound.play(Paths.sound('intro1' + altSuffix), 0.6);
 				case 3:
+					FlxG.sound.play(Paths.sound('introGo' + altSuffix), 0.6);
 					var go:FlxSprite = new FlxSprite().loadGraphic(Paths.image(introPath + introAlts[2]));
-					if (curStage.startsWith('school'))
-						go.setGraphicSize(Std.int(go.width * CoolUtil.pixelScale));
 					go.screenCenter();
 					add(go);
 					FlxTween.tween(go, {y: go.y += 100, alpha: 0}, Conductor.crochet / 1000, {
 						onComplete: function(twn:FlxTween) go.destroy(),
 						ease: FlxEase.cubeInOut
 					});
-					FlxG.sound.play(Paths.sound('introGo' + altSuffix), 0.6);
-				case 4:
 			}
 
 			swagCounter += 1;
@@ -473,7 +467,7 @@ class PlayState extends MusicBeatState {
 		songLength = inst.length;
 
 		#if discord_rpc // Updating Discord Rich Presence (with Time Left)
-		DiscordClient.changePresence(detailsText + ' ${SONG.song} ($storyDifficultyText)\n${scoreTxt.text}' iconRPC);
+		DiscordClient.changePresence(detailsText + ' ${SONG.song} ($difficultyName)\n${scoreTxt.text}' iconRPC);
 		#end
 	}
 
@@ -567,7 +561,7 @@ class PlayState extends MusicBeatState {
 			}
 
 			#if discord_rpc
-			DiscordClient.changePresence('PAUSED on ${SONG.song} ($storyDifficultyText)', iconRPC);
+			DiscordClient.changePresence('PAUSED on ${SONG.song} ($difficultyName)', iconRPC);
 			#end
 			if (!startTimer.finished)
 				startTimer.active = false;
@@ -587,9 +581,9 @@ class PlayState extends MusicBeatState {
 
 			#if discord_rpc
 			if (startTimer.finished)
-				DiscordClient.changePresence(detailsText + '${SONG.song} ($storyDifficultyText)', iconRPC, true, songLength - Conductor.songPosition);
+				DiscordClient.changePresence(detailsText + '${SONG.song} ($difficultyName)', iconRPC, true, songLength - Conductor.songPosition);
 			else
-				DiscordClient.changePresence(detailsText, '${SONG.song} ($storyDifficultyText)', iconRPC);
+				DiscordClient.changePresence(detailsText, '${SONG.song} ($difficultyName)', iconRPC);
 			#end
 		}
 
@@ -610,9 +604,13 @@ class PlayState extends MusicBeatState {
 
 	override public function update(elapsed:Float) { // debug keys
 		#if debug
-		if (FlxG.keys.justPressed.F6) {
-			perfectMode = true;
+		if (FlxG.keys.justPressed.ONE) {
 			invalidSession = true;
+			endSong();
+		}
+		if (FlxG.keys.justPressed.F6) {
+			invalidSession = true;
+			perfectMode = true;
 		}
 		#end
 
@@ -673,32 +671,18 @@ class PlayState extends MusicBeatState {
 			}
 		}
 
-		if (generatedMusic && PlayState.SONG.notes[Std.int(curStep / 16)] != null) { // Make sure Girlfriend cheers only for certain songs
-			if (allowedToHeadbang) { // Don't animate GF if something else is already animating her (eg. train passing)
-				if (gf.animation.curAnim.name == 'danceLeft'
-					|| gf.animation.curAnim.name == 'danceRight'
-					|| gf.animation.curAnim.name == 'idle') { // Per song treatment since some songs will only have the 'Hey' at certain times
-					switch (curSong) {
-						case 'Bopeebo':
-							// Where it starts || where it ends
-							if (curBeat > 5 && curBeat < 130) {
-								if (curBeat % 8 == 7)
-									gf.playAnim('cheer');
-							}
-					}
-				}
-			}
+		var curMeasure:Int = Std.int(curStep / 16);
+		if (generatedMusic && PlayState.SONG.notes[curMeasure] != null) {
+			var mustHitSec:Bool = PlayState.SONG.notes[curMeasure].mustHitSection;
+			var nextChar:Character = mustHitSec ? boyfriend : dad;
+			var mid = nextChar.getMidpoint();
+			var off = nextChar.cameraOffset;
+			camFollow.setPosition(mid.x + off.x, mid.y + off.y);
+			// do not remove this line its funny as fuck PLEASEEEEE don't remove it lmao -asmadeuxs
+			// camFollow.setPosition(lucky.getMidpoint().x - 120, lucky.getMidpoint().y + 210);
 
-			if (camFollow.x != dad.getMidpoint().x + 150 && !PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection) {
-				camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
-				// camFollow.setPosition(lucky.getMidpoint().x - 120, lucky.getMidpoint().y + 210);
-			}
-
-			if (PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection && camFollow.x != boyfriend.getMidpoint().x - 100) {
-				camFollow.setPosition(boyfriend.getMidpoint().x - 100, boyfriend.getMidpoint().y - 100);
-				if (SONG.song.toLowerCase() == 'tutorial')
-					FlxTween.tween(camGame, {zoom: 1}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut});
-			}
+			if (SONG.song.toLowerCase() == 'tutorial')
+				FlxTween.tween(camGame, {zoom: 1}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut});
 		}
 
 		if (camZooming) {
@@ -708,20 +692,6 @@ class PlayState extends MusicBeatState {
 
 		FlxG.watch.addQuick("beatShit", curBeat);
 		FlxG.watch.addQuick("stepShit", curStep);
-
-		if (curSong == 'Fresh') {
-			switch (curBeat) {
-				case 16:
-					camZooming = true;
-					gfSpeed = 2;
-				case 48:
-					gfSpeed = 1;
-				case 80:
-					gfSpeed = 2;
-				case 112:
-					gfSpeed = 1;
-			}
-		}
 
 		if (health <= 0) {
 			boyfriend.stunned = true;
@@ -736,7 +706,7 @@ class PlayState extends MusicBeatState {
 
 			#if discord_rpc
 			// Game Over doesn't get his own variable because it's only used here
-			DiscordClient.changePresence("GAME OVER -- " + '${SONG.song} ($storyDifficultyText)', iconRPC);
+			DiscordClient.changePresence("GAME OVER -- " + '${SONG.song} ($difficultyName)', iconRPC);
 			#end
 		}
 
@@ -762,12 +732,9 @@ class PlayState extends MusicBeatState {
 						camZooming = true;
 
 					var altAnim:String = "";
-					if (SONG.notes[Math.floor(curStep / 16)] != null)
-						if (SONG.notes[Math.floor(curStep / 16)].altAnim)
-							dad.idleSuffix = '-alt';
-						else
-							dad.idleSuffix = "";
-					dad.sing(daNote.noteData, true);
+					if (SONG.notes[curMeasure] != null && SONG.notes[Math.floor(curStep / 16)].altAnim)
+						altAnim = '-alt';
+					dad.sing(daNote.noteData, altAnim, true);
 					dad.danceCooldown = (Conductor.stepCrochet) + daNote.sustainLength;
 					if (SONG.needsVoices)
 						vocals.volume = 1;
@@ -823,11 +790,6 @@ class PlayState extends MusicBeatState {
 				}
 			});
 		}
-
-		#if debug
-		if (FlxG.keys.justPressed.ONE)
-			endSong();
-		#end
 	}
 
 	function endSong():Void {
@@ -835,7 +797,7 @@ class PlayState extends MusicBeatState {
 		vocals.volume = 0;
 		inst.volume = 0;
 		if (!invalidSession)
-			Highscore.saveScore(SONG.song, Math.round(songScore), storyDifficulty);
+			Highscore.saveScore(SONG.song, Math.round(songScore), difficultyName);
 
 		if (isStoryMode) {
 			campaignScore += Math.round(songScore);
@@ -851,39 +813,24 @@ class PlayState extends MusicBeatState {
 
 				StoryMenuState.weekUnlocked[Std.int(Math.min(storyWeek + 1, StoryMenuState.weekUnlocked.length - 1))] = true;
 				if (!invalidSession)
-					Highscore.saveWeekScore(storyWeek, campaignScore, storyDifficulty);
+					Highscore.saveWeekScore(storyWeek, campaignScore, difficultyName);
 				FlxG.save.data.weekUnlocked = StoryMenuState.weekUnlocked;
 				FlxG.save.flush();
 			} else {
-				var difficulty:String = "";
-				if (storyDifficulty == 0)
-					difficulty = '-easy';
-				if (storyDifficulty == 2)
-					difficulty = '-hard';
-
 				trace('LOADING NEXT SONG');
-				trace(PlayState.storyPlaylist[0].toLowerCase() + difficulty);
-
-				if (SONG.song.toLowerCase() == 'eggnog') {
-					var blackShit:FlxSprite = new FlxSprite(-FlxG.width * camGame.zoom,
-						-FlxG.height * camGame.zoom).makeGraphic(FlxG.width * 3, FlxG.height * 3, FlxColor.BLACK);
-					blackShit.scrollFactor.set();
-					add(blackShit);
-					camHUD.visible = false;
-					FlxG.sound.play(Paths.sound('Lights_Shut_off'));
-				}
-
+				trace(PlayState.storyPlaylist[0].toLowerCase() + difficultyName);
 				FlxTransitionableState.skipNextTransIn = true;
 				FlxTransitionableState.skipNextTransOut = true;
+				PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0].toLowerCase() + difficultyName, PlayState.storyPlaylist[0]);
 				prevCamFollow = camFollow;
-
-				PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0].toLowerCase() + difficulty, PlayState.storyPlaylist[0]);
 				inst.stop();
 
 				FlxG.switchState(new gameplay.PlayState());
 			}
 		} else {
 			trace('WENT BACK TO FREEPLAY??');
+			if (!FlxG.sound.music.playing)
+				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song));
 			FlxG.switchState(new menus.FreeplayState());
 		}
 	}
@@ -936,7 +883,7 @@ class PlayState extends MusicBeatState {
 
 	public function popUpCombo(combo:Int, ?judgement:Judgement = null):Void {
 		var comboSprScale:Float = 0.65;
-		var color:FlxColor = judgement != null ? judgement.color : FlxColor.WHITE;
+		var color:FlxColor = judgement.color ?? FlxColor.WHITE;
 		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image('gameplay/ui/score/combo'));
 		comboSpr.screenCenter();
 		comboSpr.x += 100;
@@ -981,7 +928,7 @@ class PlayState extends MusicBeatState {
 			FlxTween.cancelTweensOf(currentTimingShown, ['alpha']);
 			comboDisplay.remove(currentTimingShown);
 		}
-		var color:FlxColor = judgement != null ? judgement.color : FlxColor.WHITE;
+		var color:FlxColor = judgement.color ?? FlxColor.WHITE;
 		var position:Float = FlxG.width * 0.55;
 		currentTimingShown = new FlxText(position - 125, 50, 0, timing + "ms");
 		currentTimingShown.setFormat(null, 20, color, LEFT);
@@ -1028,7 +975,8 @@ class PlayState extends MusicBeatState {
 
 	public function keyShit(event:KeyboardEvent):Void {
 		var key:Int = getStrumFromKey(event.keyCode);
-		if (perfectMode || key < 0 || paused || inCutscene || !generatedMusic || endingSong || boyfriend.stunned)
+		var tooMany:Bool = key < 0 || key > noteActions.length - 1;
+		if (perfectMode || tooMany || paused || inCutscene || !generatedMusic || endingSong || boyfriend.stunned)
 			return;
 
 		var strum = playerStrums.members[key];
@@ -1065,9 +1013,8 @@ class PlayState extends MusicBeatState {
 				combo = 0;
 			else
 				combo--;
-			misses++;
 			var missJudge = judgementData.getMiss();
-			trace('miss combo $combo');
+			missJudge.hits++;
 			popUpRating(missJudge.image);
 			popUpCombo(combo, missJudge);
 
@@ -1143,7 +1090,7 @@ class PlayState extends MusicBeatState {
 			resyncVocals();
 
 		#if discord_rpc
-		DiscordClient.changePresence(detailsText + ' ${SONG.song} ($storyDifficultyText) ${scoreTxt.text}', iconRPC, true, songLength - Conductor.songPosition);
+		DiscordClient.changePresence(detailsText + ' ${SONG.song} ($difficultyName) ${scoreTxt.text}', iconRPC, true, songLength - Conductor.songPosition);
 		#end
 	}
 
@@ -1171,19 +1118,37 @@ class PlayState extends MusicBeatState {
 		if (currentHUD != null)
 			currentHUD.beatHit(curBeat);
 		characterDance(curBeat);
-		if (curBeat % 8 == 7 && curSong == 'Bopeebo')
-			boyfriend.playAnim('hey', true);
 
-		if (curBeat % 16 == 15 && SONG.song == 'Tutorial' && dad.characterId == 'gf' && curBeat > 16 && curBeat < 48) {
-			boyfriend.playAnim('hey', true);
-			dad.playAnim('cheer', true);
+		switch curSong {
+			case 'Tutorial':
+				if (curBeat % 16 == 15 && dad.characterId == 'gf' && curBeat > 16 && curBeat < 48) {
+					boyfriend.playAnim('hey', true);
+					dad.playAnim('cheer', true);
+				}
+			case 'Bopeebo':
+				if (curBeat % 8 == 7)
+					boyfriend.playAnim('hey', true);
+				if (curBeat > 5 && curBeat < 130 && curBeat % 8 == 7)
+					gf.playAnim('cheer');
+			case 'Fresh':
+				switch (curBeat) {
+					case 16:
+						camZooming = true;
+						gfSpeed = 2;
+					case 48:
+						gfSpeed = 1;
+					case 80:
+						gfSpeed = 2;
+					case 112:
+						gfSpeed = 1;
+				}
 		}
 	}
 
 	function characterDance(beat:Int) {
 		if (curBeat % dad.beatsToDance == 0)
 			dad.dance();
-		if (curBeat % (gf.beatsToDance * gfSpeed) == 0)
+		if (curBeat % Math.floor(gf.beatsToDance * gfSpeed) == 0)
 			gf.dance();
 		if (!boyfriend.isSinging() && curBeat % boyfriend.beatsToDance == 0)
 			boyfriend.dance();

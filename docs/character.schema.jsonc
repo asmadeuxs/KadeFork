@@ -13,9 +13,14 @@
   "singDuration": 4.0,
 
   /**
+   * Offset used when the camera focuses on a character
+   */
+  "cameraOffset": [0, 0], // can also be "cameraOffset": { "x": 0, "y": 0 }
+
+  /**
    * The default framerate for every animation.
    *
-   * You can always override this with your own in the animation schema itself
+   * You can always override this with an animation-specific framerate when adding the animation itself
    */
   "defaultFramerate": 24,
 
@@ -88,6 +93,7 @@
    * "animationName": { "x": 0, "y": 0 }||[ 0, 0 ]
    */
   "offsets": {
-    "idle": [ 0, 0 ]
+    "idle": [ 0, 0 ],
+    "hey": { "x": 5, "y": 0 }
   }
 }

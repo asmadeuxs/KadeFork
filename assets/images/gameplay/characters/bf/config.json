@@ -2,9 +2,11 @@
   "name": "Boyfriend",
   "singDuration": 4.0,
   "defaultFramerate": 24,
+  "cameraOffset": [-100, -100],
   "idleAnimations": [ "idle" ],
   "singAnimations": [ "left", "down", "up", "right" ],
   "missAnimations": [ "missleft", "missdown", "missup", "missright" ],
+  "facesLeft": true,
   "animationTimers": {
     "hey": 1.0
   },
@@ -19,5 +21,22 @@
     "missdown": "BF NOTE DOWN MISS",
     "missup": "BF NOTE UP MISS",
     "missright": "BF NOTE RIGHT MISS"
+  },
+
+  "offsets": {
+    "idle": [ 0, 0 ],
+    "left": [ 17, -6 ],
+    "down": [ -5, -50 ],
+    "up": [ -24, 27 ],
+    "right": [ -33, -7 ],
+    "missleft": [ 17, 24 ],
+    "missdown": [ -6, -19 ],
+    "missup": [ -24, 27 ],
+    "missright": [ -25, 21 ],
+    "hey": [ 12, 4 ],
+    "firstDeath": [ 42, 11 ],
+    "deathLoop": [ 42, 5 ],
+    "deathConfirm": [ 42, 69 ],
+    "scared": [ 1, 0 ]
   }
 }

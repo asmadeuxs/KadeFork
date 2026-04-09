@@ -30,7 +30,7 @@ class HealthIcon extends FunkinSprite {
 	public function loadIcon(character:String):Void {
 		switch character { // just so its easier to hardcode
 			default:
-				var noSuffix:String = character.substring(0, character.indexOf("-"));
+				var noSuffix:String = character.substring(0, character.lastIndexOf("-"));
 				var paths = [
 					'gameplay/characters/$character/icon-$character',
 					'gameplay/characters/$noSuffix/icon-$character',

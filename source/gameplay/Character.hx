@@ -2,6 +2,7 @@ package gameplay;
 
 import data.ScriptLoader;
 import flixel.FlxG;
+import flixel.math.FlxPoint;
 import haxe.Json5;
 
 using StringTools;
@@ -30,9 +31,18 @@ class Character extends gameplay.FunkinSprite {
 	public var missAnimations:Array<String> = DEFAULT_SING_ANIMATIONS;
 	public var singAnimations:Array<String> = DEFAULT_MISS_ANIMATIONS;
 
+	public var cameraOffset:FlxPoint = new FlxPoint(0, 0);
 	public var idleSuffix:String = "";
 
+	/**
+	 * This scuffed ass variable is used specifically when the character parsing fails
+	 *
+	 * It's a weird way of fixing an issue that could be solved by hardcoding a character
+	 *
+	 * It'll be kept here for now until we find a better way
+	 */
 	private var placeholder:Bool = false;
+
 	private var characterScript:Script;
 	private var currentDance:Int = 0;
 
@@ -46,34 +56,33 @@ class Character extends gameplay.FunkinSprite {
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 		if (!placeholder) {
-			if (animation.curAnim.name != idleAnimations[currentDance] + idleSuffix) {
+			if (isSinging()) {
 				danceCooldown -= elapsed * (singDuration * (Conductor.stepCrochet * 0.25));
 				if (danceCooldown <= 0.0)
 					dance();
 			}
-
 			if (isMissing() && animation.curAnim.finished)
 				dance(true, false, 10);
 		}
 	}
 
 	public function isSinging():Bool
-		return animation.curAnim != null && singAnimations.contains(animation.curAnim.name + idleSuffix);
+		return animation.curAnim != null && singAnimations.contains(animation.curAnim.name);
 
 	public function isMissing():Bool
-		return animation.curAnim != null && missAnimations.contains(animation.curAnim.name + idleSuffix);
+		return animation.curAnim != null && missAnimations.contains(animation.curAnim.name);
 
 	public function dance(?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
 		if (placeholder)
 			return;
-		playAnim(idleAnimations[currentDance], force, reversed, frame);
+		playAnim(idleAnimations[currentDance] + idleSuffix, force, reversed, frame);
 		currentDance = flixel.math.FlxMath.wrap(currentDance + 1, 0, idleAnimations.length - 1);
 	}
 
-	public function sing(direction:Int, ?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
+	public function sing(direction:Int, ?suffix:String = "", ?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
 		if (placeholder)
 			return;
-		playAnim(singAnimations[direction], force, reversed, frame);
+		playAnim(singAnimations[direction] + suffix, force, reversed, frame);
 	}
 
 	public function miss(direction:Int, ?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
@@ -103,83 +112,103 @@ class Character extends gameplay.FunkinSprite {
 		var indices:Array<Int> = field ?? null;
 		if (field is String) {
 			var minmax:Array<String> = field.split("...");
-			indices = CoolUtil.numberArray(Std.parseInt(minmax[0]), Std.parseInt(minmax[1]));
+			indices = CoolUtil.numberArray(Std.parseInt(minmax[1]), Std.parseInt(minmax[0]));
+			trace('indices $indices');
 		} else if (field is Array)
 			indices = field;
 		return indices;
+	}
+
+	private function loadPlaceholder():Character {
+		placeholder = true;
+		displayName = "Placeholder";
+		characterId = "placeholder";
+		makeGraphic(200, 100, 0xFFFF7070);
+		// just to prevent crashes
+		for (i in idleAnimations)
+			animation.add(i, [0], 0, false);
+		for (i in singAnimations)
+			animation.add(i, [0], 0, false);
+		for (i in missAnimations)
+			animation.add(i, [0], 0, false);
+		return this;
 	}
 
 	public function loadCharacter(characterName:String):Character {
 		switch (characterName) {
 			default:
 				var file:String = findCharacterFile(characterName);
-				if (!Paths.fileExists(file)) {
-					displayName = "Placeholder";
-					characterId = "placeholder";
-					makeGraphic(200, 100, 0xFFFF7070);
-					// just to prevent crashes
-					for (i in idleAnimations)
-						animation.add(i, [0], 0, false);
-					for (i in singAnimations)
-						animation.add(i, [0], 0, false);
-					for (i in missAnimations)
-						animation.add(i, [0], 0, false);
-					return this;
-				}
+				if (!Paths.fileExists(file))
+					return loadPlaceholder();
+				try {
+					trace('loading character $characterName');
+					var file:Dynamic = Json5.parse(Paths.getText(file));
+					this.idleAnimations = file.idleAnimations ?? DEFAULT_IDLE_ANIMATIONS;
+					this.singAnimations = file.singAnimations ?? DEFAULT_SING_ANIMATIONS;
+					this.missAnimations = file.missAnimations ?? DEFAULT_MISS_ANIMATIONS;
+					this.beatsToDance = file.beatsToDance ?? singAnimations.length >= 2 ? 1 : 2;
+					if (file.cameraOffset != null) {
+						var coff:Dynamic = file.cameraOffset; // casting so it actually works
+						if (coff is Array)
+							cameraOffset.set(coff[0] ?? 0, coff[1] ?? 0);
+						else if (coff is Dynamic)
+							cameraOffset.set(coff.x ?? 0, coff.y ?? 0);
+					}
+					if (file.facesLeft == true && !isPlayer)
+						flipX = true;
+					this.singDuration = file.singDuration ?? 4.0;
+					this.displayName = file.name ?? file.displayName ?? "idk";
+					this.isPlayer = file.facesLeft ?? file.isPlayer ?? false;
 
-				var file:Dynamic = Json5.parse(Paths.getText(file));
-				trace('loading character $characterName');
-				this.idleAnimations = file.idleAnimations ?? DEFAULT_IDLE_ANIMATIONS;
-				this.singAnimations = file.singAnimations ?? DEFAULT_SING_ANIMATIONS;
-				this.missAnimations = file.missAnimations ?? DEFAULT_MISS_ANIMATIONS;
-				this.beatsToDance = file.beatsToDance ?? singAnimations.length >= 2 ? 1 : 2;
-				this.singDuration = file.singDuration ?? 4.0;
-				this.displayName = file.name ?? file.displayName ?? "idk";
-				this.isPlayer = file.facesLeft ?? file.isPlayer ?? false;
+					// TODO: file.atlasType, OR auto-detection based on files in folder -asmadeuxs
+					if (file.texture != null)
+						frames = Paths.getSparrowAtlas('${file.texture}');
+					else
+						frames = Paths.getSparrowAtlas('gameplay/characters/$characterName/$characterName');
 
-				// TODO: file.atlasType, OR auto-detection based on files in folder -asmadeuxs
-				if (file.texture != null)
-					frames = Paths.getSparrowAtlas('${file.texture}');
-				else
-					frames = Paths.getSparrowAtlas('gameplay/characters/$characterName/$characterName');
-
-				if (file.offsets != null) {
-					for (key in Reflect.fields(file.offsets)) {
-						var offset:Dynamic = Reflect.field(file.offsets, key);
-						if (offset != null) {
-							if (offset is Array)
-								addOffset(key, offset[0] ?? 0, offset[1] ?? 0);
-							else if (offset is Dynamic)
-								addOffset(key, offset.x ?? 0, offset.y ?? 0);
+					if (file.offsets != null) {
+						for (key in Reflect.fields(file.offsets)) {
+							var offset:Dynamic = Reflect.field(file.offsets, key);
+							if (offset != null) {
+								if (offset is Array)
+									addOffset(key, offset[0] ?? 0, offset[1] ?? 0);
+								else if (offset is Dynamic)
+									addOffset(key, offset.x ?? 0, offset.y ?? 0);
+							}
 						}
 					}
-				}
-				if (file.animations != null) {
-					var defaultFramerate:Int = file.defaultFramerate ?? 24;
-					for (key in Reflect.fields(file.animations)) {
-						var stuff:Dynamic = Reflect.field(file.animations, key);
-						switch Type.typeof(stuff) {
-							case TObject:
-								stuff.looped = Std.string(stuff.looped);
-								if (stuff.indices != null) {
-									var indies:Array<Int> = parseJsonIndicesField(stuff.indices);
-									animation.addByIndices(key, stuff.prefix, indies, "", stuff.frameRate ?? defaultFramerate, stuff.looped == "true");
-								} else
-									animation.addByPrefix(key, stuff.prefix, stuff.frameRate ?? defaultFramerate, stuff.looped == "true");
-								if (stuff.offset != null) {
-									if (stuff.offset is Array)
-										addOffset(key, stuff.offset[0] ?? 0, stuff.offset[1] ?? 0);
-									else if (stuff.offset is Dynamic)
-										addOffset(key, stuff.offset.x ?? 0, stuff.offset.y ?? 0);
-								}
-							case TClass(String):
-								animation.addByPrefix(key, stuff, defaultFramerate, false);
-							case _:
-								continue;
+					if (file.animations != null) {
+						var defaultFramerate:Int = file.defaultFramerate ?? 24;
+						for (key in Reflect.fields(file.animations)) {
+							var stuff:Dynamic = Reflect.field(file.animations, key);
+							switch Type.typeof(stuff) {
+								case TObject:
+									stuff.looped = Std.string(stuff.looped);
+									if (stuff.indices != null) {
+										var indies:Array<Int> = parseJsonIndicesField(stuff.indices);
+										animation.addByIndices(key, stuff.prefix, indies, "", stuff.frameRate ?? defaultFramerate, stuff.looped == "true");
+									} else
+										animation.addByPrefix(key, stuff.prefix, stuff.frameRate ?? defaultFramerate, stuff.looped == "true");
+									if (stuff.offset != null) {
+										if (stuff.offset is Array)
+											addOffset(key, stuff.offset[0] ?? 0, stuff.offset[1] ?? 0);
+										else if (stuff.offset is Dynamic)
+											addOffset(key, stuff.offset.x ?? 0, stuff.offset.y ?? 0);
+									}
+								case TClass(String):
+									animation.addByPrefix(key, stuff, defaultFramerate, false);
+								case _:
+									continue;
+							}
 						}
 					}
+					placeholder = false; // make sure this is disabled
+					dance(true);
 				}
-				dance(true);
+				catch (e:haxe.Exception) {
+					trace('Error loading character $characterName - ${e.message}');
+					return loadPlaceholder();
+				}
 		}
 		return this;
 	}

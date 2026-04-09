@@ -120,6 +120,15 @@ class JudgementData {
 		return activeList[activeList.length - 1];
 	}
 
+	public function listCounts() {
+		var str:String = '';
+		var breaks:Int = gameplay.PlayState.comboBreaks;
+		for (idx => judge in activeList)
+			str += '${judge.name}: ${judge.hits}\n';
+		str += 'Combo Breaks: $breaks';
+		return str;
+	}
+
 	public function getClearFlag():String { // made these static JUST for this btw :friendly_hearts:
 		var breaks:Int = gameplay.PlayState.comboBreaks;
 		var misses:Int = gameplay.PlayState.misses;

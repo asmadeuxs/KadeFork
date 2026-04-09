@@ -66,19 +66,24 @@ class OptionsMenu extends MusicBeatSubstate {
 				variable: "lowQualityMode"
 			},
 			{
+				name: "Show More Stats",
+				description: "Shows Misses and Accuracy in the Score Text",
+				variable: "accuracyDisplay"
+			},
+			{
 				name: "Show Song Position",
 				description: "Shows a progress bar for the song in the HUD",
 				variable: "showSongPosition"
 			},
 			{
-				name: "Show Notes per Second",
-				description: "Shows a NPS counter on the Score Text",
-				variable: "showNps"
+				name: "Show Judgement Counts",
+				description: "Shows a judgement counter during gameplay on the left side of the screen",
+				variable: "showJudgeCounts"
 			},
 			{
-				name: "More Stats",
-				description: "Shows Misses and Accuracy in the Score Text",
-				variable: "accuracyDisplay"
+				name: "Notes per Second",
+				description: "Shows a NPS counter on the Score Text",
+				variable: "showNps"
 			},
 			{
 				name: "Note Splashes",
@@ -207,42 +212,35 @@ class OptionsMenu extends MusicBeatSubstate {
 		var up:Bool = controls.UP_P;
 		if (up || controls.DOWN_P)
 			changeSelection((up ? -1 : 1) * (FlxG.keys.pressed.SHIFT ? 5 : 1));
-
-		// I genuinely hate this entire block of code
-		// and I'll probably change it later on -asmadeuxs
+		// I genuinely hate this entire block of code and I'll probably change it later on -asmadeuxs
+		var curOption:Option = curCatOptions[curSelected];
 		var leftp:Bool = controls.LEFT_P;
 		var rightp:Bool = controls.RIGHT_P;
+		// choice options
+		if ((leftp || rightp) && curOption.type != "number")
+			changeOption(leftp ? -1 : 1);
+		// number options
 		var lefth:Bool = controls.LEFT;
 		var righth:Bool = controls.RIGHT;
-		var curOption:Option = curCatOptions[curSelected];
-		if (leftp || rightp || lefth || righth) {
-			var change:Bool = curOption.type != "number";
-			if (curOption.type != "number" && (lefth || righth))
-				change = false;
-			if (curOption.type == "number") {
-				if (leftp || rightp)
+		if ((leftp || rightp || lefth || righth) && curOption.type == "number") {
+			var change:Bool = false;
+			if (leftp || rightp)
+				change = true;
+			else if (lefth || righth) {
+				// TODO: implement keyRepeat in Controls so I don't have to do this shit manually -asmadeuxs
+				keyTimer += 0.1;
+				if (keyTimer >= 1.0) {
 					change = true;
-				else if (lefth || righth) {
-					// TODO: implement keyRepeat in Controls so I don't have to do this shit manually -asmadeuxs
-					keyTimer += 0.1;
-					if (keyTimer >= 1.0) {
-						change = true;
-						keyTimer = 0.0;
-					}
+					keyTimer = 0.0;
 				}
 			}
 			if (change) {
-				var inc:Int = 1;
-				if (FlxG.keys.pressed.SHIFT)
-					inc = 4;
+				var inc:Int = FlxG.keys.pressed.SHIFT ? 4 : 1;
 				var left:Bool = leftp || lefth;
-				curCatOptions[curSelected].change(left ? -inc : inc);
-				catOptions.members[curSelected * 2 + 1].text = curOption.valueString();
-				FlxG.sound.play(Paths.sound('scrollMenu'));
+				changeOption(left ? -inc : inc);
 			}
 		} else if (controls.LEFT_R || controls.RIGHT_R)
 			keyTimer = 0.0;
-
 		// rest of the controls
 		var leftCat:Bool = FlxG.keys.justPressed.Q;
 		if (leftCat || FlxG.keys.justPressed.E) {
@@ -265,6 +263,13 @@ class OptionsMenu extends MusicBeatSubstate {
 			});
 		}
 		updateScroll();
+	}
+
+	public function changeOption(by:Int = 0, ?playSound:Bool = true) {
+		if (playSound)
+			FlxG.sound.play(Paths.sound('scrollMenu'));
+		curCatOptions[curSelected].change(by);
+		catOptions.members[curSelected * 2 + 1].text = curCatOptions[curSelected].valueString();
 	}
 
 	public function changeSelection(next:Int = 0, ?playSound:Bool = true) {

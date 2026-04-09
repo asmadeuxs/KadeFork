@@ -16,7 +16,6 @@ typedef SwagSong = {
 
 	var player1:String;
 	var player2:String;
-	var validScore:Bool;
 }
 
 class Song {
@@ -36,15 +35,19 @@ class Song {
 	}
 
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong {
-		var rawJson = Paths.getText(Paths.getPath('songs/$folder/$jsonInput.json')).trim();
+		if (folder == null)
+			folder = jsonInput.substring(0, jsonInput.lastIndexOf("-"));
+		var pathWithSuf:String = Paths.getPath('songs/$folder/$jsonInput.json');
+		var pathNoSuf:String = Paths.getPath('songs/$folder/${jsonInput.substring(0, jsonInput.lastIndexOf("-"))}.json');
+		var path:String = Paths.fileExists(pathWithSuf) ? pathWithSuf : pathNoSuf;
+
+		trace('loading song at path $path');
+		var rawJson = Paths.getText(path).trim();
 		while (!rawJson.endsWith("}"))
 			rawJson = rawJson.substr(0, rawJson.length - 1);
 		return parseJSONshit(rawJson);
 	}
 
-	public static function parseJSONshit(rawJson:String):SwagSong {
-		var swagShit:SwagSong = cast Json.parse(rawJson).song;
-		swagShit.validScore = true;
-		return swagShit;
-	}
+	public static function parseJSONshit(rawJson:String):SwagSong
+		return cast Json.parse(rawJson).song;
 }

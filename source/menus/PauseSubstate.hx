@@ -33,7 +33,14 @@ class PauseSubstate extends MusicBeatSubstate {
 		menuItems = [
 			{name: 'Resume', func: () -> close()},
 			{name: 'Restart Song', func: () -> FlxG.resetState()},
-			{name: 'Exit to menu', func: () -> FlxG.switchState(new menus.FreeplayState())}
+			{
+				name: 'Exit to menu',
+				func: () -> {
+					if (!FlxG.sound.music.playing)
+						FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song));
+					FlxG.switchState(new menus.FreeplayState());
+				}
+			}
 		];
 
 		pauseMusic = new FlxSound().loadEmbedded(Paths.music('breakfast'), true, true);
@@ -55,7 +62,7 @@ class PauseSubstate extends MusicBeatSubstate {
 		add(levelInfo);
 
 		var levelDifficulty:FlxText = new FlxText(20, 15 + 32, 0, "", 32);
-		levelDifficulty.text += CoolUtil.difficultyString(PlayState.storyDifficulty);
+		levelDifficulty.text += PlayState.difficultyName.toUpperCase();
 		levelDifficulty.scrollFactor.set();
 		levelDifficulty.setFormat(Paths.font('vcr.ttf'), 32);
 		levelDifficulty.updateHitbox();

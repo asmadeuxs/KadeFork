@@ -13,6 +13,7 @@ class Kade extends BaseHUD {
 	public var healthBarBG:FlxSprite;
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
+	public var judgesTxt:FlxText;
 
 	var songPos:Float = 0;
 
@@ -52,12 +53,20 @@ class Kade extends BaseHUD {
 		scoreTxt = new FlxText(FlxG.width / 2 - 235, healthBarBG.y + 50, 0, "", 20);
 		if (!Preferences.user.accuracyDisplay)
 			scoreTxt.x = healthBarBG.x + healthBarBG.width / 2;
-		scoreTxt.setFormat(Paths.font("vcr"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		updateScoreText();
+		scoreTxt.setFormat(Paths.font("vcr"), 16, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
 		add(scoreTxt);
+		if (Preferences.user.showJudgeCounts) {
+			judgesTxt = new FlxText(5, 0, FlxG.width, "");
+			judgesTxt.setFormat(Paths.font("vcr"), 18, FlxColor.WHITE, LEFT);
+			judgesTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.3);
+			judgesTxt.screenCenter(Y);
+			judgesTxt.y -= 30;
+			add(judgesTxt);
+		}
+		updateScoreText();
 
-		var songText:FlxText = new FlxText(5, 0, 0, '${PlayState.SONG.song} ${PlayState.storyDifficultyText} - KE v${Main.versions.KADE}', 12);
-		songText.setFormat(Paths.font("vcr"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		var songText:FlxText = new FlxText(5, 0, 0, '${PlayState.SONG.song} ${PlayState.difficultyName} - KE v${Main.versions.KADE}', 12);
+		songText.setFormat(Paths.font("vcr"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
 		songText.y = (FlxG.height - songText.height) - 3;
 		add(songText);
 
@@ -84,12 +93,12 @@ class Kade extends BaseHUD {
 					iconP1.animation.play('bf-old');
 			}*/
 			iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01) - iconOffset);
-			iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.50)));// / (30 / Preferences.user.frameRate))));
+			iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.50))); // / (30 / Preferences.user.frameRate))));
 			iconP1.updateHitbox();
 		}
 		if (iconP2 != null) {
 			iconP2.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) - (iconP2.width - iconOffset);
-			iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.)));// / (30 / Preferences.user.frameRate))));
+			iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.))); // / (30 / Preferences.user.frameRate))));
 			iconP2.updateHitbox();
 		}
 		if (iconP1 != null && iconP2 != null) {
@@ -119,6 +128,8 @@ class Kade extends BaseHUD {
 		} else
 			layout += 'Score: ${PlayState.songScore}';
 		scoreTxt.text = layout;
+		if (judgesTxt != null)
+			judgesTxt.text = PlayState.judgementData.listCounts();
 	}
 
 	override function beatHit(beat:Int):Void {
