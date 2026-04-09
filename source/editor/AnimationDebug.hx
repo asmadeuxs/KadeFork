@@ -44,7 +44,7 @@ class AnimationDebug extends FlxState {
 		if (isDad) {
 			dad = new Character(0, 0, daAnim);
 			dad.screenCenter();
-			//dad.debugMode = true;
+			// dad.debugMode = true;
 			add(dad);
 
 			char = dad;
@@ -52,7 +52,7 @@ class AnimationDebug extends FlxState {
 		} else {
 			bf = new Character(0, 0, "bf", true);
 			bf.screenCenter();
-			//bf.debugMode = true;
+			// bf.debugMode = true;
 			add(bf);
 
 			char = bf;

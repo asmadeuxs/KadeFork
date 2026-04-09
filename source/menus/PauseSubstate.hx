@@ -36,7 +36,7 @@ class PauseSubstate extends MusicBeatSubstate {
 			{
 				name: 'Exit to menu',
 				func: () -> {
-					if (!FlxG.sound.music.playing){
+					if (!FlxG.sound.music.playing) {
 						FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 0);
 						FlxG.sound.music.time = FlxG.random.int(0, Std.int(FlxG.sound.music.length / 2));
 						FlxG.sound.music.fadeIn(4, 0, 0.7);

@@ -28,7 +28,7 @@ class Note extends gameplay.FunkinSprite {
 	public var canBeHit(get, never):Bool;
 
 	function get_canBeHit():Bool {
-		if(!mustPress || wasGoodHit || missed || tooLate)
+		if (!mustPress || wasGoodHit || missed || tooLate)
 			return false;
 		var pos:Float = Conductor.songPosition;
 		var safeZone:Float = PlayState.judgementData.maxHitWindow ?? 180.0;
@@ -73,26 +73,26 @@ class Note extends gameplay.FunkinSprite {
 		// old checks
 
 		/*
-		// we make sure its downscroll and its a SUSTAIN NOTE (aka a trail, not a note)
-		// and flip it so it doesn't look weird.
-		// THIS DOESN'T FUCKING FLIP THE NOTE, CONTRIBUTERS DON'T JUST COMMENT THIS OUT JESUS
-		if (Preferences.user.scrollType == 1 && isSustainNote)
-			flipY = true;
+			// we make sure its downscroll and its a SUSTAIN NOTE (aka a trail, not a note)
+			// and flip it so it doesn't look weird.
+			// THIS DOESN'T FUCKING FLIP THE NOTE, CONTRIBUTERS DON'T JUST COMMENT THIS OUT JESUS
+			if (Preferences.user.scrollType == 1 && isSustainNote)
+				flipY = true;
 
-		if (isSustainNote && prevNote != null) {
-			alpha = 0.6;
-			x += width / 2;
-			// updateHitbox();
-			x -= width / 2;
+			if (isSustainNote && prevNote != null) {
+				alpha = 0.6;
+				x += width / 2;
+				// updateHitbox();
+				x -= width / 2;
 
-			if (PlayState.curStage.startsWith('school'))
-				x += 30;
+				if (PlayState.curStage.startsWith('school'))
+					x += 30;
 
-			if (prevNote.isSustainNote) {
-				prevNote.animation.play(colorArray[noteData] + 'hold');
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.8 * Preferences.user.scrollSpeed;
-				// prevNote.updateHitbox();
-			}
+				if (prevNote.isSustainNote) {
+					prevNote.animation.play(colorArray[noteData] + 'hold');
+					prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.8 * Preferences.user.scrollSpeed;
+					// prevNote.updateHitbox();
+				}
 		}*/
 		return this;
 	}

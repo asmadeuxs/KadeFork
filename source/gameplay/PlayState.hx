@@ -288,7 +288,7 @@ class PlayState extends MusicBeatState {
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 
 		var cacheNotes:Int = 16;
-		for(_ in 0...cacheNotes)
+		for (_ in 0...cacheNotes)
 			notes.add(new Note());
 
 		// fake notesplash cache type deal so that it loads in the graphic?
