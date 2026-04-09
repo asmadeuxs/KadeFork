@@ -26,10 +26,19 @@ class JudgementData {
 			this.maxHitWindow = maxHitWindow;
 	};
 
+	public function getPerfect()
+		return activeList[0];
+
+	public function getWorst()
+		return activeList[activeList.length - 2];
+
+	public function getMiss()
+		return activeList[activeList.length - 1];
+
 	public function getDefaultJudgements():Array<Judgement> {
 		return [
 			{
-				name: "kino",
+				name: "Kino",
 				image: "kino",
 				splash: true,
 				color: 0xFF97FFFF,
@@ -38,7 +47,7 @@ class JudgementData {
 				score: 500
 			},
 			{
-				name: "sick",
+				name: "Sick",
 				image: "sick",
 				splash: true,
 				color: 0xFFEAFF74,
@@ -47,7 +56,7 @@ class JudgementData {
 				score: 350
 			},
 			{
-				name: "good",
+				name: "Good",
 				image: "good",
 				color: 0xFF97FF9F,
 				hitWindow: 90.0,
@@ -55,7 +64,7 @@ class JudgementData {
 				score: 200
 			},
 			{
-				name: "bad",
+				name: "Bad",
 				image: "bad",
 				color: 0xFFDC7487,
 				hitWindow: 135.0,
@@ -63,7 +72,7 @@ class JudgementData {
 				score: 0
 			},
 			{
-				name: "shit",
+				name: "Shit",
 				image: "shit",
 				color: 0xFFE02447,
 				hitWindow: 180.0,
@@ -71,12 +80,22 @@ class JudgementData {
 				score: -300,
 				comboBreak: true
 			},
+			{
+				name: "Miss",
+				image: "miss",
+				color: 0xFFFF0000,
+				hitWindow: -1, // unhittable?
+				accuracy: 0.0,
+				score: -350,
+			}
 		];
 	}
 
 	public function getHealthBonus(judgementName:String) {
 		var health:Float = 0.0;
-		switch (judgementName) {
+		switch (judgementName.toLowerCase()) {
+			case 'miss':
+				health -= 0.04;
 			case 'shit':
 				health -= 0.2;
 			case 'bad':
@@ -112,11 +131,11 @@ class JudgementData {
 		var bads:Int = activeList[3].hits;
 		var shits:Int = activeList[4].hits;
 		if (misses == 0) {
-			if (bads == 0 && shits == 0 && goods == 0 && sicks == 0) // Marvelous (SICK) Full Combo
+			if (bads == 0 && shits == 0 && goods == 0 && sicks == 0) // Kino Full Combo
 				clearFlag = "KFC";
-			else if (bads == 0 && shits == 0 && goods == 0 && sicks >= 1) // White Flag / Good Full Combo (Nothing but Goods & Sicks)
+			else if (bads == 0 && shits == 0 && goods == 0 && sicks >= 1) // White Flag / Sick Full Combo (Nothing but Kinos & Sicks)
 				clearFlag = sicks == 1 ? "WF" : "SFC";
-			else if (bads == 0 && shits == 0 && goods >= 1) // White Flag / Good Full Combo (Nothing but Goods & Sicks)
+			else if (bads == 0 && shits == 0 && goods >= 1) // Black Flag / Good Full Combo (Nothing but Kinos, Sicks & Goods)
 				clearFlag = goods == 1 ? "BF" : "GFC";
 			else
 				clearFlag = breaks > 0 ? "NM" : "FC"; // No Misses / Full Combo

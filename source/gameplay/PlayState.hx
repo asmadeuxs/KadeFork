@@ -897,140 +897,106 @@ class PlayState extends MusicBeatState {
 	var showComboNumbers:Bool = true;
 	var showComboSprite:Bool = false;
 
-	private function popUpScore(daNote:Note):Void {
-		var noteDiff:Float = Math.abs(Conductor.songPosition - daNote.strumTime);
-		var placement:String = Std.string(combo);
-
-		var coolText:FlxText = new FlxText(0, 0, 0, placement, 32);
-		coolText.screenCenter();
-		coolText.x = FlxG.width * 0.55;
-		coolText.y -= 350;
-		coolText.cameras = [camHUD];
-
-		var daRating:String = daNote.judgement.name;
-		var rating:FlxSprite = new FlxSprite();
-
+	public function popNoteSplash(daNote:Note):Void {
 		if (daNote.judgement.splash && Preferences.user.noteSplashes) {
 			var noteSplash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
 			noteSplash.setupNoteSplash(daNote.x, daNote.y, daNote.noteData);
 			// new NoteSplash(daNote.x, daNote.y, daNote.noteData);
 			grpNoteSplashes.add(noteSplash);
 		}
+	}
 
-		rating.loadGraphic(Paths.image('gameplay/ui/score/$daRating'));
-		rating.screenCenter();
-		rating.y -= 50;
-		rating.x = coolText.x - 125;
+	public function popUpScore(daNote:Note):Void {
+		popUpRating(daNote.judgement.image);
+		popUpCombo(combo, daNote.judgement);
+		var noteDiff:Float = Math.abs(Conductor.songPosition - daNote.strumTime);
+		popUpMillisecondDisplay(FlxMath.roundDecimal(noteDiff, 3), daNote.judgement);
+	}
 
-		if (FlxG.save.data.changedHit) {
-			rating.x = FlxG.save.data.changedHitX;
-			rating.y = FlxG.save.data.changedHitY;
-		}
+	public function popUpRating(image:String):Void {
+		var position:Float = FlxG.width * 0.55;
+		var rating:FlxSprite = new FlxSprite().loadGraphic(Paths.image('gameplay/ui/score/$image'));
+		rating.screenCenter(Y);
+		rating.x = position - 125;
 		rating.acceleration.y = 550;
 		rating.velocity.y -= FlxG.random.int(140, 175);
 		rating.velocity.x -= FlxG.random.int(0, 10);
+		rating.y -= 50;
 
-		var msTiming = FlxMath.roundDecimal(noteDiff, 3);
+		var ratingSprScale:Float = 0.65;
+		rating.setGraphicSize(Std.int(rating.width * ratingSprScale));
+		rating.updateHitbox();
+		comboDisplay.add(rating);
 
+		FlxTween.tween(rating, {alpha: 0}, 0.2, {
+			onComplete: (tween:FlxTween) -> rating.destroy(),
+			startDelay: Conductor.crochet * 0.001
+		});
+	}
+
+	public function popUpCombo(combo:Int, ?judgement:Judgement = null):Void {
+		var comboSprScale:Float = 0.65;
+		var color:FlxColor = judgement != null ? judgement.color : FlxColor.WHITE;
+		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image('gameplay/ui/score/combo'));
+		comboSpr.screenCenter();
+		comboSpr.x += 100;
+		comboSpr.y += 50;
+
+		comboSpr.acceleration.y = 600;
+		comboSpr.velocity.y -= 150;
+		comboSpr.velocity.x += FlxG.random.int(1, 10);
+		comboSpr.setGraphicSize(Std.int(comboSpr.width * comboSprScale));
+		comboSpr.updateHitbox();
+		comboSpr.color = color;
+		if (showComboSprite)
+			comboDisplay.add(comboSpr);
+
+		var seperatedScore:Array<String> = Std.string(combo).split('');
+		var numScoreScale:Float = 0.5;
+		for (daLoop => i in seperatedScore) {
+			var numScore:FlxSprite = new FlxSprite(0, comboSpr.y + 30).loadGraphic(Paths.image('gameplay/ui/score/num$i'));
+			numScore.setGraphicSize(Std.int(numScore.width * numScoreScale));
+			numScore.x = comboSpr.x + (43 * daLoop) - 50;
+			numScore.updateHitbox();
+			numScore.color = color;
+
+			numScore.acceleration.y = FlxG.random.int(200, 300);
+			numScore.velocity.y -= FlxG.random.int(140, 160);
+			numScore.velocity.x = FlxG.random.float(-5, 5);
+			comboDisplay.add(numScore);
+
+			FlxTween.tween(numScore, {alpha: 0}, 0.2, {
+				onComplete: (tween:FlxTween) -> numScore.destroy(),
+				startDelay: Conductor.crochet * 0.002
+			});
+		}
+		FlxTween.tween(comboSpr, {alpha: 0}, 0.2, {
+			onComplete: (tween:FlxTween) -> comboSpr.destroy(),
+			startDelay: Conductor.crochet * 0.001
+		});
+	}
+
+	public function popUpMillisecondDisplay(timing:Float, ?judgement:Judgement = null) {
 		if (currentTimingShown != null) {
 			FlxTween.cancelTweensOf(currentTimingShown, ['alpha']);
 			comboDisplay.remove(currentTimingShown);
 		}
-
-		currentTimingShown = new FlxText(0, 0, 0, "0ms");
-		currentTimingShown.color = daNote.judgement.color;
-		currentTimingShown.borderStyle = OUTLINE;
-		currentTimingShown.borderSize = 1.5;
-		currentTimingShown.borderColor = FlxColor.BLACK;
-		currentTimingShown.text = msTiming + "ms";
-		currentTimingShown.size = 20;
-
+		var color:FlxColor = judgement != null ? judgement.color : FlxColor.WHITE;
+		var position:Float = FlxG.width * 0.55;
+		currentTimingShown = new FlxText(position - 125, 50, 0, timing + "ms");
+		currentTimingShown.setFormat(null, 20, color, LEFT);
+		currentTimingShown.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.5);
 		currentTimingShown.alpha = 1;
 
-		comboDisplay.add(currentTimingShown);
-
-		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image('gameplay/ui/score/combo'));
-		comboSpr.color = daNote.judgement.color;
-		comboSpr.screenCenter();
-		comboSpr.x = rating.x;
-		comboSpr.y = rating.y + 100;
-		comboSpr.acceleration.y = 600;
-		comboSpr.velocity.y -= 150;
-
 		currentTimingShown.screenCenter();
-		currentTimingShown.x = comboSpr.x + 100;
-		currentTimingShown.y = rating.y + 100;
+		currentTimingShown.x += 150;
+		currentTimingShown.y += 100;
 		currentTimingShown.acceleration.y = 600;
 		currentTimingShown.velocity.y -= 150;
 		currentTimingShown.moves = true;
-
-		comboSpr.velocity.x += FlxG.random.int(1, 10);
-		currentTimingShown.velocity.x += comboSpr.velocity.x;
-		comboDisplay.add(rating);
-		if (showComboSprite)
-			comboDisplay.add(comboSpr);
-
-		var ratingSprScale:Float = 0.65;
-
-		if (!curStage.startsWith('school')) {
-			rating.setGraphicSize(Std.int(rating.width * ratingSprScale));
-			comboSpr.setGraphicSize(Std.int(comboSpr.width * ratingSprScale));
-		} else {
-			rating.setGraphicSize(Std.int(rating.width * CoolUtil.pixelScale * ratingSprScale));
-			comboSpr.setGraphicSize(Std.int(comboSpr.width * CoolUtil.pixelScale * ratingSprScale));
-		}
-
+		currentTimingShown.velocity.x += FlxG.random.int(1, 10);
 		currentTimingShown.updateHitbox();
-		comboSpr.updateHitbox();
-		rating.updateHitbox();
-
-		var seperatedScore:Array<Int> = [];
-
-		var comboSplit:Array<String> = (combo + "").split('');
-		if (comboSplit.length == 2)
-			seperatedScore.push(0);
-		for (i in 0...comboSplit.length) {
-			var str:String = comboSplit[i];
-			seperatedScore.push(Std.parseInt(str));
-		}
-
-		var daLoop:Int = 0;
-		if (combo >= 10 || combo == 0) {
-			var numScoreScale:Float = 0.5;
-			for (i in seperatedScore) {
-				var numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image('gameplay/ui/score/num${Std.int(i)}'));
-				numScore.color = daNote.judgement.color;
-				numScore.screenCenter();
-				numScore.x = rating.x + (43 * daLoop) - 50;
-				numScore.y = rating.y + 100;
-				numScore.cameras = [camHUD];
-
-				if (!curStage.startsWith('school'))
-					numScore.setGraphicSize(Std.int(numScore.width * numScoreScale));
-				else
-					numScore.setGraphicSize(Std.int(numScore.width * CoolUtil.pixelScale * numScoreScale));
-				numScore.updateHitbox();
-
-				numScore.acceleration.y = FlxG.random.int(200, 300);
-				numScore.velocity.y -= FlxG.random.int(140, 160);
-				numScore.velocity.x = FlxG.random.float(-5, 5);
-				comboDisplay.add(numScore);
-
-				FlxTween.tween(numScore, {alpha: 0}, 0.2, {
-					onComplete: function(tween:FlxTween) numScore.destroy(),
-					startDelay: Conductor.crochet * 0.002
-				});
-
-				daLoop++;
-			}
-		}
-		coolText.text = Std.string(seperatedScore);
-		FlxTween.tween(rating, {alpha: 0}, 0.2, {
-			startDelay: Conductor.crochet * 0.001,
-			onComplete: function(tween:FlxTween) {
-				rating.destroy();
-			},
-		});
+		comboDisplay.add(currentTimingShown);
 
 		FlxTween.tween(currentTimingShown, {alpha: 0}, 0.2, {
 			startDelay: Conductor.crochet * 0.001,
@@ -1040,14 +1006,6 @@ class PlayState extends MusicBeatState {
 					currentTimingShown = null;
 				}
 			},
-		});
-
-		FlxTween.tween(comboSpr, {alpha: 0}, 0.2, {
-			onComplete: function(tween:FlxTween) {
-				coolText.destroy();
-				comboSpr.destroy();
-			},
-			startDelay: Conductor.crochet * 0.001
 		});
 	}
 
@@ -1103,8 +1061,15 @@ class PlayState extends MusicBeatState {
 			if (combo > 5 && gf.animOffsets.exists('sad'))
 				gf.playAnim('sad');
 			comboBreaks++;
-			combo = 0;
+			if (combo > 0)
+				combo = 0;
+			else
+				combo--;
 			misses++;
+			var missJudge = judgementData.getMiss();
+			trace('miss combo $combo');
+			popUpRating(missJudge.image);
+			popUpCombo(combo, missJudge);
 
 			if (daNote != null) {
 				var noteDiff:Float = Math.abs(daNote.strumTime - Conductor.songPosition);
@@ -1136,6 +1101,7 @@ class PlayState extends MusicBeatState {
 			if (!note.isSustainNote) {
 				scoreNote(note);
 				popUpScore(note);
+				popNoteSplash(note);
 				combo += 1;
 			} else
 				totalNotesHit += 1;
