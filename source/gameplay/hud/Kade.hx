@@ -84,12 +84,12 @@ class Kade extends BaseHUD {
 					iconP1.animation.play('bf-old');
 			}*/
 			iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01) - iconOffset);
-			iconP1.setGraphicSize(Std.int(iconP1.width + 30));
+			iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.50)));// / (30 / Preferences.user.frameRate))));
 			iconP1.updateHitbox();
 		}
 		if (iconP2 != null) {
 			iconP2.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) - (iconP2.width - iconOffset);
-			iconP2.setGraphicSize(Std.int(iconP2.width + 30));
+			iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.)));// / (30 / Preferences.user.frameRate))));
 			iconP2.updateHitbox();
 		}
 		if (iconP1 != null && iconP2 != null) {

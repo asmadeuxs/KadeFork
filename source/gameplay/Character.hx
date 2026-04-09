@@ -1,299 +1,186 @@
 package gameplay;
 
+import data.ScriptLoader;
 import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.animation.FlxBaseAnimation;
-import flixel.graphics.frames.FlxAtlasFrames;
+import haxe.Json5;
 
 using StringTools;
 
-class Character extends FlxSprite {
-	public var animOffsets:Map<String, Array<Dynamic>>;
-	public var debugMode:Bool = false;
+class Character extends gameplay.FunkinSprite {
+	public static final DEFAULT_CHARACTER:String = "bf";
 
-	public var isPlayer:Bool = false;
-	public var curCharacter:String = 'bf';
+	public static final DEFAULT_IDLE_ANIMATIONS:Array<String> = ["idle"];
+	public static final DEFAULT_SING_ANIMATIONS:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
+	public static final DEFAULT_MISS_ANIMATIONS:Array<String> = ["singLEFTmiss", "singDOWNmiss", "singUPmiss", "singRIGHTmiss"];
+
+	public var displayName:String = "idk";
+	public var characterId:String = DEFAULT_CHARACTER;
+	public var healthIconPath:String;
+
+	public var singDuration:Float = 4.0;
+	public var animationTimer:Float = 0.0;
 	public var beatsToDance:Int = 2;
 
+	public var danceCooldown:Float = 0.0;
+
+	public var isPlayer:Bool = false;
 	public var stunned:Bool = false;
-	public var holdTimer:Float = 0;
 
-	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false) {
+	public var idleAnimations:Array<String> = DEFAULT_IDLE_ANIMATIONS;
+	public var missAnimations:Array<String> = DEFAULT_SING_ANIMATIONS;
+	public var singAnimations:Array<String> = DEFAULT_MISS_ANIMATIONS;
+
+	public var idleSuffix:String = "";
+
+	private var placeholder:Bool = false;
+	private var characterScript:Script;
+	private var currentDance:Int = 0;
+
+	public function new(x:Float = 0, y:Float = 0, character:String, ?isPlayer:Bool = false):Void {
 		super(x, y);
-
-		animOffsets = new Map<String, Array<Dynamic>>();
-		curCharacter = character;
 		this.isPlayer = isPlayer;
-		antialiasing = true;
-
-		switch (curCharacter) {
-			case 'gf':
-				// GIRLFRIEND CODE
-				frames = Paths.getSparrowAtlas('gameplay/characters/gf/gf');
-				animation.addByPrefix('cheer', 'GF Cheer', 24, false);
-				animation.addByPrefix('singLEFT', 'GF left note', 24, false);
-				animation.addByPrefix('singRIGHT', 'GF Right Note', 24, false);
-				animation.addByPrefix('singUP', 'GF Up Note', 24, false);
-				animation.addByPrefix('singDOWN', 'GF Down Note', 24, false);
-				animation.addByIndices('sad', 'gf sad', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "", 24, false);
-				animation.addByIndices('danceLeft', 'GF Dancing Beat', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
-				animation.addByIndices('danceRight', 'GF Dancing Beat', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
-				animation.addByIndices('hairBlow', "GF Dancing Beat Hair blowing", [0, 1, 2, 3], "", 24);
-				animation.addByIndices('hairFall', "GF Dancing Beat Hair Landing", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "", 24, false);
-				animation.addByPrefix('scared', 'GF FEAR', 24);
-
-				addOffset('cheer');
-				addOffset('sad', -2, -2);
-				addOffset('danceLeft', 0, -9);
-				addOffset('danceRight', 0, -9);
-
-				addOffset("singUP", 0, 4);
-				addOffset("singRIGHT", 0, -20);
-				addOffset("singLEFT", 0, -19);
-				addOffset("singDOWN", 0, -20);
-				addOffset('hairBlow', 45, -8);
-				addOffset('hairFall', 0, -9);
-
-				addOffset('scared', -2, -17);
-
-				playAnim('danceRight');
-
-			case 'dad':
-				// DAD ANIMATION LOADING CODE
-				frames = Paths.getSparrowAtlas('gameplay/characters/dad/dad');
-				animation.addByPrefix('idle', 'Dad idle dance', 24);
-				animation.addByPrefix('singUP', 'Dad Sing Note UP', 24);
-				animation.addByPrefix('singRIGHT', 'Dad Sing Note RIGHT', 24);
-				animation.addByPrefix('singDOWN', 'Dad Sing Note DOWN', 24);
-				animation.addByPrefix('singLEFT', 'Dad Sing Note LEFT', 24);
-
-				addOffset('idle');
-				addOffset("singUP", -6, 50);
-				addOffset("singRIGHT", 0, 27);
-				addOffset("singLEFT", -10, 10);
-				addOffset("singDOWN", 0, -30);
-
-				playAnim('idle');
-
-			case 'bf-pixel':
-				frames = Paths.getSparrowAtlas('gameplay/characters/bf/pixel/bfPixel');
-				animation.addByPrefix('idle', 'BF IDLE', 24, false);
-				animation.addByPrefix('singUP', 'BF UP NOTE', 24, false);
-				animation.addByPrefix('singLEFT', 'BF LEFT NOTE', 24, false);
-				animation.addByPrefix('singRIGHT', 'BF RIGHT NOTE', 24, false);
-				animation.addByPrefix('singDOWN', 'BF DOWN NOTE', 24, false);
-				animation.addByPrefix('singUPmiss', 'BF UP MISS', 24, false);
-				animation.addByPrefix('singLEFTmiss', 'BF LEFT MISS', 24, false);
-				animation.addByPrefix('singRIGHTmiss', 'BF RIGHT MISS', 24, false);
-				animation.addByPrefix('singDOWNmiss', 'BF DOWN MISS', 24, false);
-
-				addOffset('idle');
-				addOffset("singUP");
-				addOffset("singRIGHT");
-				addOffset("singLEFT");
-				addOffset("singDOWN");
-				addOffset("singUPmiss");
-				addOffset("singRIGHTmiss");
-				addOffset("singLEFTmiss");
-				addOffset("singDOWNmiss");
-
-				setGraphicSize(Std.int(width * 6));
-				updateHitbox();
-
-				playAnim('idle');
-
-				width -= 100;
-				height -= 100;
-
-				antialiasing = false;
-
-				flipX = true;
-
-			case 'bf-pixel-dead':
-				frames = Paths.getSparrowAtlas('gameplay/characters/bf/pixel/bfPixelsDEAD');
-				animation.addByPrefix('singUP', "BF Dies pixel", 24, false);
-				animation.addByPrefix('firstDeath', "BF Dies pixel", 24, false);
-				animation.addByPrefix('deathLoop', "Retry Loop", 24, true);
-				animation.addByPrefix('deathConfirm', "RETRY CONFIRM", 24, false);
-				animation.play('firstDeath');
-
-				addOffset('firstDeath');
-				addOffset('deathLoop', -37);
-				addOffset('deathConfirm', -37);
-				playAnim('firstDeath');
-				// pixel bullshit
-				setGraphicSize(Std.int(width * 6));
-				updateHitbox();
-				antialiasing = false;
-				flipX = true;
-
-			default:
-				frames = Paths.getSparrowAtlas("gameplay/characters/bf/bf");
-				animation.addByPrefix('idle', 'BF idle dance', 24, false);
-				animation.addByPrefix('singUP', 'BF NOTE UP0', 24, false);
-				animation.addByPrefix('singLEFT', 'BF NOTE LEFT0', 24, false);
-				animation.addByPrefix('singRIGHT', 'BF NOTE RIGHT0', 24, false);
-				animation.addByPrefix('singDOWN', 'BF NOTE DOWN0', 24, false);
-				animation.addByPrefix('singUPmiss', 'BF NOTE UP MISS', 24, false);
-				animation.addByPrefix('singLEFTmiss', 'BF NOTE LEFT MISS', 24, false);
-				animation.addByPrefix('singRIGHTmiss', 'BF NOTE RIGHT MISS', 24, false);
-				animation.addByPrefix('singDOWNmiss', 'BF NOTE DOWN MISS', 24, false);
-				animation.addByPrefix('hey', 'BF HEY', 24, false);
-
-				animation.addByPrefix('firstDeath', "BF dies", 24, false);
-				animation.addByPrefix('deathLoop', "BF Dead Loop", 24, true);
-				animation.addByPrefix('deathConfirm', "BF Dead confirm", 24, false);
-
-				animation.addByPrefix('scared', 'BF idle shaking', 24);
-
-				addOffset('idle', -5);
-				addOffset("singUP", -29, 27);
-				addOffset("singRIGHT", -38, -7);
-				addOffset("singLEFT", 12, -6);
-				addOffset("singDOWN", -10, -50);
-				addOffset("singUPmiss", -29, 27);
-				addOffset("singRIGHTmiss", -30, 21);
-				addOffset("singLEFTmiss", 12, 24);
-				addOffset("singDOWNmiss", -11, -19);
-				addOffset("hey", 7, 4);
-				addOffset('firstDeath', 37, 11);
-				addOffset('deathLoop', 37, 5);
-				addOffset('deathConfirm', 37, 69);
-				addOffset('scared', -4);
-
-				playAnim('idle');
-
-				flipX = true;
-		}
-
-		dance();
-
-		if (isPlayer) {
-			flipX = !flipX;
-
-			// Doesn't flip for BF, since his are already in the right place???
-			if (!curCharacter.startsWith('bf')) { // var animArray
-				var oldRight = animation.getByName('singRIGHT').frames;
-				animation.getByName('singRIGHT').frames = animation.getByName('singLEFT').frames;
-				animation.getByName('singLEFT').frames = oldRight;
-
-				// IF THEY HAVE MISS ANIMATIONS??
-				if (animation.getByName('singRIGHTmiss') != null) {
-					var oldMiss = animation.getByName('singRIGHTmiss').frames;
-					animation.getByName('singRIGHTmiss').frames = animation.getByName('singLEFTmiss').frames;
-					animation.getByName('singLEFTmiss').frames = oldMiss;
-				}
-			}
-		}
+		this.characterId = character;
+		loadCharacter(this.characterId);
 	}
 
-	override function update(elapsed:Float) {
-		if (animation.curAnim.name.startsWith('sing'))
-			holdTimer += elapsed;
-		else if (isPlayer)
-			holdTimer = 0;
-
-		if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished)
-			playAnim('idle', true, false, 10);
-
-		var dadVar:Float = 4;
-		if (curCharacter == 'dad')
-			dadVar = 6.1;
-		if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001) {
-			dance();
-			holdTimer = 0;
-		}
-		switch (curCharacter) {
-			case 'gf':
-				if (animation.exists("danceLeft") && animation.curAnim.name == 'hairFall' && animation.curAnim.finished)
-					playAnim('danceRight');
-		}
+	override function update(elapsed:Float):Void {
 		super.update(elapsed);
-	}
-
-	private var danced:Bool = false;
-
-	/**
-	 * FOR GF DANCING SHIT
-	 */
-	public function dance() {
-		if (!debugMode) {
-			switch (curCharacter) {
-				case 'gf':
-					if (!animation.curAnim.name.startsWith('hair')) {
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-
-				case 'gf-christmas':
-					if (!animation.curAnim.name.startsWith('hair')) {
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-
-				case 'gf-car':
-					if (!animation.curAnim.name.startsWith('hair')) {
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-				case 'gf-pixel':
-					if (!animation.curAnim.name.startsWith('hair')) {
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-
-				case 'spooky':
-					danced = !danced;
-
-					if (danced)
-						playAnim('danceRight');
-					else
-						playAnim('danceLeft');
-				default:
-					playAnim('idle');
+		if (!placeholder) {
+			if (animation.curAnim.name != idleAnimations[currentDance] + idleSuffix) {
+				danceCooldown -= elapsed * (singDuration * (Conductor.stepCrochet * 0.25));
+				if (danceCooldown <= 0.0)
+					dance();
 			}
+
+			if (isMissing() && animation.curAnim.finished)
+				dance(true, false, 10);
 		}
 	}
 
-	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void {
-		animation.play(AnimName, Force, Reversed, Frame);
+	public function isSinging():Bool
+		return animation.curAnim != null && singAnimations.contains(animation.curAnim.name + idleSuffix);
 
-		var daOffset = animOffsets.get(AnimName);
-		if (animOffsets.exists(AnimName)) {
-			offset.set(daOffset[0], daOffset[1]);
-		} else
-			offset.set(0, 0);
+	public function isMissing():Bool
+		return animation.curAnim != null && missAnimations.contains(animation.curAnim.name + idleSuffix);
 
-		if (curCharacter == 'gf') {
-			if (AnimName == 'singLEFT') {
-				danced = true;
-			} else if (AnimName == 'singRIGHT') {
-				danced = false;
-			}
-
-			if (AnimName == 'singUP' || AnimName == 'singDOWN') {
-				danced = !danced;
-			}
-		}
+	public function dance(?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
+		if (placeholder)
+			return;
+		playAnim(idleAnimations[currentDance], force, reversed, frame);
+		currentDance = flixel.math.FlxMath.wrap(currentDance + 1, 0, idleAnimations.length - 1);
 	}
 
-	public function addOffset(name:String, x:Float = 0, y:Float = 0) {
-		animOffsets[name] = [x, y];
+	public function sing(direction:Int, ?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
+		if (placeholder)
+			return;
+		playAnim(singAnimations[direction], force, reversed, frame);
+	}
+
+	public function miss(direction:Int, ?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
+		if (placeholder)
+			return;
+		playAnim(missAnimations[direction], force, reversed, frame);
+	}
+
+	private function findCharacterFile(character:String):String {
+		var paths = [
+			Paths.getPath('images/gameplay/characters/$character/config.json'),
+			Paths.getPath('images/gameplay/characters/$character/$character.json'),
+			Paths.getPath('images/gameplay/characters/$character/$character-config.json')
+		];
+		var path:String = paths[0];
+		var found:Bool = false;
+		for (i in paths) {
+			if (Paths.fileExists(i)) {
+				path = i;
+				break;
+			}
+		}
+		return path;
+	}
+
+	private function parseJsonIndicesField(field:Dynamic):Array<Int> {
+		var indices:Array<Int> = field ?? null;
+		if (field is String) {
+			var minmax:Array<String> = field.split("...");
+			indices = CoolUtil.numberArray(Std.parseInt(minmax[0]), Std.parseInt(minmax[1]));
+		} else if (field is Array)
+			indices = field;
+		return indices;
+	}
+
+	public function loadCharacter(characterName:String):Character {
+		switch (characterName) {
+			default:
+				var file:String = findCharacterFile(characterName);
+				if (!Paths.fileExists(file)) {
+					displayName = "Placeholder";
+					characterId = "placeholder";
+					makeGraphic(200, 100, 0xFFFF7070);
+					// just to prevent crashes
+					for (i in idleAnimations)
+						animation.add(i, [0], 0, false);
+					for (i in singAnimations)
+						animation.add(i, [0], 0, false);
+					for (i in missAnimations)
+						animation.add(i, [0], 0, false);
+					return this;
+				}
+
+				var file:Dynamic = Json5.parse(Paths.getText(file));
+				trace('loading character $characterName');
+				this.idleAnimations = file.idleAnimations ?? DEFAULT_IDLE_ANIMATIONS;
+				this.singAnimations = file.singAnimations ?? DEFAULT_SING_ANIMATIONS;
+				this.missAnimations = file.missAnimations ?? DEFAULT_MISS_ANIMATIONS;
+				this.beatsToDance = file.beatsToDance ?? singAnimations.length >= 2 ? 1 : 2;
+				this.singDuration = file.singDuration ?? 4.0;
+				this.displayName = file.name ?? file.displayName ?? "idk";
+				this.isPlayer = file.facesLeft ?? file.isPlayer ?? false;
+
+				// TODO: file.atlasType, OR auto-detection based on files in folder -asmadeuxs
+				if (file.texture != null)
+					frames = Paths.getSparrowAtlas('${file.texture}');
+				else
+					frames = Paths.getSparrowAtlas('gameplay/characters/$characterName/$characterName');
+
+				if (file.offsets != null) {
+					for (key in Reflect.fields(file.offsets)) {
+						var offset:Dynamic = Reflect.field(file.offsets, key);
+						if (offset != null) {
+							if (offset is Array)
+								addOffset(key, offset[0] ?? 0, offset[1] ?? 0);
+							else if (offset is Dynamic)
+								addOffset(key, offset.x ?? 0, offset.y ?? 0);
+						}
+					}
+				}
+				if (file.animations != null) {
+					var defaultFramerate:Int = file.defaultFramerate ?? 24;
+					for (key in Reflect.fields(file.animations)) {
+						var stuff:Dynamic = Reflect.field(file.animations, key);
+						switch Type.typeof(stuff) {
+							case TObject:
+								stuff.looped = Std.string(stuff.looped);
+								if (stuff.indices != null) {
+									var indies:Array<Int> = parseJsonIndicesField(stuff.indices);
+									animation.addByIndices(key, stuff.prefix, indies, "", stuff.frameRate ?? defaultFramerate, stuff.looped == "true");
+								} else
+									animation.addByPrefix(key, stuff.prefix, stuff.frameRate ?? defaultFramerate, stuff.looped == "true");
+								if (stuff.offset != null) {
+									if (stuff.offset is Array)
+										addOffset(key, stuff.offset[0] ?? 0, stuff.offset[1] ?? 0);
+									else if (stuff.offset is Dynamic)
+										addOffset(key, stuff.offset.x ?? 0, stuff.offset.y ?? 0);
+								}
+							case TClass(String):
+								animation.addByPrefix(key, stuff, defaultFramerate, false);
+							case _:
+								continue;
+						}
+					}
+				}
+				dance(true);
+		}
+		return this;
 	}
 }

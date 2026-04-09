@@ -138,11 +138,9 @@ class FreeplayState extends MusicBeatState {
 					curDifficulty = difficulties.length - 1;
 			}
 		}
-		trace(difficulties);
 		curDifficulty = FlxMath.wrap(curDifficulty + change, 0, difficulties.length - 1);
 		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
 		diffText.text = difficulties[curDifficulty].toUpperCase();
-		trace(difficulties[curDifficulty]);
 	}
 
 	function changeSelection(change:Int = 0) {
@@ -153,7 +151,6 @@ class FreeplayState extends MusicBeatState {
 		changeDiff();
 
 		var bullShit:Int = 0;
-
 		for (i in 0...iconArray.length)
 			iconArray[i].alpha = 0.6;
 		iconArray[curSelected].alpha = 1;

@@ -71,6 +71,12 @@ import Discord.DiscordClient;
 import sys.FileSystem;
 #end
 
+typedef PlaySession = {
+	story:Bool,
+	difficulty:String,
+	levelName:String,
+}
+
 class PlayState extends MusicBeatState {
 	public static var current:PlayState;
 
@@ -143,7 +149,9 @@ class PlayState extends MusicBeatState {
 	public static var misses:Int = 0;
 	public static var comboBreaks:Int = 0;
 	public static var combo:Int = 0;
+
 	public static var nps:Int = 0;
+	public static var maxNps:Int = 0;
 
 	public static var accuracy:Float = 0.00;
 	public static var totalNotesHit:Float = 0;
@@ -172,6 +180,10 @@ class PlayState extends MusicBeatState {
 
 	// Per song additive offset
 	public static var songOffset:Float = 0;
+
+	public function new():Void {
+		super();
+	}
 
 	public function resetScoring() {
 		combo = 0;
@@ -356,7 +368,7 @@ class PlayState extends MusicBeatState {
 		}
 		add(camFollow);
 
-		camGame.follow(camFollow, LOCKON, 0.04 * (30 / Preferences.user.frameRate));
+		camGame.follow(camFollow, LOCKON, 0.04 * (60 / Preferences.user.frameRate));
 		// camGame.setScrollBounds(0, FlxG.width, 0, FlxG.height);
 		camGame.zoom = defaultCamZoom;
 		camGame.focusOn(camFollow.getPosition());
@@ -483,22 +495,22 @@ class PlayState extends MusicBeatState {
 		var noteData:Array<SwagSection> = songData.notes;
 
 		// Per song offset check
-		#if desktop
-		var songPath = Paths.getPath('songs/${PlayState.SONG.song.toLowerCase()}/');
-		for (file in sys.FileSystem.readDirectory(songPath)) {
-			var path = haxe.io.Path.join([songPath, file]);
-			if (!sys.FileSystem.isDirectory(path)) {
-				if (path.endsWith('.offset')) {
-					trace('Found offset file: ' + path);
-					songOffset = Std.parseFloat(file.substring(0, file.indexOf('.off')));
-					break;
-				} else {
-					trace('Offset file not found. Creating one @: ' + songPath);
-					sys.io.File.saveContent(songPath + songOffset + '.offset', '');
+		/*#if desktop
+			var songPath = Paths.getPath('songs/${PlayState.SONG.song.toLowerCase()}/');
+			for (file in sys.FileSystem.readDirectory(songPath)) {
+				var path = haxe.io.Path.join([songPath, file]);
+				if (!sys.FileSystem.isDirectory(path)) {
+					if (path.endsWith('.offset')) {
+						trace('Found offset file: ' + path);
+						songOffset = Std.parseFloat(file.substring(0, file.indexOf('.off')));
+						break;
+					} else {
+						trace('Offset file not found. Creating one @: ' + songPath);
+						sys.io.File.saveContent(songPath + songOffset + '.offset', '');
+					}
 				}
 			}
-		}
-		#end
+			#end */
 
 		for (section in noteData) {
 			for (songNotes in section.sectionNotes) {
@@ -623,6 +635,8 @@ class PlayState extends MusicBeatState {
 						notesHitArray.remove(cock);
 			}
 			nps = Math.floor(notesHitArray.length / 2);
+			if (nps > maxNps)
+				maxNps = nps;
 			currentFrames = 0;
 		} else
 			currentFrames++;
@@ -734,10 +748,6 @@ class PlayState extends MusicBeatState {
 		}
 
 		if (generatedMusic) {
-			if (boyfriend.holdTimer > Conductor.stepCrochet * 4 * 0.001 && !holdInputs.contains(true))
-				if (boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss'))
-					boyfriend.dance();
-
 			notes.forEachAlive(function(daNote:Note) {
 				if (daNote.y > FlxG.height) {
 					daNote.active = false;
@@ -754,18 +764,11 @@ class PlayState extends MusicBeatState {
 					var altAnim:String = "";
 					if (SONG.notes[Math.floor(curStep / 16)] != null)
 						if (SONG.notes[Math.floor(curStep / 16)].altAnim)
-							altAnim = '-alt';
-					switch (Math.abs(daNote.noteData)) {
-						case 2:
-							dad.playAnim('singUP' + altAnim, true);
-						case 3:
-							dad.playAnim('singRIGHT' + altAnim, true);
-						case 1:
-							dad.playAnim('singDOWN' + altAnim, true);
-						case 0:
-							dad.playAnim('singLEFT' + altAnim, true);
-					}
-					dad.holdTimer = 0;
+							dad.idleSuffix = '-alt';
+						else
+							dad.idleSuffix = "";
+					dad.sing(daNote.noteData, true);
+					dad.danceCooldown = (Conductor.stepCrochet) + daNote.sustainLength;
 					if (SONG.needsVoices)
 						vocals.volume = 1;
 					daNote.active = false;
@@ -1109,17 +1112,8 @@ class PlayState extends MusicBeatState {
 					totalNotesHit += data.EtternaFunctions.wife3(noteDiff, 1.7);
 			}
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
-			switch (direction) {
-				case 0:
-					boyfriend.playAnim('singLEFTmiss', true);
-				case 1:
-					boyfriend.playAnim('singDOWNmiss', true);
-				case 2:
-					boyfriend.playAnim('singUPmiss', true);
-				case 3:
-					boyfriend.playAnim('singRIGHTmiss', true);
-			}
-
+			boyfriend.miss(direction, true);
+			boyfriend.danceCooldown = (Conductor.stepCrochet) * 0.2;
 			updateAccuracy();
 			if (currentHUD != null)
 				currentHUD.updateScoreText();
@@ -1146,17 +1140,8 @@ class PlayState extends MusicBeatState {
 			} else
 				totalNotesHit += 1;
 
-			switch (note.noteData) {
-				case 2:
-					boyfriend.playAnim('singUP', true);
-				case 3:
-					boyfriend.playAnim('singRIGHT', true);
-				case 1:
-					boyfriend.playAnim('singDOWN', true);
-				case 0:
-					boyfriend.playAnim('singLEFT', true);
-			}
-
+			boyfriend.sing(note.noteData, true);
+			boyfriend.danceCooldown = (Conductor.stepCrochet) + note.sustainLength;
 			note.wasGoodHit = true;
 			vocals.volume = 1;
 
@@ -1223,7 +1208,7 @@ class PlayState extends MusicBeatState {
 		if (curBeat % 8 == 7 && curSong == 'Bopeebo')
 			boyfriend.playAnim('hey', true);
 
-		if (curBeat % 16 == 15 && SONG.song == 'Tutorial' && dad.curCharacter == 'gf' && curBeat > 16 && curBeat < 48) {
+		if (curBeat % 16 == 15 && SONG.song == 'Tutorial' && dad.characterId == 'gf' && curBeat > 16 && curBeat < 48) {
 			boyfriend.playAnim('hey', true);
 			dad.playAnim('cheer', true);
 		}
@@ -1234,8 +1219,7 @@ class PlayState extends MusicBeatState {
 			dad.dance();
 		if (curBeat % (gf.beatsToDance * gfSpeed) == 0)
 			gf.dance();
-		var bfSinging:Bool = boyfriend.animation.curAnim.name.startsWith("sing");
-		if (!bfSinging && curBeat % boyfriend.beatsToDance == 0)
+		if (!boyfriend.isSinging() && curBeat % boyfriend.beatsToDance == 0)
 			boyfriend.dance();
 	}
 }
