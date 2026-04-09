@@ -1,0 +1,93 @@
+{
+  "title": "asmadeuxs/KadeFork's Character Format",
+  "description": "The character format for KadeFork/DEKA! Engine",
+
+  /**
+   * Display Name of a character, used in some contexts (mainly editor fields)
+   */
+  "name": "Example",
+
+  /**
+   * How long the character takes to go back to idling after a sing animation
+   */
+  "singDuration": 4.0,
+
+  /**
+   * The default framerate for every animation.
+   *
+   * You can always override this with your own in the animation schema itself
+   */
+  "defaultFramerate": 24,
+
+  /**
+   * Animation names used for when the character is idling.
+   *
+   * The game cycles through these every time a character needs to headbop/dance
+   */
+  "idleAnimations": [ "idle" ],
+
+  /**
+   * Animation names used for when the character hits notes.
+   *
+   * These are ordered just like the notes themselves (Left, Down, Up, Right)
+   */
+  "singAnimations": [ "singLEFT", "singDOWN", "singUP", "singRIGHT" ],
+
+  /**
+   * Animation names used for when the character misses notes.
+   *
+   * These are ordered just like the notes themselves (Left, Down, Up, Right)
+   */
+  "missAnimations": [ "singLEFTmiss", "singDOWNmiss", "singUPmiss", "singRIGHTmiss" ],
+
+  /**
+   * Whether the character is looking to the left on its spritesheet
+   *
+   * This is especially useful for playable characters.
+   *
+   * Playable characters tend to face left and in order for them to be correctly positioned when they are the opponent,
+   * You'd wanna flick this setting on.
+   */
+  "facesLeft": true,
+
+  /**
+   * Similar to "singDuration" but for individual animations
+   */
+  "animationTimers": {
+    "hey": 1.0
+  },
+
+  /**
+   * The character's animations
+   *
+   * Each value inside this object can be either a string
+   *
+   * "animationName": "animationPreefix"
+   *
+   * or an object formatted like this:
+   *
+   * ```json
+   * "animationName": {
+   *   "prefix": "AnimationPrefix",
+   *   "frameRate": 24,
+   *   "looped": true|false,
+   *   "indices": "1...30"|[1, 2, 3, 4, 5, ..., 30],
+   *   "offset": { "x": 0, "y": 0}|[0, 0]
+   * }
+   * ```
+   */
+  "animations": {
+    "idle": "idle",
+    "hey": { "prefix": "hey", "frameRate": 20, "looped": false },
+    "bye1": { "prefix": "bye", "indices": [ 30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ] },
+    "bye2": { "prefix": "bye", "indices": "11...16" }
+  },
+  /**
+   * Similar to the animations field, But only stores offsets.
+   *
+   * "animationName": { "x": 0, "y": 0 }||[ 0, 0 ]
+   */
+  "offsets": {
+    "idle": [ 0, 0 ]
+  }
+}
