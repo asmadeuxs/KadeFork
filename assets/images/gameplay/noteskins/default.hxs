@@ -1,8 +1,11 @@
 var directions = ["left", "down", "up", "right"];
+var colors = ["purple", "blue", "green", "red"];
+var skinTex = Paths.getSparrowAtlas('gameplay/noteskins/NOTE_assets');
 
 function generateStrum(strum, noteData) {
 	var direction = directions[noteData];
-	strum.frames = Paths.getSparrowAtlas('gameplay/noteskins/NOTE_assets');
+	strum.frames = skinTex;
+
 	strum.animation.addByPrefix('static', 'arrow' + direction.toUpperCase());
 	strum.animation.addByPrefix('pressed', direction + ' press', 24, false);
 	strum.animation.addByPrefix('confirm', direction + ' confirm', 24, false);
@@ -16,4 +19,16 @@ function generateStrum(strum, noteData) {
 			FlxTween.tween(strum, {y: strum.y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
 	}*/
 	strum.playAnim('static', true);
+}
+
+function generateNote(note, noteData) {
+	var color = colors[noteData];
+	note.frames = skinTex;
+	note.animation.addByPrefix(color + 'Scroll', color + '0');
+	note.animation.addByPrefix(color + 'holdend', color + ' hold end');
+	note.animation.addByPrefix(color + 'hold', color + ' hold piece');
+	note.animation.addByPrefix('purpleholdend', 'pruple end hold'); // dude.
+	note.setGraphicSize(Std.int(note.width * 0.7));
+	note.playAnim(color + 'Scroll', true);
+	note.antialiasing = true;
 }

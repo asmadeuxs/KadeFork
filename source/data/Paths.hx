@@ -47,6 +47,9 @@ class Paths {
 		}
 	}
 
+	static public function getCacheContext()
+		return cachingContext;
+
 	static public function changeCacheContext(newContext:String) {
 		resetCacheContext();
 		if (!newContext.endsWith(":"))

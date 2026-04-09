@@ -7,8 +7,7 @@ import data.ScriptLoader;
 
 class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 	public var keyCount:Int = 4;
-
-	private var noteScript:Script;
+	public var noteScript:Script;
 
 	public function new(x:Float = 0, y:Float = 0, ?keyCount:Int = 4):Void {
 		super(x, y);
@@ -16,7 +15,7 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 		var skin:String = 'default'; // hardcoded for now
 		var skinPath:String = Paths.getPath('images/gameplay/noteskins');
 		var path = ScriptLoader.getScriptFile(skinPath, skin);
-		noteScript = ScriptLoader.loadScript(path);
+		noteScript = ScriptLoader.findScript(path);
 		generateStrums();
 	}
 
@@ -35,15 +34,15 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 	public function playAnim(direction:Int = 0, animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0):Void {
 		var strum:FunkinSprite = this.members[direction];
 		if (strum != null) {
-			if (noteScript != null && noteScript.hasFunction("onPlayAnim")) {
+			if (noteScript != null) {
 				var ret = noteScript.callFunc("onPlayAnim", [strum, direction, animName, force, reversed, frame]);
-				if (ret.value == ScriptLoader.STOP_FUNC)
+				if (ret != null && ret.value == ScriptLoader.STOP_FUNC)
 					return;
 			}
 			strum.playAnim(animName, force, reversed, frame);
 			strum.centerOrigin();
 			strum.centerOffsets();
-			if (noteScript != null && noteScript.hasFunction("postPlayAnim"))
+			if (noteScript != null)
 				noteScript.callFunc("postPlayAnim", [strum, direction, animName, force, reversed, frame]);
 		}
 	}

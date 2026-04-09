@@ -150,6 +150,7 @@ class MainMenuState extends MusicBeatState {
 		this.active = true;
 		menuItems.forEach(function(spr:FlxSprite) {
 			spr.revive();
+			FlxTween.cancelTweensOf(spr);
 			FlxTween.tween(spr, {alpha: 1}, 0.3, {ease: FlxEase.quadIn});
 		});
 	}

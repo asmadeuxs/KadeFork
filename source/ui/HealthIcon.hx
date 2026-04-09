@@ -27,9 +27,14 @@ class HealthIcon extends FunkinSprite {
 		iconScript = ScriptLoader.loadScript(path);
 	}
 
-	public function loadIcon(character:String):Void {
+	public function loadIcon(character:String):HealthIcon {
 		switch character { // just so its easier to hardcode
 			default:
+				if (iconScript != null) {
+					var caller = iconScript.callFunc("loadIcon", [this, character]);
+					if (caller != null && caller.value == ScriptLoader.STOP_FUNC)
+						return this;
+				}
 				var noSuffix:String = character.substring(0, character.lastIndexOf("-"));
 				var paths = [
 					'gameplay/characters/$character/icon-$character',
@@ -47,7 +52,7 @@ class HealthIcon extends FunkinSprite {
 				}
 				if (fail) {
 					makeGraphic(100, 100, 0xFF00FFFF);
-					return;
+					return this;
 				}
 				iconPath = mainPath;
 				if (Paths.fileExists(Paths.getPath("images/" + mainPath.replace(".png", ".xml")))) {
@@ -73,6 +78,7 @@ class HealthIcon extends FunkinSprite {
 				switchState("idle", true);
 		}
 		scrollFactor.set();
+		return this;
 	}
 
 	///
@@ -95,7 +101,7 @@ class HealthIcon extends FunkinSprite {
 	private function loadIconGrid(character:String) {
 		loadGraphic(Paths.image('gameplay/characters/iconGrid'), true, 150, 150);
 
-		if (iconScript != null && iconScript.hasFunction("loadIconGrid")) {
+		if (iconScript != null) {
 			iconScript.callFunc("loadIconGrid", [character]);
 		} else {
 			animation.add('bf', [0, 1], 0, false);

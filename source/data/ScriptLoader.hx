@@ -66,7 +66,43 @@ class ScriptLoader {
 	public static inline var CONTINUE_FUNC:String = "#HSCRIPT_CONTINUE_FUNC";
 	public static inline var KILL_SCRIPT:String = "#HSCRIPT_KILL_SCRIPT";
 
+	// just a little something so we can reuse scripts instead of loading a new one that is identical to an older one.
+	// this is mainly useful for note scripts, not so much for gameplay scripts and whatnot
+	public static var scriptCache:Map<String, Script> = [];
+
 	public static final acceptedExtensions:Array<String> = ["hx", "hxc", "hxs"];
+
+	public static function findScript(path:String):Script {
+		var con:String = Paths.getCacheContext() ?? "global:";
+		if (!scriptCache.exists(con + path))
+			scriptCache.set(con + path, loadScript(path));
+		return scriptCache.get(con + path);
+	}
+
+	public static function removeScriptFromCachedPath(path:String, ?destroyScript:Bool = true):Script {
+		var script:Script = null;
+		for (key in scriptCache.keys()) {
+			if (key == path) {
+				script = scriptCache.get(key);
+				scriptCache.remove(key);
+				if (destroyScript)
+					script.destroy();
+			}
+		}
+		return script;
+	}
+
+	public static function removeScriptFromCache(script:Script, ?destroyScript:Bool = true):Script {
+		for (key in scriptCache.keys()) {
+			var target = scriptCache.get(key);
+			if (target == script) {
+				scriptCache.remove(key);
+				if (destroyScript)
+					script.destroy();
+			}
+		}
+		return script;
+	}
 
 	private static function makeInterpreter() {
 		var interp = new Interp();
