@@ -1,0 +1,100 @@
+{
+  /**
+   * Noteskin Name, used in some contexts (mainly editor fields)
+   */
+  "name": "Example",
+  /**
+   * Noteskin Artist Name, used for credits
+   */
+  "author": "Example",
+
+  /**
+   * Noteskin texture configuration
+   *
+   * The example below shows what they CAN have
+   *
+   * "def" will be selected if the value for a specific texture is unspecified
+   *
+   * "atlasType" is optional, it refers to the type of spritesheet the notes are,
+   * you most likely want "sparrow" as its the most common format.
+   * But some pixel noteskins do use "spritesheet"
+   *
+   * the default "atlasType" is "sparrow" so you could omit the field altogether.
+   */
+  "texture": {
+    "def": {
+      "path": "gameplay/noteskins/myCustomStrums",
+      "atlasType": "sparrow"
+    },
+    "notes": {
+      "path": "gameplay/noteskins/myCustomNotes",
+      "atlasType": "sparrow"
+    },
+    "holds": {
+      "path": "gameplay/noteskins/myCustomHolds",
+      "atlasType": "sparrow"
+    },
+    "splashes": {
+      "path": "gameplay/noteskins/myCustomSplashes",
+      "atlasType": "sparrow"
+    }
+  },
+
+  /**
+   * Atlas Type, can be "sparrow", "packer", or "sheet"
+   */
+  "atlasType": "sparrow",
+
+  /**
+   * The default framerate for every animation.
+   *
+   * You can always override this with an animation-specific framerate when adding the animation itself
+   */
+  "defaultFramerate": 24,
+
+  /**
+   * How many keys (strum count) this noteskin was designed for.
+   *
+   * This value gets used so the game can properly calculate which animation goes where
+   */
+  "keyCount": 4,
+
+  /**
+   * Noteskin animations
+   *
+   * Each value inside these arrays can be either a string or an object
+   *
+   * "arrows": [ "purple0", { "prefix": "blue0", "frameRate": 24 }, "green0", "red0" ]
+   *
+   * Keep in mind that the `holds` field and `splashes` field have special treatment.
+   *
+   * For holds:
+   *   Down there you have 4 hold pieces and 4 holds, this means that in-game;
+   *   The first 4 elements on the array will be used for the sustain"s body,
+   *   Whereas the remaining 4 will be used for sustain"s tail
+   *
+   * This is why the keyCount value is important, as it determines when the sustain body animations stop
+   * and where the tail starts
+   *
+   * Note Splash animations behave similarly to this, except instead of affecting the "body" and "tail"
+   *
+   * Instead, note splash animations are exclusively for a randomness factor
+   */
+  "animations": {
+    "strums": {
+      "animStatic": [ "arrowLEFT", "arrowDOWN", "arrowUP", "arrowRIGHT" ],
+      "animPressed": [ "left press", "down press", "up press", "right press" ],
+      "animConfirm": [ "left confirm", "down confirm", "up confirm", "right confirm" ],
+      "animHolding": null
+    },
+    "arrows": [ "purple0", "blue0", "green0", "red0" ],
+    "holds": [
+      "purple hold piece", "blue hold piece", "green hold piece", "red hold piece",
+      "pruple end hold", "blue hold end", "green hold end", "red hold end"
+    ],
+    "splashes": [
+      "note impact 1 purple", "note impact 1  blue", "note impact 1 green", "note impact 1 red",
+      "note impact 2 purple", "note impact 2 blue", "note impact 2 green", "note impact 2 red"
+    ]
+  }
+}

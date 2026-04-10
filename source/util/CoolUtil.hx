@@ -1,4 +1,4 @@
-package;
+package util;
 
 import flixel.FlxObject;
 import flixel.FlxSprite;
@@ -26,7 +26,7 @@ class CoolUtil {
 		if (centerType == X || centerType == XY)
 			o1.x = o2.x + (o2.width - o1.width) * 0.5;
 		if (centerType == Y || centerType == XY)
-			o2.y = o2.y + (o2.height - o1.height) * 0.5;
+			o1.y = o2.y + (o2.height - o1.height) * 0.5;
 		return o1;
 	}
 

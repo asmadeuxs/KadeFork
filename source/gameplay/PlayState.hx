@@ -30,7 +30,7 @@ import openfl.events.KeyboardEvent;
 import openfl.filters.ShaderFilter;
 import ui.HealthIcon;
 
-using CoolUtil;
+using util.CoolUtil;
 using StringTools;
 
 #if discord_rpc
@@ -93,7 +93,6 @@ class PlayState extends MusicBeatState {
 	public var noteSpawnIndex:Int = 0;
 
 	public var strumlines:FlxTypedSpriteGroup<Strumline>;
-	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 	public var camFollow:FlxObject;
 
 	private static var prevCamFollow:FlxObject;
@@ -285,21 +284,12 @@ class PlayState extends MusicBeatState {
 		comboDisplay = new FlxSpriteGroup();
 		strumlines = new FlxTypedSpriteGroup(0, 0);
 		notes = new FlxTypedGroup<Note>();
-		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 
 		var cacheNotes:Int = 16;
 		for (_ in 0...cacheNotes)
 			notes.add(new Note());
 
-		// fake notesplash cache type deal so that it loads in the graphic?
-		// so basically ninjamuffin's method for this sucks ass so
-		// TODO: revise all this
-		var noteSplash:NoteSplash = new NoteSplash(100, 100, 0);
-		noteSplash.alpha = 0.000000000001;
-		grpNoteSplashes.add(noteSplash);
-
 		currentHUD.camera = camHUD;
-		grpNoteSplashes.camera = camHUD;
 		comboDisplay.camera = camHUD;
 		strumlines.camera = camHUD;
 		notes.camera = camHUD;
@@ -325,7 +315,6 @@ class PlayState extends MusicBeatState {
 		add(currentHUD);
 		add(strumlines);
 		add(notes);
-		add(grpNoteSplashes);
 		add(comboDisplay);
 
 		generateSong(SONG.song);
@@ -498,7 +487,7 @@ class PlayState extends MusicBeatState {
 
 				// delete duplicates
 				if (oldNote != null)
-					if (Math.abs(oldNote.strumTime - daStrumTime) < 0.00001 && oldNote.noteData == daNoteData)
+					if (Math.abs(oldNote.strumTime - daStrumTime) < 0.00001 && oldNote.noteData == daNoteData && oldNote.noteOwner == noteOwner)
 						continue;
 				var swagNote:NoteData = {
 					strumTime: daStrumTime,
@@ -694,8 +683,7 @@ class PlayState extends MusicBeatState {
 				if (strumline != null) {
 					// spawn the note if the strumline is there for it
 					var swagNote:Note = notes.recycle(Note).setup(nextNote.strumTime, nextNote.noteData, nextNote.sustainLength, oldNote);
-					if (strumline.noteScript != null)
-						strumline.noteScript.callFunc("generateNote", [swagNote, nextNote.noteData]);
+					strumline.noteskin.generateArrow(nextNote.noteData, swagNote);
 					swagNote.mustPress = strumline == playerStrums;
 					// notes.add(unspawnNotes[noteSpawnIndex]);
 				}
@@ -735,7 +723,7 @@ class PlayState extends MusicBeatState {
 
 				var noteData:Int = Math.floor(Math.abs(daNote.noteData));
 				if (daNote.mustPress) {
-					var curStrum = playerStrums.members[noteData];
+					var curStrum = playerStrums.getStrum(noteData);
 					daNote.y = curStrum.y - noteScroll;
 					daNote.visible = curStrum.visible;
 					if (!daNote.isSustainNote)
@@ -743,7 +731,7 @@ class PlayState extends MusicBeatState {
 					daNote.alpha = curStrum.alpha;
 					daNote.x = curStrum.x;
 				} else if (!daNote.wasGoodHit) {
-					var curStrum = opponentStrums.members[noteData];
+					var curStrum = opponentStrums.getStrum(noteData);
 					daNote.y = curStrum.y - noteScroll;
 					daNote.visible = curStrum.visible;
 					if (!daNote.isSustainNote)
@@ -826,15 +814,6 @@ class PlayState extends MusicBeatState {
 	var showJudgement:Bool = true;
 	var showComboNumbers:Bool = true;
 	var showComboSprite:Bool = false;
-
-	public function popNoteSplash(daNote:Note):Void {
-		if (daNote.judgement.splash && Preferences.user.noteSplashes) {
-			var noteSplash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
-			noteSplash.setupNoteSplash(daNote.x, daNote.y, daNote.noteData);
-			// new NoteSplash(daNote.x, daNote.y, daNote.noteData);
-			grpNoteSplashes.add(noteSplash);
-		}
-	}
 
 	public function popUpScore(daNote:Note):Void {
 		popUpRating(daNote.judgement.image);
@@ -1004,7 +983,7 @@ class PlayState extends MusicBeatState {
 			if (daNote != null) {
 				var noteDiff:Float = Math.abs(daNote.strumTime - Conductor.songPosition);
 				if (Preferences.user.etternaMode)
-					totalNotesHit += data.EtternaFunctions.wife3(noteDiff, 1.7);
+					totalNotesHit += util.EtternaFunctions.wife3(noteDiff, 1.7);
 			}
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 			boyfriend.miss(direction, true);
@@ -1031,7 +1010,8 @@ class PlayState extends MusicBeatState {
 			if (!note.isSustainNote) {
 				scoreNote(note);
 				popUpScore(note);
-				popNoteSplash(note);
+				if (Preferences.user.noteSplashes && note.judgement.splash)
+					playerStrums.spawnSplash(note.noteData);
 				combo += 1;
 			} else
 				totalNotesHit += 1;
@@ -1051,7 +1031,7 @@ class PlayState extends MusicBeatState {
 		var score:Float = daNote.judgement.score;
 		var noteDiff:Float = Math.abs(Conductor.songPosition - daNote.strumTime);
 		if (Preferences.user.etternaMode)
-			totalNotesHit += data.EtternaFunctions.wife3(noteDiff, Conductor.timeScale);
+			totalNotesHit += util.EtternaFunctions.wife3(noteDiff, Conductor.timeScale);
 		else
 			totalNotesHit += daNote.judgement.accuracy;
 		health += judgementData.getHealthBonus(daNote.judgement.name);

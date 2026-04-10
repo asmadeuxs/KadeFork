@@ -1,49 +1,72 @@
 package gameplay;
 
+import data.Noteskin;
+import data.ScriptLoader;
 import flixel.FlxG;
 import flixel.group.FlxSpriteGroup;
 import gameplay.FunkinSprite;
-import data.ScriptLoader;
+import util.ObjectPool;
+
+using util.CoolUtil;
 
 class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 	public var keyCount:Int = 4;
-	public var noteScript:Script;
+	public var noteskin:Noteskin;
+
+	public var strums:Array<FunkinSprite> = [];
+
+	private var splashPool:ObjectPool<FunkinSprite>;
 
 	public function new(x:Float = 0, y:Float = 0, ?keyCount:Int = 4):Void {
 		super(x, y);
 		this.keyCount = keyCount;
 		var skin:String = 'default'; // hardcoded for now
-		var skinPath:String = Paths.getPath('images/gameplay/noteskins');
-		var path = ScriptLoader.getScriptFile(skinPath, skin);
-		noteScript = ScriptLoader.findScript(path);
+		noteskin = Noteskin.loadNoteskinFile(skin);
+		splashPool = new ObjectPool(16, (index:Int) -> return add(noteskin.generateNoteSplashSprite(index)));
 		generateStrums();
 	}
+
+	public function spawnSplash(noteData:Int, ?x:Float = 0, ?y:Float = 0):Bool {
+		var splash:FunkinSprite = splashPool.get();
+		if (splash != null) {
+			splash.alpha = 0.6;
+			splash.setPosition(0, 0);
+			var strum = getStrum(noteData);
+			if (strum != null)
+				splash.objectCenter(strum, XY);
+			splash.x += x;
+			splash.y += y;
+			splash.revive();
+			noteskin.playSplashAnimation(splash, noteData);
+			splash.animation.finishCallback = function(_) {
+				splash.kill();
+				splashPool.release(splash);
+				splash.animation.finishCallback = null;
+			};
+		}
+		return splash != null;
+	}
+
+	public function getStrum(noteData:Int)
+		return strums[noteData];
 
 	public function generateStrums():Void {
 		var spacing:Float = 160;
 		for (i in 0...this.keyCount) {
-			var strum:FunkinSprite = new FunkinSprite(0, 0);
-			if (noteScript != null)
-				noteScript.callFunc("generateStrum", [strum, i]);
+			var strum:FunkinSprite = noteskin.generateStrum(i);
 			strum.x = (spacing * strum.scale.x) * i;
 			// strum.updateHitbox();
+			strums.push(strum);
 			add(strum);
 		}
 	}
 
 	public function playAnim(direction:Int = 0, animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0):Void {
-		var strum:FunkinSprite = this.members[direction];
+		var strum:FunkinSprite = getStrum(direction);
 		if (strum != null) {
-			if (noteScript != null) {
-				var ret = noteScript.callFunc("onPlayAnim", [strum, direction, animName, force, reversed, frame]);
-				if (ret != null && ret.value == ScriptLoader.STOP_FUNC)
-					return;
-			}
 			strum.playAnim(animName, force, reversed, frame);
 			strum.centerOrigin();
 			strum.centerOffsets();
-			if (noteScript != null)
-				noteScript.callFunc("postPlayAnim", [strum, direction, animName, force, reversed, frame]);
 		}
 	}
 }

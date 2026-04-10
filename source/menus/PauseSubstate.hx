@@ -14,7 +14,7 @@ import flixel.util.FlxColor;
 import gameplay.PlayState;
 import menus.GenericMenu.SimpleMenuButton;
 
-using CoolUtil;
+using util.CoolUtil;
 
 class PauseSubstate extends MusicBeatSubstate {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
