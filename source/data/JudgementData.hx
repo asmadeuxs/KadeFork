@@ -7,6 +7,7 @@ import flixel.util.FlxColor;
 	public var image:String = "combo";
 	public var hitWindow:Float = 0.0;
 
+	@:optional public var healthBonus:Float->Float = null;
 	@:optional public var comboBreak:Bool = false;
 	@:optional public var accuracy:Float = 0.0;
 	@:optional public var score:Int = 0;
@@ -29,6 +30,9 @@ class JudgementData {
 	public function getPerfect()
 		return activeList[0];
 
+	public function getGreat()
+		return activeList[1];
+
 	public function getWorst()
 		return activeList[activeList.length - 2];
 
@@ -38,18 +42,20 @@ class JudgementData {
 	public function getDefaultJudgements():Array<Judgement> {
 		return [
 			{
-				name: "Kino",
+				name: "Sick",
 				image: "kino",
 				splash: true,
 				color: 0xFF97FFFF,
+				healthBonus: (health:Float) -> return health < 2 ? 0.12 : 0.0,
 				hitWindow: 22.5,
 				accuracy: 1.0,
 				score: 500
 			},
 			{
-				name: "Sick",
+				name: "Great",
 				image: "sick",
 				splash: true,
+				healthBonus: (health:Float) -> return health < 2 ? 0.1 : 0.0,
 				color: 0xFFEAFF74,
 				hitWindow: 45.0,
 				accuracy: 0.95,
@@ -58,6 +64,7 @@ class JudgementData {
 			{
 				name: "Good",
 				image: "good",
+				healthBonus: (health:Float) -> return health < 2 ? 0.04 : 0.0,
 				color: 0xFF97FF9F,
 				hitWindow: 90.0,
 				accuracy: 0.75,
@@ -66,6 +73,7 @@ class JudgementData {
 			{
 				name: "Bad",
 				image: "bad",
+				healthBonus: (_:Float) -> return -0.06,
 				color: 0xFFDC7487,
 				hitWindow: 135.0,
 				accuracy: 0.50,
@@ -74,15 +82,17 @@ class JudgementData {
 			{
 				name: "Shit",
 				image: "shit",
+				comboBreak: true,
+				healthBonus: (_:Float) -> return -0.2,
 				color: 0xFFE02447,
 				hitWindow: 180.0,
 				accuracy: 0.25,
 				score: -300,
-				comboBreak: true
 			},
 			{
 				name: "Miss",
 				image: "miss",
+				healthBonus: (_:Float) -> return -0.04,
 				color: 0xFFFF0000,
 				hitWindow: -1, // unhittable?
 				accuracy: 0.0,
@@ -91,27 +101,30 @@ class JudgementData {
 		];
 	}
 
-	public function getHealthBonus(judgementName:String) {
-		var health:Float = 0.0;
-		switch (judgementName.toLowerCase()) {
-			case 'miss':
-				health -= 0.04;
-			case 'shit':
-				health -= 0.2;
-			case 'bad':
-				health -= 0.06;
-			case 'good':
-				if (health < 2)
-					health += 0.04;
-			case 'sick':
-				if (health < 2)
-					health += 0.1;
-			case 'kino':
-				if (health < 2)
-					health += 0.12;
+	// if you do add a judgement, modify this function, just in case it has a clear flag
+
+	public function getClearFlag():String {
+		var misses:Int = gameplay.PlayState.misses;
+		if (misses > 0) // Single Miss = Miss Flag | <10 Misses = Single Digit Combo Breaks
+			return misses == 1 ? "MF" : misses < 10 ? "SDCB" : "Clear";
+		// get lowest judgement fc
+		var lowestFC:Int = -1;
+		for (i in 0...activeList.length)
+			if (activeList[i].hits > 0)
+				lowestFC = i;
+		if (lowestFC == -1)
+			return "N/A";
+		var breaks:Int = gameplay.PlayState.comboBreaks;
+		return switch lowestFC {
+			case 0: "MFC"; // Marvelous (Sick) Full Combo
+			case 1: activeList[1].hits == 1 ? "WF" : "GFC+"; // White Flag / Great Full Combo
+			case 2: return activeList[2].hits == 1 ? "BF" : "GFC"; // Black Flag / Good Full Combo
+			case _: return breaks > 0 ? "NM" : "FC"; // No Misses / Full Combo
 		}
-		return health;
 	}
+
+	public function getHealthBonus(judgement:Judgement, health:Float)
+		return judgement.healthBonus != null ? judgement.healthBonus(health) : 0.0;
 
 	public function judgeTime(noteDiff:Float):Null<Judgement> {
 		for (judgement in activeList)
@@ -127,35 +140,5 @@ class JudgementData {
 			str += '${judge.name}: ${judge.hits}\n';
 		str += 'Combo Breaks: $breaks';
 		return str;
-	}
-
-	public function getClearFlag():String { // made these static JUST for this btw :friendly_hearts:
-		var breaks:Int = gameplay.PlayState.comboBreaks;
-		var misses:Int = gameplay.PlayState.misses;
-
-		var clearFlag:String = "N/A";
-		var kinos:Int = activeList[0].hits;
-		var sicks:Int = activeList[1].hits;
-		var goods:Int = activeList[2].hits;
-		var bads:Int = activeList[3].hits;
-		var shits:Int = activeList[4].hits;
-		if (misses == 0) {
-			if (bads == 0 && shits == 0 && goods == 0 && sicks == 0) // Kino Full Combo
-				clearFlag = "KFC";
-			else if (bads == 0 && shits == 0 && goods == 0 && sicks >= 1) // White Flag / Sick Full Combo (Nothing but Kinos & Sicks)
-				clearFlag = sicks == 1 ? "WF" : "SFC";
-			else if (bads == 0 && shits == 0 && goods >= 1) // Black Flag / Good Full Combo (Nothing but Kinos, Sicks & Goods)
-				clearFlag = goods == 1 ? "BF" : "GFC";
-			else
-				clearFlag = breaks > 0 ? "NM" : "FC"; // No Misses / Full Combo
-		} else {
-			if (misses == 1)
-				clearFlag = "MF"; // Miss Flag
-			else if (misses < 10)
-				clearFlag = "SDCB"; // Single Digit Combo Breaks
-			else
-				clearFlag = "Clear";
-		}
-		return clearFlag;
 	}
 }

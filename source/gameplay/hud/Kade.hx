@@ -57,8 +57,8 @@ class Kade extends BaseHUD {
 		add(scoreTxt);
 		if (Preferences.user.showJudgeCounts) {
 			judgesTxt = new FlxText(5, 0, FlxG.width, "");
-			judgesTxt.setFormat(Paths.font("vcr"), 18, FlxColor.WHITE, LEFT);
-			judgesTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.3);
+			judgesTxt.setFormat(Paths.font("vcr"), 16, FlxColor.WHITE, LEFT);
+			judgesTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.0);
 			judgesTxt.screenCenter(Y);
 			judgesTxt.y -= 30;
 			add(judgesTxt);

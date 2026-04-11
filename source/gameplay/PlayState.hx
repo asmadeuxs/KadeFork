@@ -1035,7 +1035,7 @@ class PlayState extends MusicBeatState {
 			totalNotesHit += util.EtternaFunctions.wife3(noteDiff, Conductor.timeScale);
 		else
 			totalNotesHit += daNote.judgement.accuracy;
-		health += judgementData.getHealthBonus(daNote.judgement.name);
+		health += judgementData.getHealthBonus(daNote.judgement, health);
 		daNote.judgement.hits++;
 		songScore += Math.round(score);
 		if (daNote.judgement.comboBreak == true) {
