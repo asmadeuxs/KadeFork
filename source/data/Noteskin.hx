@@ -17,29 +17,13 @@ private typedef StrumAnimations = {
 	animStatic:Array<ModAnimation>,
 	animPressed:Array<ModAnimation>,
 	animConfirm:Array<ModAnimation>,
-	animHolding:Array<ModAnimation>
-}
-
-private typedef NoteAnimations = {
-	strums:StrumAnimations,
-	arrows:Array<ModAnimation>,
-	holds:Array<ModAnimation>,
-	?splashes:Array<ModAnimation>
+	?animHolding:Array<ModAnimation>
 }
 
 // TODO: make this typedef just a general mod thing and not exclusive to this file
 // this file *in general* is very useful
 private typedef TextureConfig = {path:String, ?atlasType:String}
-
-private typedef NoteTextures = {
-	// TODO: make all these fields accept a simple string
-	// in that case, the atlasType defaults to "sparrow" -asmadeuxs
-	def:TextureConfig,
-	?strums:TextureConfig,
-	?notes:TextureConfig,
-	?holds:TextureConfig,
-	?splashes:TextureConfig
-}
+private typedef AnimationConfig = {animations:Array<ModAnimation>, ?atlas:TextureConfig};
 
 typedef NoteskinFile = {
 	?name:String,
@@ -47,33 +31,46 @@ typedef NoteskinFile = {
 	?atlasType:String,
 	?keyCount:Int,
 	?defaultFramerate:Int,
-	atlases:NoteTextures,
-	animations:NoteAnimations,
-	?offsets:Array<OneOfTwo<Dynamic, Array<Float>>>
+	?offsets:Array<OneOfTwo<Dynamic, Array<Float>>>,
+	defaultAtlas:TextureConfig,
+	strums:{animations:StrumAnimations, ?atlas:TextureConfig, ?scale:Float},
+	arrows:AnimationConfig & {?scale:Float},
+	?holds:AnimationConfig,
+	?splashes:AnimationConfig & {?scale:Float},
 }
 
 // i hate this file in specific -asmadeuxs
-// actually ii rewrote it entirely and i hate it slightly less now -asmadeuxs
+// actually i rewrote it entirely and i hate it slightly less now -asmadeuxs
 class Noteskin {
 	public static final DEFAULT_SKIN:NoteskinFile = {
 		name: "Classic",
 		author: "PhantomArcade",
-		atlases: {def: {path: "gameplay/noteskins/NOTE_assets", atlasType: "sparrow"}},
+		defaultAtlas: {path: "gameplay/noteskins/NOTE_assets", atlasType: "sparrow"},
 		defaultFramerate: 24,
 		keyCount: 4,
-		animations: {
-			strums: {
-				animStatic: ['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT'],
-				animPressed: ['left press', 'down press', 'up press', 'right press'],
-				animConfirm: ['left confirm', 'down confirm', 'up confirm', 'right confirm'],
-				animHolding: null,
-			},
-			arrows: ["purple0", "blue0", "green0", "red0"],
-			holds: [
+		strums: {
+			scale: 0.7,
+			animations: {
+				animStatic: ["arrowLEFT", "arrowDOWN", "arrowUP", "arrowRIGHT"],
+				animPressed: ["left press", "down press", "up press", "right press"],
+				animConfirm: ["left confirm", "down confirm", "up confirm", "right confirm"],
+				animHolding: null
+			}
+		},
+		arrows: {
+			scale: 0.7,
+			animations: ["purple0", "blue0", "green0", "red0"]
+		},
+		holds: {
+			animations: [
 				"purple hold piece", "blue hold piece", "green hold piece", "red hold piece",
 				  "pruple end hold",   "blue hold end",   "green hold end",   "red hold end"
-			],
-			splashes: [
+			]
+		},
+		splashes: {
+			scale: 1.0,
+			atlas: {path: "gameplay/noteskins/noteSplashes"},
+			animations: [
 				"note impact 1 purple", "note impact 1  blue", "note impact 1 green", "note impact 1 red",
 				"note impact 2 purple",  "note impact 2 blue", "note impact 2 green", "note impact 2 red"
 			]
@@ -81,9 +78,12 @@ class Noteskin {
 	};
 
 	private var atlasMap:Map<String, FlxAtlasFrames> = [];
-	private var keyCount:Int;
 	private var defaultFramerate:Int;
-	private var scaleFactor:Float = 0.7;
+	private var keyCount:Int;
+
+	private var strumScale:Float = 0.7;
+	private var arrowScale:Float = 0.7;
+	private var splashScale:Float = 1.0;
 
 	private var staticAnimNames:Array<String>;
 	private var pressedAnimNames:Array<String>;
@@ -102,38 +102,44 @@ class Noteskin {
 	}
 
 	public function loadNoteskinTextures(conf:NoteskinFile, ?type:String) {
+		var key:String = type;
 		var texConf:TextureConfig = switch type {
-			case "strums": conf.atlases.strums;
-			case "notes": conf.atlases.notes;
-			case "holds": conf.atlases.holds;
-			case "splashes": conf.atlases.splashes;
+			case "strums": conf.strums.atlas;
+			case "arrows": conf.arrows.atlas;
+			case "holds": conf.holds.atlas;
+			case "splashes": conf.splashes.atlas;
 			case _:
-				type = "def"; // make sure this is default
-				conf.atlases.def;
+				key = "defaultAtlas"; // make sure this is default
+				conf.defaultAtlas;
 		}
-		if (texConf != null && Paths.fileExists(Paths.getPath('images/${texConf.path}.png')))
-			atlasMap.set(type, Paths.getSparrowAtlas(texConf.path));
-		return atlasMap.get(type);
+		if (texConf != null) {
+			var atlas = Paths.getSparrowAtlas(texConf.path);
+			if (atlas != null)
+				atlasMap.set(key, atlas);
+			else
+				trace('Cannot load noteskin atlas for $key (path: ${Paths.getPath('images/${texConf.path}')})');
+		}
+		return atlasMap.get(key);
 	}
 
 	private function getAtlas(key:String):FlxAtlasFrames
-		return atlasMap.exists(key) ? atlasMap.get(key) : atlasMap.get("def");
+		return (atlasMap.get(key) != null) ? atlasMap.get(key) : atlasMap.get("defaultAtlas");
 
 	private function preload():Void {
 		var conf = file;
 		keyCount = conf.keyCount ?? DEFAULT_SKIN.keyCount;
-		defaultFramerate = conf.defaultFramerate ?? 24;
+		defaultFramerate = conf.defaultFramerate ?? DEFAULT_SKIN.defaultFramerate;
 
-		for (type in ["def", "strums", "notes", "holds", "splashes"])
+		for (type in ["defaultAtlas", "strums", "arrows", "holds", "splashes"])
 			loadNoteskinTextures(conf, type);
 
-		var strumAnims = conf.animations.strums;
+		var strumAnims = conf.strums.animations;
 		staticAnimNames = loadAnimArray(strumAnims.animStatic);
 		pressedAnimNames = loadAnimArray(strumAnims.animPressed);
 		confirmAnimNames = loadAnimArray(strumAnims.animConfirm);
-		scrollAnimNames = loadAnimArray(conf.animations.arrows);
+		scrollAnimNames = loadAnimArray(conf.arrows.animations);
 
-		var holdAnims = conf.animations.holds;
+		var holdAnims = conf.holds.animations;
 		if (holdAnims != null && holdAnims.length >= 2 * keyCount) {
 			holdBodyAnimNames = loadAnimArray(holdAnims.slice(0, keyCount));
 			holdEndAnimNames = loadAnimArray(holdAnims.slice(keyCount, 2 * keyCount));
@@ -142,7 +148,7 @@ class Noteskin {
 			holdEndAnimNames = [for (i in 0...keyCount) ""];
 		}
 
-		var splashAnims = conf.animations.splashes;
+		var splashAnims = conf.splashes.animations;
 		if (splashAnims != null) {
 			var numVariants = Math.floor(splashAnims.length / keyCount);
 			splashAnimNames = [];
@@ -154,6 +160,10 @@ class Noteskin {
 			}
 		} else
 			splashAnimNames = [];
+
+		strumScale = conf.strums.scale ?? DEFAULT_SKIN.strums.scale;
+		arrowScale = conf.arrows.scale ?? DEFAULT_SKIN.arrows.scale;
+		splashScale = conf.splashes.scale ?? DEFAULT_SKIN.splashes.scale;
 	}
 
 	private static function _animMapper(anim:ModAnimation):String {
@@ -168,11 +178,8 @@ class Noteskin {
 	private static function loadAnimArray(arr:Array<ModAnimation>):Array<String>
 		return arr == null ? [] : arr.map(_animMapper);
 
-	private inline function getFromArray(arr:Array<String>, noteData:Int):String {
-		if (arr.length == 0)
-			return "";
-		return arr[noteData % arr.length];
-	}
+	private inline function getFromArray(arr:Array<String>, noteData:Int):String
+		return arr.length == 0 ? "" : arr[noteData % arr.length];
 
 	public function generateStrum(noteData:Int):FunkinSprite {
 		var strum = new FunkinSprite(0, 0);
@@ -192,7 +199,7 @@ class Noteskin {
 		strum.animation.addByPrefix("static", staticName, defaultFramerate, false);
 		strum.animation.addByPrefix("pressed", pressedName, defaultFramerate, false);
 		strum.animation.addByPrefix("confirm", confirmName, defaultFramerate, false);
-		strum.setGraphicSize(Std.int(strum.width * scaleFactor));
+		strum.setGraphicSize(Std.int(strum.width * strumScale));
 		strum.playAnim('static', true);
 		return strum;
 	}
@@ -200,7 +207,7 @@ class Noteskin {
 	public function generateArrow(noteData:Int, ?note:Note):Note {
 		var arrow:Note = note ?? new Note();
 		noteData = FlxMath.wrap(noteData, 0, keyCount - 1);
-		var frames = getAtlas("notes");
+		var frames = getAtlas("arrows");
 		if (frames == null) {
 			arrow.makeGraphic(50, 50, 0xFF888888);
 			return arrow;
@@ -208,32 +215,36 @@ class Noteskin {
 		arrow.frames = frames;
 		var scrollName = getFromArray(scrollAnimNames, noteData);
 		arrow.animation.addByPrefix('${noteData}Scroll', scrollName, defaultFramerate, false);
-		arrow.setGraphicSize(Std.int(arrow.width * scaleFactor));
+		arrow.setGraphicSize(Std.int(arrow.width * arrowScale));
 		arrow.playAnim('${noteData}Scroll', true);
 		return arrow;
 	}
 
-	public function generateNoteSplashSprite(noteData:Int):FunkinSprite {
+	public function generateNoteSplashSprite():FunkinSprite {
 		var splash = new FunkinSprite(0, 0);
 		var frames = getAtlas("splashes");
 		if (frames == null)
 			return splash;
 		splash.frames = frames;
-		// splash.setGraphicSize(Std.int(splash.width * scaleFactor));
-		// splash.updateHitbox();
+		for (i in 0...splashAnimNames.length)
+			for (j in 0...splashAnimNames[i].length)
+				splash.animation.addByPrefix('splash$j-$i', splashAnimNames[i][j], defaultFramerate, false);
+		splash.setGraphicSize(Std.int(splash.width * splashScale));
+		splash.updateHitbox();
 		return splash;
 	}
 
-	public function playSplashAnimation(splash:FunkinSprite, noteData:Int):Void {
+	public function playSplashAnimation(splash:FunkinSprite, noteData:Int):Bool {
 		noteData = FlxMath.wrap(noteData, 0, keyCount - 1);
 		var randomInt:Int = Std.random(splashAnimNames.length); // FlxG.random.int wasn't working properly
-		var splashList = splashAnimNames[randomInt];
-		if (splashList.length == 0)
-			return;
-		// I'm very afraid this causes the game to lag actually, I might move this -asmadeuxs
-		splash.animation.addByPrefix('splash', splashList[noteData], defaultFramerate, false);
-		splash.playAnim('splash', true);
-		// splash.animation.curAnim.frameRate += Std.int(defaultFramerate);
+		var playThis:String = 'splash$noteData-$randomInt';
+		var played:Bool = false;
+		if (splash.animation.getByName(playThis) != null) {
+			splash.playAnim(playThis, true);
+			// splash.animation.curAnim.frameRate += Std.int(defaultFramerate);
+			played = true;
+		}
+		return played;
 	}
 
 	public static function getDefaultConfig():NoteskinFile

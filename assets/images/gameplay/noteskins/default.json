@@ -1,25 +1,28 @@
 {
   "name": "Classic",
   "author": "PhantomArcade",
-  "atlases": {
-    "def": { "path": "gameplay/noteskins/NOTE_assets" },
-    "splashes": { "path": "gameplay/noteskins/noteSplashes" }
-  },
-  "atlasType": "sparrow",
-  "maxColumns": 4,
-  "animations": {
-    "strums": {
+  "defaultAtlas": { "path": "gameplay/noteskins/NOTE_assets" },
+  "keyCount": 4,
+  "strums": {
+    "animations": {
       "animStatic": [ "arrowLEFT", "arrowDOWN", "arrowUP", "arrowRIGHT" ],
       "animPressed": [ "left press", "down press", "up press", "right press" ],
       "animConfirm": [ "left confirm", "down confirm", "up confirm", "right confirm" ],
       "animHolding": null
-    },
-    "arrows": [ "purple0", "blue0", "green0", "red0" ],
-    "holds": [
+    }
+  },
+  "arrows": {
+    "animations": [ "purple0", "blue0", "green0", "red0" ]
+  },
+  "holds": {
+    "animations": [
       "purple hold piece", "blue hold piece", "green hold piece", "red hold piece",
       "pruple end hold", "blue hold end", "green hold end", "red hold end"
-    ],
-    "splashes": [
+    ]
+  },
+  "splashes": {
+    "atlas": { "path": "gameplay/noteskins/noteSplashes" },
+    "animations": [
       "note impact 1 purple", "note impact 1  blue", "note impact 1 green", "note impact 1 red",
       "note impact 2 purple", "note impact 2 blue", "note impact 2 green", "note impact 2 red"
     ]

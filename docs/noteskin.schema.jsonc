@@ -11,39 +11,16 @@
   /**
    * Noteskin texture configuration
    *
-   * The example below shows what they CAN have
+   * This field can be overriden within the animation blocks
    *
-   * "def" will be selected if the value for a specific texture is unspecified
-   *
-   * "atlasType" is optional, it refers to the type of spritesheet the notes are,
-   * you most likely want "sparrow" as its the most common format.
-   * But some pixel noteskins do use "spritesheet"
+   * Later down this file, this is shown by the splashes block overriding the atlas.
    *
    * the default "atlasType" is "sparrow" so you could omit the field altogether.
    */
-  "texture": {
-    "def": {
-      "path": "gameplay/noteskins/myCustomStrums",
-      "atlasType": "sparrow"
-    },
-    "notes": {
-      "path": "gameplay/noteskins/myCustomNotes",
-      "atlasType": "sparrow"
-    },
-    "holds": {
-      "path": "gameplay/noteskins/myCustomHolds",
-      "atlasType": "sparrow"
-    },
-    "splashes": {
-      "path": "gameplay/noteskins/myCustomSplashes",
-      "atlasType": "sparrow"
-    }
+  "defaultAtlas": {
+    "path": "gameplay/noteskins/myCustomStrums",
+    "atlasType": "sparrow"
   },
-
-  /**
-   * Atlas Type, can be "sparrow", "packer", or "sheet"
-   */
-  "atlasType": "sparrow",
 
   /**
    * The default framerate for every animation.
@@ -64,7 +41,7 @@
    *
    * Each value inside these arrays can be either a string or an object
    *
-   * "arrows": [ "purple0", { "prefix": "blue0", "frameRate": 24 }, "green0", "red0" ]
+   * "animations": { "arrows": [ "purple0", { "prefix": "blue0", "frameRate": 24 }, "green0", "red0" ] }
    *
    * Keep in mind that the `holds` field and `splashes` field have special treatment.
    *
@@ -80,19 +57,30 @@
    *
    * Instead, note splash animations are exclusively for a randomness factor
    */
-  "animations": {
-    "strums": {
+
+  "strums": { // Strum-specific animations
+    "scale": 0.7,
+    "animations": {
       "animStatic": [ "arrowLEFT", "arrowDOWN", "arrowUP", "arrowRIGHT" ],
       "animPressed": [ "left press", "down press", "up press", "right press" ],
       "animConfirm": [ "left confirm", "down confirm", "up confirm", "right confirm" ],
       "animHolding": null
-    },
-    "arrows": [ "purple0", "blue0", "green0", "red0" ],
-    "holds": [
+    }
+  },
+  "arrows": { // Arrow-specific animations
+    "scale": 0.7,
+    "animations": [ "purple0", "blue0", "green0", "red0" ]
+  },
+  "holds": { // Sustain-specific animations
+    "animations": [
       "purple hold piece", "blue hold piece", "green hold piece", "red hold piece",
       "pruple end hold", "blue hold end", "green hold end", "red hold end"
-    ],
-    "splashes": [
+    ]
+  },
+  "splashes": { // Note splash specific animations
+    "scale": 0.7,
+    "atlas": { "path": "gameplay/noteskins/noteSplashes" }, // This one overrides the atlas
+    "animations": [
       "note impact 1 purple", "note impact 1  blue", "note impact 1 green", "note impact 1 red",
       "note impact 2 purple", "note impact 2 blue", "note impact 2 green", "note impact 2 red"
     ]

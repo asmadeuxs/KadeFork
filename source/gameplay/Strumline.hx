@@ -22,7 +22,7 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 		this.keyCount = keyCount;
 		var skin:String = 'default'; // hardcoded for now
 		noteskin = Noteskin.loadNoteskinFile(skin);
-		splashPool = new ObjectPool(16, (index:Int) -> return add(noteskin.generateNoteSplashSprite(index)));
+		splashPool = new ObjectPool(16, (_) -> return add(noteskin.generateNoteSplashSprite()));
 		generateStrums();
 	}
 
@@ -36,13 +36,16 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 				splash.objectCenter(strum, XY);
 			splash.x += x;
 			splash.y += y;
-			splash.revive();
-			noteskin.playSplashAnimation(splash, noteData);
-			splash.animation.finishCallback = function(_) {
+			var played:Bool = noteskin.playSplashAnimation(splash, noteData);
+			if (played) {
+				splash.revive();
+				splash.animation.finishCallback = function(_) {
+					splash.kill();
+					splashPool.release(splash);
+					splash.animation.finishCallback = null;
+				};
+			} else
 				splash.kill();
-				splashPool.release(splash);
-				splash.animation.finishCallback = null;
-			};
 		}
 		return splash != null;
 	}

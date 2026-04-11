@@ -1,12 +1,13 @@
 package data;
 
 import flixel.FlxG;
-import flixel.system.FlxAssets;
-import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.FlxGraphic;
+import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.system.FlxAssets;
+// import haxe.io.Path;
 import openfl.display.BitmapData;
-import openfl.utils.AssetType;
 import openfl.media.Sound;
+import openfl.utils.AssetType;
 
 using StringTools;
 
@@ -104,9 +105,6 @@ class Paths {
 
 	inline static public function xml(key:String)
 		return getPath('data/$key.xml', TEXT);
-
-	inline static public function json(key:String)
-		return getPath('songs/$key.json', TEXT);
 
 	static public function sound(key:String, ?library:String)
 		return getPath('sounds/$key.ogg', SOUND);

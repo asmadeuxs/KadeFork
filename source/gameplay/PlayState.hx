@@ -484,16 +484,17 @@ class PlayState extends MusicBeatState {
 				var gottaHitNote:Bool = section.mustHitSection;
 				if (songNotes[1] > 3)
 					gottaHitNote = !section.mustHitSection;
+				var owner:Int = gottaHitNote ? 1 : 0;
 
 				// delete duplicates
 				if (oldNote != null)
-					if (Math.abs(oldNote.strumTime - daStrumTime) < 0.00001 && oldNote.noteData == daNoteData && oldNote.noteOwner == noteOwner)
+					if (Math.abs(oldNote.strumTime - daStrumTime) < 0.00001 && oldNote.noteData == daNoteData && oldNote.noteOwner == owner)
 						continue;
 				var swagNote:NoteData = {
 					strumTime: daStrumTime,
 					noteData: daNoteData,
 					sustainLength: songNotes[2],
-					noteOwner: gottaHitNote ? 1 : 0
+					noteOwner: owner
 				};
 				// swagNote.sustainLength = songNotes[2];
 				// swagNote.mustPress = gottaHitNote;
