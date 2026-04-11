@@ -967,7 +967,6 @@ class PlayState extends MusicBeatState {
 
 	function noteMiss(direction:Int = 1, ?daNote:Note):Void {
 		if (!boyfriend.stunned) {
-			health -= 0.04;
 			songScore -= 10;
 			if (combo > 5 && gf.animOffsets.exists('sad'))
 				gf.playAnim('sad');
@@ -978,6 +977,7 @@ class PlayState extends MusicBeatState {
 				combo--;
 			var missJudge = judgementData.getMiss();
 			missJudge.hits++;
+			health += judgementData.getHealthBonus(missJudge, health);
 			popUpRating(missJudge.image);
 			popUpCombo(combo, missJudge);
 
