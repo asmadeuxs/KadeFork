@@ -40,6 +40,8 @@ class FreeplayState extends MusicBeatState {
 	private var iconArray:Array<HealthIcon> = [];
 
 	override function create() {
+		Conductor.current.active = false;
+		Conductor.setTime(0.0);
 		var initSonglist = CoolUtil.coolTextFile(Paths.txt('freeplaySonglist'));
 
 		for (i in 0...initSonglist.length) {
@@ -115,9 +117,10 @@ class FreeplayState extends MusicBeatState {
 		if (accepted) {
 			PlayState.isStoryMode = false;
 			var curSong = songs[curSelected];
-			PlayState.difficultyName = getDifficultyList()[curDifficulty].toLowerCase();
-			var poop:String = Highscore.formatSong(curSong.songFolder, PlayState.difficultyName);
-			PlayState.SONG = Song.loadFromJson(poop, curSong.songFolder);
+			PlayState.difficulty = getDifficultyList()[curDifficulty].toLowerCase();
+			var poop:String = Highscore.formatSong(curSong.songFolder, PlayState.difficulty);
+			PlayState.songName = curSong.songFolder;
+			PlayState.moonSong = Song.loadFromFile(poop, curSong.songFolder);
 			FlxG.switchState(new gameplay.PlayState());
 		}
 	}

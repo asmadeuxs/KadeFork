@@ -7,6 +7,7 @@ import flixel.text.FlxText;
 import flixel.ui.FlxBar;
 import flixel.util.FlxColor;
 import gameplay.PlayState;
+import moonchart.formats.fnf.legacy.FNFLegacy.FNFLegacyMetaValues;
 import ui.HealthIcon;
 
 class Kade extends BaseHUD {
@@ -32,7 +33,7 @@ class Kade extends BaseHUD {
 			songPosBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
 			add(songPosBar);
 
-			var songName = new FlxText(songPosBG.x + (songPosBG.width / 2) - 20, songPosBG.y, 0, PlayState.SONG.song, 16);
+			var songName = new FlxText(songPosBG.x + (songPosBG.width / 2) - 20, songPosBG.y, 0, PlayState.moonMeta.title, 16);
 			if (Preferences.user.scrollType == 1)
 				songName.y -= 3;
 			songName.setFormat(Paths.font("vcr"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -65,16 +66,16 @@ class Kade extends BaseHUD {
 		}
 		updateScoreText();
 
-		var songText:FlxText = new FlxText(5, 0, 0, '${PlayState.SONG.song} ${PlayState.difficultyName} - KE v${Main.versions.KADE}', 12);
+		var songText:FlxText = new FlxText(5, 0, 0, '${PlayState.moonMeta.title} ${PlayState.difficulty.toUpperCase()} - KE v${Main.versions.KADE}', 12);
 		songText.setFormat(Paths.font("vcr"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
 		songText.y = (FlxG.height - songText.height) - 3;
 		add(songText);
 
-		iconP1 = new HealthIcon(PlayState.SONG.player1, true);
+		iconP1 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_1) ?? "bf", true);
 		iconP1.y = healthBar.y - (iconP1.height / 2);
 		add(iconP1);
 
-		iconP2 = new HealthIcon(PlayState.SONG.player2, false);
+		iconP2 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_2) ?? "bf", false);
 		iconP2.y = healthBar.y - (iconP2.height / 2);
 		add(iconP2);
 	}
@@ -93,12 +94,12 @@ class Kade extends BaseHUD {
 					iconP1.animation.play('bf-old');
 			}*/
 			iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01) - iconOffset);
-			iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.50))); // / (30 / Preferences.user.frameRate))));
+			iconP1.setGraphicSize(FlxMath.lerp(150, iconP1.width, elapsed * 30));
 			iconP1.updateHitbox();
 		}
 		if (iconP2 != null) {
 			iconP2.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) - (iconP2.width - iconOffset);
-			iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.))); // / (30 / Preferences.user.frameRate))));
+			iconP2.setGraphicSize(FlxMath.lerp(150, iconP2.width, elapsed * 30));
 			iconP2.updateHitbox();
 		}
 		if (iconP1 != null && iconP2 != null) {
@@ -118,7 +119,7 @@ class Kade extends BaseHUD {
 	override function updateScoreText(?miss:Bool = false):Void {
 		var layout:String;
 		if (Preferences.user.showNps)
-			layout = '${PlayState.nps} NPS | ';
+			layout = '${PlayState.nps} / ${PlayState.maxNps} NPS | ';
 		else
 			layout = '';
 		if (Preferences.user.accuracyDisplay) {

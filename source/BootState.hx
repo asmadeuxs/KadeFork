@@ -1,7 +1,6 @@
 package;
 
 import flixel.FlxG;
-import menus.StoryMenuState;
 
 // This is just a class to initialise variables
 // Preferably only mess with it if you need to do some save-file related stuff
@@ -22,19 +21,19 @@ class BootState extends flixel.FlxState {
 
 		Preferences.setFPSCap(Preferences.user.frameRate);
 
-		if (FlxG.save.data.weekUnlocked != null) { // FIX LATER!!!
-			// WEEK UNLOCK PROGRESSION!!
-			// StoryMenuState.weekUnlocked = FlxG.save.data.weekUnlocked;
-			if (StoryMenuState.weekUnlocked.length < 4)
-				StoryMenuState.weekUnlocked.insert(0, true);
-			// QUICK PATCH OOPS!
-			if (!StoryMenuState.weekUnlocked[0])
-				StoryMenuState.weekUnlocked[0] = true;
-		}
+		/* // we're just gonna rewrite story mode altogether,
+			// the current one is genuinely hell to work with and was basically unmaintained -asmadeuxs
+			if (FlxG.save.data.weekUnlocked != null) { // FIX LATER!!!
+				// WEEK UNLOCK PROGRESSION!!
+				// StoryMenuState.weekUnlocked = FlxG.save.data.weekUnlocked;
+				if (StoryMenuState.weekUnlocked.length < 4)
+					StoryMenuState.weekUnlocked.insert(0, true);
+				// QUICK PATCH OOPS!
+				if (!StoryMenuState.weekUnlocked[0])
+					StoryMenuState.weekUnlocked[0] = true;
+		}*/
 		#if FREEPLAY
 		FlxG.switchState(new menus.FreeplayState());
-		#elseif CHARTING
-		FlxG.switchState(new editor.ChartingState());
 		#else
 		FlxG.switchState(Type.createInstance(Main.initialState, []));
 		#end

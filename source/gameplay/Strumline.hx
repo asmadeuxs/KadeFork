@@ -9,6 +9,7 @@ import util.ObjectPool;
 
 using util.CoolUtil;
 
+@:access(gameplay.Note)
 class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 	public var keyCount:Int = 4;
 	public var noteskin:Noteskin;
@@ -26,7 +27,7 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 		generateStrums();
 	}
 
-	public function spawnSplash(noteData:Int, ?x:Float = 0, ?y:Float = 0):Bool {
+	public function spawnSplash(noteData:Int, ?note:Note, ?x:Float = 0, ?y:Float = 0):Bool {
 		var splash:FunkinSprite = splashPool.get();
 		if (splash != null) {
 			splash.alpha = 0.6;
@@ -36,7 +37,12 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 				splash.objectCenter(strum, XY);
 			splash.x += x;
 			splash.y += y;
-			var played:Bool = noteskin.playSplashAnimation(splash, noteData);
+			var played:Bool = false;
+			if (note != null && note.noteScript != null) {
+				var scriptCall = note.noteScript?.callFunc('generateNoteSplash', [splash, noteData, note]);
+				played = scriptCall.value != null;
+			} else
+				played = noteskin.playSplashAnimation(splash, noteData);
 			if (played) {
 				splash.revive();
 				splash.animation.finishCallback = function(_) {

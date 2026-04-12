@@ -1,0 +1,14 @@
+function generateNoteType(note) {
+	note.loadGraphic(Paths.image('gameplay/notetypes/mine'));
+	note.scale.set(6, 6);
+	note.antialiasing = true;
+
+	note.isMine = true;
+	// nerf early and late hitboxes
+	note.hitMultiplier[0] = 0.8;
+	note.hitMultiplier[1] = 0.8;
+}
+
+function generateNoteSplash(splash) {}
+
+function update(elapsed, note) {}

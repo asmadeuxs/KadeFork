@@ -3,7 +3,7 @@ package;
 #if discord_rpc
 import Discord.DiscordClient;
 #end
-import Conductor.BPMChangeEvent;
+import data.ScriptLoader;
 import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.ui.FlxUIState;
@@ -14,47 +14,37 @@ import flixel.util.FlxTimer;
 import openfl.Lib;
 
 class MusicBeatState extends FlxUIState {
-	private var lastBeat:Float = 0;
-	private var lastStep:Float = 0;
-
-	private var curStep:Int = 0;
-	private var curBeat:Int = 0;
 	private var controls(get, never):Controls;
 
 	inline function get_controls():Controls
 		return Controls.current;
 
-	override function update(elapsed:Float) { // everyStep();
-		var oldStep:Int = curStep;
+	public var curStep(get, never):Int;
+	public var curBeat(get, never):Int;
 
-		updateCurStep();
-		updateBeat();
+	function get_curStep()
+		return Math.floor(Conductor.currentStep);
 
-		if (oldStep != curStep && curStep > 0)
-			stepHit();
+	function get_curBeat()
+		return Math.floor(Conductor.currentBeat);
 
-		super.update(elapsed);
+	override function create() {
+		super.create();
+		Conductor.stepHit.add(stepHit);
+		Conductor.beatHit.add(beatHit);
+		Conductor.barHit.add(barHit);
 	}
 
-	private function updateBeat():Void {
-		lastBeat = curStep;
-		curBeat = Math.floor(curStep / 4);
+	override function destroy() {
+		super.destroy();
+		Conductor.stepHit.remove(stepHit);
+		Conductor.beatHit.remove(beatHit);
+		Conductor.barHit.remove(barHit);
 	}
 
-	public static var currentColor = 0;
+	public function stepHit(step:Int):Void {}
 
-	private function updateCurStep():Void {
-		var lastChange:BPMChangeEvent = {stepTime: 0, songTime: 0, bpm: 0}
-		for (i in 0...Conductor.bpmChangeMap.length)
-			if (Conductor.songPosition >= Conductor.bpmChangeMap[i].songTime)
-				lastChange = Conductor.bpmChangeMap[i];
-		curStep = lastChange.stepTime + Math.floor((Conductor.songPosition - lastChange.songTime) / Conductor.stepCrochet);
-	}
+	public function beatHit(beat:Int):Void {}
 
-	public function stepHit():Void {
-		if (curStep % 4 == 0)
-			beatHit();
-	}
-
-	public function beatHit():Void {}
+	public function barHit(bar:Int):Void {}
 }

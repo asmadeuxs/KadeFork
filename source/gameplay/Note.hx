@@ -1,5 +1,6 @@
 package gameplay;
 
+import data.ScriptLoader;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.effects.FlxSkewedSprite;
@@ -21,9 +22,22 @@ typedef NoteData = {
 class Note extends gameplay.FunkinSprite {
 	public var noteData:Int = 0;
 	public var strumTime:Float = 0;
-	public var noteType:String = null;
 	public var sustainLength:Float = 0;
 	public var prevNote:Note;
+
+	public var noteType(default, set):String = null;
+
+	private var noteScript:Script;
+
+	function set_noteType(type:String):String {
+		noteType = type;
+		switch type {
+			default:
+				noteScript = ScriptLoader.findScript(Paths.getPath('scripts/notetypes/$type'));
+				noteScript?.callFunc('generateNoteType', [this]);
+		}
+		return noteType;
+	}
 
 	public var canBeHit(get, never):Bool;
 
@@ -41,6 +55,9 @@ class Note extends gameplay.FunkinSprite {
 	public var isSustainNote:Bool = false;
 	public var missed:Bool = false;
 
+	public var isMine:Bool = false;
+	public var isFake:Bool = false;
+
 	/**
 	 * Left is *Early Window*, Right is *Late Window*.
 	 */
@@ -56,6 +73,10 @@ class Note extends gameplay.FunkinSprite {
 
 	public function setup(strumTime:Float, noteData:Int, ?sustainLength:Float = 0.0, ?prevNote:Note):Note {
 		setPosition(0, 4000);
+
+		this.isMine = false;
+		this.isFake = false;
+
 		if (prevNote == null)
 			prevNote = this;
 		this.prevNote = prevNote;
@@ -69,6 +90,8 @@ class Note extends gameplay.FunkinSprite {
 		this.wasGoodHit = false;
 		this.tooLate = false;
 		this.missed = false;
+
+		noteScript?.callFunc("noteRegenerated", [this, strumTime, noteData, sustainLength, prevNote]);
 
 		// old checks
 
@@ -90,7 +113,7 @@ class Note extends gameplay.FunkinSprite {
 
 				if (prevNote.isSustainNote) {
 					prevNote.animation.play(colorArray[noteData] + 'hold');
-					prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.8 * Preferences.user.scrollSpeed;
+					prevNote.scale.y *= Conductor.semiquaver / 100 * 1.8 * Preferences.user.scrollSpeed;
 					// prevNote.updateHitbox();
 				}
 		}*/
@@ -130,16 +153,7 @@ class Note extends gameplay.FunkinSprite {
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
-
-		if (!mustPress) {
-			if (strumTime <= Conductor.songPosition)
-				wasGoodHit = true;
-		} else {
-			var safeZone:Float = PlayState.judgementData.maxHitWindow ?? 180.0;
-			if (strumTime < Conductor.songPosition - safeZone)
-				tooLate = true;
-		}
-
+		noteScript?.callFunc("update", [elapsed, this]);
 		if (tooLate) {
 			if (alpha > 0.3)
 				alpha = 0.3;

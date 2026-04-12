@@ -37,6 +37,7 @@ class GameplayCustomizeState extends MusicBeatState {
 		#end
 
 		Conductor.bpm = 102;
+		Conductor.setTime(0.0);
 		persistentUpdate = true;
 
 		super.create();
@@ -106,9 +107,6 @@ class GameplayCustomizeState extends MusicBeatState {
 	}
 
 	override function update(elapsed:Float) {
-		if (FlxG.sound.music != null)
-			Conductor.songPosition = FlxG.sound.music.time;
-
 		super.update(elapsed);
 
 		FlxG.camera.zoom = FlxMath.lerp(0.9, FlxG.camera.zoom, 0.95);

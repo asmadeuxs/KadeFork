@@ -32,7 +32,6 @@ class AlphabetMenu extends FlxTypedSpriteGroup<Alphabet> {
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 		if (members.length != 0) {
-			var fps:Int = Preferences.user.frameRate;
 			for (i in members) {
 				if (i.y < -30 || i.y > FlxG.height + 30) {
 					i.active = false;
@@ -42,8 +41,8 @@ class AlphabetMenu extends FlxTypedSpriteGroup<Alphabet> {
 					i.visible = true;
 				}
 				var scaledY = FlxMath.remapToRange(i.targetY, 0, 1, 0, 1.3);
-				i.y = FlxMath.lerp(i.y, (scaledY * spacingBetweenItems) + (FlxG.height * 0.48), 0.16 / (fps / 60));
-				i.x = FlxMath.lerp(i.x, (i.targetY * 20) + 90, 0.16 / (fps / 60));
+				i.y = FlxMath.lerp(i.y, (scaledY * spacingBetweenItems) + (FlxG.height * 0.48), 0.16);
+				i.x = FlxMath.lerp(i.x, (i.targetY * 20) + 90, 0.16);
 			}
 		}
 	}

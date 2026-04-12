@@ -27,12 +27,15 @@ class MainMenuState extends MusicBeatState {
 	var camFollow:FlxObject;
 
 	override function create() {
+		super.create();
 		#if discord_rpc // Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 
+		persistentUpdate = persistentDraw = true;
+
 		optionShit = [
-			{name: 'story mode', func: () -> FlxG.switchState(new menus.StoryMenuState())},
+			// {name: 'story mode', func: () -> FlxG.switchState(new menus.StoryMenuState())},
 			{name: 'freeplay', func: () -> FlxG.switchState(new menus.FreeplayState())},
 			{
 				name: 'options',
@@ -46,8 +49,6 @@ class MainMenuState extends MusicBeatState {
 
 		if (!FlxG.sound.music.playing)
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
-
-		persistentUpdate = persistentDraw = true;
 
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('ui/backgrounds/menuBG'));
 		bg.scrollFactor.set(0, 0.15);
@@ -84,7 +85,7 @@ class MainMenuState extends MusicBeatState {
 			menuItem.antialiasing = true;
 		}
 
-		FlxG.camera.follow(camFollow, null, 0.60 * (60 / Preferences.user.frameRate));
+		FlxG.camera.follow(camFollow, null, 0.60);
 
 		var versionShit:FlxText = new FlxText(5, 0, 0, 'FNF v${Main.versions.BASE_GAME} - KE v${Main.versions.KADE} - Fork v${Main.versions.FORK}', 12);
 		versionShit.setFormat(Paths.font("vcr"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -93,8 +94,6 @@ class MainMenuState extends MusicBeatState {
 		add(versionShit);
 
 		changeItem();
-
-		super.create();
 	}
 
 	public var selectedSomethin:Bool = false;

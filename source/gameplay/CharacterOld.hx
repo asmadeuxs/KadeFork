@@ -199,7 +199,7 @@ class Character extends FlxSprite {
 		var dadVar:Float = 4;
 		if (curCharacter == 'dad')
 			dadVar = 6.1;
-		if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001) {
+		if (holdTimer >= Conductor.semiquaver * dadVar * 0.001) {
 			dance();
 			holdTimer = 0;
 		}

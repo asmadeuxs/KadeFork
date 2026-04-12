@@ -34,6 +34,8 @@ class Character extends gameplay.FunkinSprite {
 
 	public var cameraOffset:FlxPoint = new FlxPoint(0, 0);
 	public var idleSuffix:String = "";
+	public var deathCharacter:String = 'bf';
+	public var gameOverSuffix:String = '';
 
 	/**
 	 * This scuffed ass variable is used specifically when the character parsing fails
@@ -58,7 +60,7 @@ class Character extends gameplay.FunkinSprite {
 		super.update(elapsed);
 		if (!placeholder) {
 			if (isSinging()) {
-				danceCooldown -= elapsed * (singDuration * (Conductor.stepCrochet * 0.25));
+				danceCooldown -= elapsed * (singDuration * (Conductor.semiquaver * 0.25));
 				if (danceCooldown <= 0.0)
 					dance();
 			}

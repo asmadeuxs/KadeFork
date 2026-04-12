@@ -15,31 +15,18 @@ class GameOverSubstate extends MusicBeatSubstate {
 	var stageSuffix:String = "";
 
 	public function new(x:Float, y:Float) {
-		var daStage = PlayState.curStage;
-		var daBf:String = '';
-		switch (daStage) {
-			case 'school':
-				stageSuffix = '-pixel';
-				daBf = 'bf-pixel-dead';
-			case 'schoolEvil':
-				stageSuffix = '-pixel';
-				daBf = 'bf-pixel-dead';
-			default:
-				daBf = 'bf';
-		}
+		stageSuffix = PlayState.current.boyfriend.gameOverSuffix;
 
 		super();
 
-		Conductor.songPosition = 0;
-
-		bf = new Character(x, y, daBf, true);
-		add(bf);
-
-		camFollow = new FlxObject(bf.getGraphicMidpoint().x, bf.getGraphicMidpoint().y, 1, 1);
-		add(camFollow);
-
-		FlxG.sound.play(Paths.sound('fnf_loss_sfx' + stageSuffix));
 		Conductor.bpm = 100;
+		Conductor.current.active = false;
+		Conductor.setTime(0.0);
+
+		add(bf = new Character(x, y, PlayState.current.boyfriend.deathCharacter, true));
+		add(camFollow = new FlxObject(bf.getGraphicMidpoint().x, bf.getGraphicMidpoint().y, 1, 1));
+
+		FlxG.sound.play(Paths.sound('fnf_loss_sfx$stageSuffix'));
 
 		// FlxG.camera.followLerp = 1;
 		// FlxG.camera.focusOn(FlxPoint.get(FlxG.width / 2, FlxG.height / 2));
@@ -57,10 +44,10 @@ class GameOverSubstate extends MusicBeatSubstate {
 
 		if (controls.BACK) {
 			FlxG.sound.music.stop();
-			if (PlayState.isStoryMode)
-				FlxG.switchState(new menus.StoryMenuState());
-			else
-				FlxG.switchState(new menus.FreeplayState());
+			// if (PlayState.isStoryMode)
+			//	FlxG.switchState(new menus.StoryMenuState());
+			// else
+			FlxG.switchState(new menus.FreeplayState());
 		}
 
 		if (bf.animation.curAnim.name == 'firstDeath' && bf.animation.curAnim.curFrame == 12)
@@ -68,13 +55,11 @@ class GameOverSubstate extends MusicBeatSubstate {
 
 		if (bf.animation.curAnim.name == 'firstDeath' && bf.animation.curAnim.finished)
 			FlxG.sound.playMusic(Paths.music('gameOver' + stageSuffix));
-
 		if (FlxG.sound.music.playing)
-			Conductor.songPosition = FlxG.sound.music.time;
+			Conductor.current.active = true;
 	}
 
-	override function beatHit() {
-		super.beatHit();
+	override function beatHit(beat:Int) {
 		if (bf.animation.curAnim.name == 'firstDeath' && bf.animation.curAnim.finished)
 			bf.playAnim('deathLoop');
 	}

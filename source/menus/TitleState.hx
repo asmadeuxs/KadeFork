@@ -44,10 +44,17 @@ class TitleState extends MusicBeatState {
 	var curWacky:Array<String> = [];
 	var wackyImage:FlxSprite;
 
+	var itsTheIntroBitch:Bool = false;
+
 	override public function create():Void {
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 		super.create();
-		new FlxTimer().start(1, function(tmr:FlxTimer) startIntro());
+		Conductor.current.active = false;
+		Conductor.setTime(0.0);
+		new FlxTimer().start(1, function(tmr:FlxTimer) {
+			itsTheIntroBitch = true;
+			startIntro();
+		});
 	}
 
 	var logoBl:FlxSprite;
@@ -144,6 +151,7 @@ class TitleState extends MusicBeatState {
 			skipIntro();
 		else {
 			new FlxTimer().start(0.05, (_) -> {
+				Conductor.current.active = true;
 				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 				FlxG.sound.music.fadeIn(4, 0, 0.7);
 			});
@@ -163,8 +171,6 @@ class TitleState extends MusicBeatState {
 	var transitioning:Bool = false;
 
 	override function update(elapsed:Float) {
-		if (FlxG.sound.music != null)
-			Conductor.songPosition = FlxG.sound.music.time;
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER;
 
 		#if mobile
@@ -228,17 +234,20 @@ class TitleState extends MusicBeatState {
 		}
 	}
 
-	override function beatHit() {
-		super.beatHit();
+	override function beatHit(curBeat:Int) {
+		if (!itsTheIntroBitch)
+			return;
 
-		logoBl.animation.play('bump');
 		danceLeft = !danceLeft;
+		if (logoBl != null)
+			logoBl.animation.play('bump');
 
-		if (danceLeft)
-			gfDance.animation.play('danceRight');
-		else
-			gfDance.animation.play('danceLeft');
-
+		if (gfDance != null) {
+			if (danceLeft)
+				gfDance.animation.play('danceRight');
+			else
+				gfDance.animation.play('danceLeft');
+		}
 		FlxG.log.add(curBeat);
 
 		switch (curBeat) {

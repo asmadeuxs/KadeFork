@@ -4,19 +4,12 @@ import data.song.Section;
 import haxe.Json;
 import haxe.format.JsonParser;
 import lime.utils.Assets;
+import moonchart.formats.fnf.legacy.FNFLegacy;
+import moonchart.formats.BasicFormat;
 
 using StringTools;
 
-typedef SwagSong = {
-	var song:String;
-	var notes:Array<SwagSection>;
-	var bpm:Int;
-	var needsVoices:Bool;
-	var speed:Float;
-
-	var player1:String;
-	var player2:String;
-}
+typedef SwagSong = FNFLegacyFormat;
 
 class Song {
 	public var song:String;
@@ -34,20 +27,14 @@ class Song {
 		this.bpm = bpm;
 	}
 
-	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong {
+	public static function loadFromFile(jsonInput:String, ?folder:String):DynamicFormat {
 		if (folder == null)
 			folder = jsonInput.substring(0, jsonInput.lastIndexOf("-"));
 		var pathWithSuf:String = Paths.getPath('songs/$folder/$jsonInput.json');
 		var pathNoSuf:String = Paths.getPath('songs/$folder/${jsonInput.substring(0, jsonInput.lastIndexOf("-"))}.json');
 		var path:String = Paths.fileExists(pathWithSuf) ? pathWithSuf : pathNoSuf;
 
-		trace('loading song at path $path');
-		var rawJson = Paths.getText(path).trim();
-		while (!rawJson.endsWith("}"))
-			rawJson = rawJson.substr(0, rawJson.length - 1);
-		return parseJSONshit(rawJson);
+		var funkinLegacy = new FNFLegacy().fromFile(path, null, "hard");
+		return funkinLegacy;
 	}
-
-	public static function parseJSONshit(rawJson:String):SwagSong
-		return cast Json.parse(rawJson).song;
 }

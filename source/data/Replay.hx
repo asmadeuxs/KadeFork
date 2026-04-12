@@ -67,7 +67,7 @@ class Replay {
 
 	public function SaveReplay() {
 		var json = {
-			"songName": PlayState.SONG.song.toLowerCase(),
+			"songName": PlayState.songName.toLowerCase(),
 			"songDiff": PlayState.storyDifficulty,
 			"keyPresses": replay.keyPresses,
 			"keyReleases": replay.keyReleases,
@@ -78,7 +78,7 @@ class Replay {
 		var data:String = Json.stringify(json);
 
 		#if sys
-		File.saveContent("assets/replays/replay-" + PlayState.SONG.song + "-time" + Date.now().getTime() + ".kadeReplay", data);
+		File.saveContent("assets/replays/replay-" + PlayState.songName + "-time" + Date.now().getTime() + ".kadeReplay", data);
 		#end
 	}
 

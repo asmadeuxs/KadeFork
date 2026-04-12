@@ -106,13 +106,13 @@ class Paths {
 	inline static public function xml(key:String)
 		return getPath('data/$key.xml', TEXT);
 
-	static public function sound(key:String, ?library:String)
+	static public function sound(key:String, ?library:String):Sound
 		return getPath('sounds/$key.ogg', SOUND);
 
-	inline static public function soundRandom(key:String, min:Int, max:Int)
+	inline static public function soundRandom(key:String, min:Int, max:Int):Sound
 		return sound(key + FlxG.random.int(min, max));
 
-	inline static public function music(key:String)
+	inline static public function music(key:String):Sound
 		return getPath('music/$key.ogg', MUSIC);
 
 	inline static public function voices(song:String)

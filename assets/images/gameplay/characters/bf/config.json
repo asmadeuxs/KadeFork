@@ -20,7 +20,10 @@
     "missleft": "BF NOTE LEFT MISS",
     "missdown": "BF NOTE DOWN MISS",
     "missup": "BF NOTE UP MISS",
-    "missright": "BF NOTE RIGHT MISS"
+    "missright": "BF NOTE RIGHT MISS",
+    "firstDeath": "BF dies",
+    "deathLoop": "BF Dead Loop",
+    "deathConfirm": "BF Dead confirm"
   },
 
   "offsets": {

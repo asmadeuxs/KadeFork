@@ -39,6 +39,7 @@
 	<haxelib name="flixel" version="5.5.0"/>
 	<haxelib name="flixel-addons" version="3.2.0"/>
 	<haxelib name="flixel-ui" version="2.6.0"/>
+	<haxelib name="moonchart" version="0.5.1"/>
 	<haxelib name="json5hx" version="1.0.2"/>
 
 	<!--
