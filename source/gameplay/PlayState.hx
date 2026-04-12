@@ -287,8 +287,11 @@ class PlayState extends MusicBeatState {
 		perfectText.screenCenter();
 
 		var cacheNotes:Int = 16;
-		for (_ in 0...cacheNotes)
-			notes.add(new Note());
+		for (_ in 0...cacheNotes) {
+			var note = new Note();
+			notes.add(note);
+			note.kill();
+		}
 
 		currentHUD.camera = camHUD;
 		perfectText.camera = camHUD;
