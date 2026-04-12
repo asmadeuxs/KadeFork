@@ -43,7 +43,7 @@ class JudgementData {
 		return [
 			{
 				name: "Sick",
-				image: "kino",
+				image: "sick",
 				splash: true,
 				color: 0xFF97FFFF,
 				healthBonus: (health:Float) -> return health < 2 ? 0.12 : 0.0,
@@ -53,7 +53,7 @@ class JudgementData {
 			},
 			{
 				name: "Great",
-				image: "sick",
+				image: "great",
 				splash: true,
 				healthBonus: (health:Float) -> return health < 2 ? 0.1 : 0.0,
 				color: 0xFFEAFF74,

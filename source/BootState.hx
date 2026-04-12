@@ -22,7 +22,7 @@ class BootState extends flixel.FlxState {
 		// init other data
 		new Controls(Controls.defaultActions.copy());
 
-		util.Mods.scan();
+		util.Mods.scan(true);
 		// yes we're calling them levels and not weeks
 		// they call it levels in base game so we will call it levels here -asmadeuxs
 		var registry = new registry.LevelRegistry();

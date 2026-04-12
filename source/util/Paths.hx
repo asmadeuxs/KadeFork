@@ -73,9 +73,15 @@ class Paths {
 		var cacheKey:String = origin + file;
 		var assetPath:String = corePath;
 		#if FEATURE_MODS
-		var modPath:String = '${Mods.modRoot}/$mod/$file';
-		if (Paths.fileExists(modPath))
-			assetPath = modPath;
+		if (mod == null) {
+			var modPath:String = Mods.getAssetFromMod(file);
+			if (modPath != null)
+				assetPath = modPath;
+		} else {
+			var modPath:String = '${Mods.modRoot}/$mod/$file';
+			if (Paths.fileExists(modPath))
+				assetPath = modPath;
+		}
 		#end
 
 		switch type {
