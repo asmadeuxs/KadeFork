@@ -85,6 +85,7 @@ class Kade extends BaseHUD {
 		songPos = Conductor.songPosition;
 		// icon
 		var iconOffset:Int = 26;
+		var hpCenter:Float = healthBar.x + healthBar.width * (1 - healthBar.percent * 0.01);
 		if (iconP1 != null) {
 			// TODO: restore this
 			/*if (FlxG.keys.justPressed.NINE) {
@@ -93,13 +94,13 @@ class Kade extends BaseHUD {
 				else
 					iconP1.animation.play('bf-old');
 			}*/
-			iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01) - iconOffset);
-			iconP1.setGraphicSize(FlxMath.lerp(150, iconP1.width, elapsed * 30));
+			iconP1.x = hpCenter - iconOffset;
+			iconP1.setGraphicSize(FlxMath.lerp(iconP1.width, 150, elapsed * 30));
 			iconP1.updateHitbox();
 		}
 		if (iconP2 != null) {
-			iconP2.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) - (iconP2.width - iconOffset);
-			iconP2.setGraphicSize(FlxMath.lerp(150, iconP2.width, elapsed * 30));
+			iconP2.x = hpCenter - (iconP2.width - iconOffset);
+			iconP2.setGraphicSize(FlxMath.lerp(iconP2.width, 150, elapsed * 30));
 			iconP2.updateHitbox();
 		}
 		if (iconP1 != null && iconP2 != null) {

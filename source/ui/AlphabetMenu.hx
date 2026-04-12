@@ -22,7 +22,6 @@ class AlphabetMenu extends FlxTypedSpriteGroup<Alphabet> {
 			return this;
 		for (i in 0...items.length) {
 			var entry:Alphabet = new Alphabet(0, (70 * i) + 30, items[i], true, false);
-			entry.isMenuItem = true;
 			entry.targetY = i;
 			add(entry);
 		}
