@@ -4,6 +4,8 @@ import flixel.FlxG;
 import haxe.io.Path;
 import hscript.*;
 
+using StringTools;
+
 typedef HScriptFunction = {
 	name:String,
 	value:Dynamic,
@@ -73,10 +75,9 @@ class ScriptLoader {
 	public static final acceptedExtensions:Array<String> = ["hx", "hxc", "hxs"];
 
 	public static function findScript(path:String):Script {
-		var con:String = Paths.getCacheContext() ?? "global:";
-		if (!scriptCache.exists(con + path))
-			scriptCache.set(con + path, loadScript(path));
-		return scriptCache.get(con + path);
+		var origin:String = Paths.getAssetOrigin(path);
+		scriptCache.set(origin + path, loadScript(path));
+		return scriptCache.get(origin + path);
 	}
 
 	public static function removeScriptFromCachedPath(path:String, ?destroyScript:Bool = true):Script {

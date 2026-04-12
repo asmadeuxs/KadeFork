@@ -13,6 +13,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import gameplay.PlayState;
 import lime.utils.Assets;
+import registry.LevelRegistry;
 import ui.AlphabetMenu;
 import ui.HealthIcon;
 
@@ -36,21 +37,50 @@ class FreeplayState extends MusicBeatState {
 	var lerpScore:Int = 0;
 	var intendedScore:Int = 0;
 
-	private var curPlaying:Bool = false;
-	private var iconArray:Array<HealthIcon> = [];
+	var curPlaying:Bool = false;
+	var iconArray:Array<HealthIcon> = [];
 
 	override function create() {
 		Conductor.current.active = false;
 		Conductor.setTime(0.0);
+
+		// to not add the same song twice
+		var foldersPushed:Array<String> = [];
+		var categories:Array<String> = util.Mods.getEnabled();
+		if (categories[0] != "core") // make sure hardcoded categories are there
+			categories.insert(0, "core");
+
+		for (modId in categories) {
+			var registry = LevelRegistry.current;
+			for (id in registry.getOrderedLevels()) {
+				var level:LevelData = registry.get('$modId:$id');
+				if (level != null && level.songs != null) {
+					for (info in level.songs) {
+						var diffs:Array<String> = info.difficulties ?? level.difficulties;
+						songs.push(new SongMetadata(info.name, info.folder, info.icon ?? "face", diffs));
+						foldersPushed.push(info.folder);
+					}
+				}
+			}
+		}
+
+		// custom songs (just for compatibility sake)
 		var initSonglist = CoolUtil.coolTextFile(Paths.txt('freeplaySonglist'));
 
 		for (i in 0...initSonglist.length) {
 			var data:Array<String> = initSonglist[i].split(':');
+			if (foldersPushed.contains(data[1]))
+				continue;
 			var diffs:Array<String> = null;
 			if (data.length > 2 && data[3].length > 0)
 				diffs = data[3].split(",");
 			songs.push(new SongMetadata(data[0], data[1], data[2], diffs));
+			foldersPushed.push(data[1]);
 		}
+
+		// cool we don't need the array anymore
+		foldersPushed.resize(0);
+		foldersPushed = null;
 
 		#if discord_rpc
 		DiscordClient.changePresence("In the Freeplay Menu", null);
@@ -71,7 +101,7 @@ class FreeplayState extends MusicBeatState {
 		}
 
 		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, "", 32);
-		scoreText.setFormat(Paths.font("vcr"), 32, FlxColor.WHITE, RIGHT);
+		scoreText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
 
 		var scoreBG:FlxSprite = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 66, 0xFF000000);
 		scoreBG.alpha = 0.6;
@@ -93,7 +123,7 @@ class FreeplayState extends MusicBeatState {
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (FlxG.sound.music.volume < 0.7)
+		if (FlxG.sound.music != null && FlxG.sound.music.playing && FlxG.sound.music.volume < 0.7)
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 
 		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, 0.4));

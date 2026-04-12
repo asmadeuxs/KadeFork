@@ -282,7 +282,7 @@ class PlayState extends MusicBeatState {
 		notes = new FlxTypedGroup<Note>();
 
 		perfectText = new FlxText(0, 0, 0, "[BOTPLAY]");
-		perfectText.setFormat(Paths.font("vcr"), 24, 0xFFFFFFFF, LEFT, OUTLINE, 0xFF000000);
+		perfectText.setFormat(Paths.font("vcr.ttf"), 24, 0xFFFFFFFF, LEFT, OUTLINE, 0xFF000000);
 		perfectText.visible = false;
 		perfectText.screenCenter();
 

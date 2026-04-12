@@ -134,7 +134,7 @@ class OptionsMenu extends MusicBeatSubstate {
 
 	var camScroll:FunkinCamera;
 	var camFollow:FlxObject;
-	var optionsFont = Paths.font("vcr");
+	var optionsFont = Paths.font("vcr.ttf");
 	var parent:MusicBeatState;
 
 	public function new(parent:MusicBeatState) {

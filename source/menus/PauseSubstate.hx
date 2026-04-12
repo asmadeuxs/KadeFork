@@ -59,7 +59,7 @@ class PauseSubstate extends MusicBeatSubstate {
 		var levelInfo:FlxText = new FlxText(20, 15, 0, "", 32);
 		levelInfo.text += PlayState.moonMeta.title;
 		levelInfo.scrollFactor.set();
-		levelInfo.setFormat(Paths.font("vcr"), 32);
+		levelInfo.setFormat(Paths.font("vcr.ttf"), 32);
 		levelInfo.updateHitbox();
 		add(levelInfo);
 

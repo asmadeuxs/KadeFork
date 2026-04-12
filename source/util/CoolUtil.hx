@@ -12,6 +12,11 @@ class CoolUtil {
 	public static var pixelScale:Float = 6;
 	public static var defaultDifficulties:Array<String> = ['easy', "normal", "hard"];
 
+	public static function coolList(str:String):Array<String> {
+		var daList:Array<String> = str.trim().split('\n');
+		return [for (i in 0...daList.length) daList[i] = daList[i].trim()];
+	}
+
 	public static function makeScaledGraphic(sprite:FlxSprite, x:Float, y:Float, color:FlxColor = FlxColor.WHITE, ?updateHitbox:Bool = true):FlxSprite {
 		if (sprite == null)
 			sprite = new FlxSprite();
@@ -46,11 +51,6 @@ class CoolUtil {
 				|| (t.startsWith("/*") && t.endsWith("*/")))
 				daList.remove(t);
 		}
-		return [for (i in 0...daList.length) daList[i] = daList[i].trim()];
-	}
-
-	public static function coolStringFile(path:String):Array<String> {
-		var daList:Array<String> = path.trim().split('\n');
 		return [for (i in 0...daList.length) daList[i] = daList[i].trim()];
 	}
 }

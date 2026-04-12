@@ -88,7 +88,7 @@ class MainMenuState extends MusicBeatState {
 		FlxG.camera.follow(camFollow, null, 0.60);
 
 		var versionShit:FlxText = new FlxText(5, 0, 0, 'FNF v${Main.versions.BASE_GAME} - KE v${Main.versions.KADE} - Fork v${Main.versions.FORK}', 12);
-		versionShit.setFormat(Paths.font("vcr"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		versionShit.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		versionShit.y = (FlxG.height - versionShit.height) - 5;
 		versionShit.scrollFactor.set();
 		add(versionShit);

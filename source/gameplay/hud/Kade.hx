@@ -36,7 +36,7 @@ class Kade extends BaseHUD {
 			var songName = new FlxText(songPosBG.x + (songPosBG.width / 2) - 20, songPosBG.y, 0, PlayState.moonMeta.title, 16);
 			if (Preferences.user.scrollType == 1)
 				songName.y -= 3;
-			songName.setFormat(Paths.font("vcr"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			songName.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			add(songName);
 		}
 
@@ -54,11 +54,11 @@ class Kade extends BaseHUD {
 		scoreTxt = new FlxText(FlxG.width / 2 - 235, healthBarBG.y + 50, 0, "", 20);
 		if (!Preferences.user.accuracyDisplay)
 			scoreTxt.x = healthBarBG.x + healthBarBG.width / 2;
-		scoreTxt.setFormat(Paths.font("vcr"), 16, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
+		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
 		add(scoreTxt);
 		if (Preferences.user.showJudgeCounts) {
 			judgesTxt = new FlxText(5, 0, FlxG.width, "");
-			judgesTxt.setFormat(Paths.font("vcr"), 16, FlxColor.WHITE, LEFT);
+			judgesTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT);
 			judgesTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.0);
 			judgesTxt.screenCenter(Y);
 			judgesTxt.y -= 30;
@@ -67,7 +67,7 @@ class Kade extends BaseHUD {
 		updateScoreText();
 
 		var songText:FlxText = new FlxText(5, 0, 0, '${PlayState.moonMeta.title} ${PlayState.difficulty.toUpperCase()} - KE v${Main.versions.KADE}', 12);
-		songText.setFormat(Paths.font("vcr"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
+		songText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
 		songText.y = (FlxG.height - songText.height) - 3;
 		add(songText);
 
