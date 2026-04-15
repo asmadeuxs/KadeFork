@@ -15,10 +15,6 @@ import menus.GenericMenu.SimpleMenuButton;
 
 using StringTools;
 
-#if discord_rpc
-import Discord.DiscordClient;
-#end
-
 class MainMenuState extends MusicBeatState {
 	var curSelected:Int = 0;
 	var menuItems:FlxTypedGroup<FlxSprite>;
@@ -28,8 +24,10 @@ class MainMenuState extends MusicBeatState {
 
 	override function create() {
 		super.create();
-		#if discord_rpc // Updating Discord Rich Presence
-		DiscordClient.changePresence("In the Menus", null);
+		if (FlxG.sound.music == null)
+			FlxG.sound.playMusic(Paths.music("freakyMenu"), 0.7);
+		#if hxdiscord_rpc
+		DiscordClient.changePresence('Main Menu', "Browsing Menus");
 		#end
 
 		persistentUpdate = persistentDraw = true;
@@ -104,6 +102,11 @@ class MainMenuState extends MusicBeatState {
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 
 		if (!selectedSomethin) {
+			if (FlxG.keys.justPressed.F5) {
+				FlxG.sound.music.stop();
+				FlxG.switchState(new gameplay.DummyPlayState());
+				selectedSomethin = true;
+			}
 			if (controls.UP_P) {
 				FlxG.sound.play(Paths.sound('scrollMenu'));
 				changeItem(-1);

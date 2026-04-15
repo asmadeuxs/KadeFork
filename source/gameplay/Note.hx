@@ -8,16 +8,9 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
 import gameplay.PlayState;
+import moonchart.formats.BasicFormat;
 
 using StringTools;
-
-typedef NoteData = {
-	noteData:Int,
-	noteOwner:Int,
-	strumTime:Float,
-	sustainLength:Float,
-	?noteType:String,
-}
 
 class Note extends gameplay.FunkinSprite {
 	public var noteData:Int = 0;
@@ -45,7 +38,7 @@ class Note extends gameplay.FunkinSprite {
 		if (!mustPress || wasGoodHit || missed || tooLate)
 			return false;
 		var pos:Float = Conductor.songPosition;
-		var safeZone:Float = PlayState.judgementData.maxHitWindow ?? 180.0;
+		var safeZone:Float = PlayState.judgementData?.maxHitWindow ?? 180.0;
 		return strumTime >= pos - (safeZone * hitMultiplier[0]) && strumTime <= pos + (safeZone * hitMultiplier[1]);
 	}
 
@@ -104,9 +97,9 @@ class Note extends gameplay.FunkinSprite {
 
 			if (isSustainNote && prevNote != null) {
 				alpha = 0.6;
-				x += width / 2;
+				x += width * 0.5;
 				// updateHitbox();
-				x -= width / 2;
+				x -= width * 0.5;
 
 				if (PlayState.curStage.startsWith('school'))
 					x += 30;

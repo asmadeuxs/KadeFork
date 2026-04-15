@@ -37,7 +37,7 @@ class PauseSubstate extends MusicBeatSubstate {
 				func: () -> {
 					if (!FlxG.sound.music.playing) {
 						FlxG.sound.playMusic(Paths.inst(PlayState.songName), 0);
-						FlxG.sound.music.time = FlxG.random.int(0, Std.int(FlxG.sound.music.length / 2));
+						FlxG.sound.music.time = FlxG.random.int(0, Std.int(FlxG.sound.music.length * 0.5));
 						FlxG.sound.music.fadeIn(4, 0, 0.7);
 					}
 					FlxG.switchState(new menus.FreeplayState());
@@ -47,7 +47,7 @@ class PauseSubstate extends MusicBeatSubstate {
 
 		pauseMusic = new FlxSound().loadEmbedded(Paths.music('breakfast'), true, true);
 		pauseMusic.volume = 0;
-		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
+		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length * 0.5)));
 
 		FlxG.sound.list.add(pauseMusic);
 
@@ -82,6 +82,8 @@ class PauseSubstate extends MusicBeatSubstate {
 		add(grpMenuShit);
 
 		reloadMenu();
+
+		camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 	}
 
 	override function update(elapsed:Float) {

@@ -21,16 +21,8 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import lime.app.Application;
-import openfl.Assets;
 
 using StringTools;
-
-#if discord_rpc
-import Discord.DiscordClient;
-#end
-#if desktop
-import sys.thread.Thread;
-#end
 
 class TitleState extends MusicBeatState {
 	static var initialized:Bool = false;
@@ -51,8 +43,11 @@ class TitleState extends MusicBeatState {
 		super.create();
 		Conductor.current.active = false;
 		Conductor.setTime(0.0);
-		new FlxTimer().start(1, function(tmr:FlxTimer) {
+		new FlxTimer().start(0.15, function(tmr:FlxTimer) {
 			itsTheIntroBitch = true;
+			#if hxdiscord_rpc
+			DiscordClient.changePresence('Title Screen', !initialized ? 'Just launched' : ":eyes:");
+			#end
 			startIntro();
 		});
 	}
@@ -160,7 +155,7 @@ class TitleState extends MusicBeatState {
 	}
 
 	function getIntroTextShit():Array<Array<String>> {
-		var fullText:String = Assets.getText(Paths.txt('introText'));
+		var fullText:String = Paths.getText(Paths.txt('introText'));
 		var firstArray:Array<String> = fullText.split('\n');
 		var swagGoodArray:Array<Array<String>> = [];
 		for (i in firstArray)

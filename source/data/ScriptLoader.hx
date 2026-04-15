@@ -20,30 +20,31 @@ typedef HScriptFunction = {
 	var code:Any = null; // fuck if i know.
 	var interp:Interp;
 
+	private var _noCache:Bool = false;
+
 	function callFunc(funcName:String, ?args:Array<Dynamic>):HScriptFunction {
 		if (args == null)
 			args = [];
-		var func = this.interp.variables.get(funcName);
 		var info = this.interp.posInfos();
 		var caller:HScriptFunction = null;
 		try {
+			var func = this.interp.variables.get(funcName);
 			if (func != null && Reflect.isFunction(func)) {
-				try {
-					var value = Reflect.callMethod(null, func, args);
-					caller = {name: funcName, value: value, caller: func};
-					if (caller.value == ScriptLoader.KILL_SCRIPT) {
-						this.destroy();
-						return caller;
-					}
+				var value = Reflect.callMethod(null, func, args);
+				caller = {name: funcName, value: value, caller: func};
+				if (caller.value == ScriptLoader.KILL_SCRIPT) {
+					this.destroy();
+					return caller;
 				}
-				catch (e:haxe.Exception)
-					trace('Script Error (${this.fileName} at line ${info.lineNumber}) - $e');
 			}
 		}
 		catch (e:Expr.Error)
-			trace('Script Error (${this.fileName} at line ${info.lineNumber}) - $e');
+			Sys.println('Script Error (${this.fileName} at line ${info.lineNumber}) - $e');
 		return caller;
 	}
+
+	function getPosInfos()
+		return this.interp.posInfos();
 
 	function hasFunction(funcName:String) {
 		var func = this.interp.variables.get(funcName);
@@ -74,10 +75,15 @@ class ScriptLoader {
 
 	public static final acceptedExtensions:Array<String> = ["hx", "hxc", "hxs"];
 
-	public static function findScript(path:String):Script {
+	public static function findScript(path:String, ?noCache:Bool = false):Script {
 		var origin:String = Paths.getAssetOrigin(path);
-		scriptCache.set(origin + path, loadScript(path));
-		return scriptCache.get(origin + path);
+		var script = scriptCache.get(origin + path);
+		if (script != null && @:privateAccess script._noCache)
+			removeScriptFromCache(script);
+		script = loadScript(path);
+		@:privateAccess script._noCache = noCache;
+		scriptCache.set(origin + path, script);
+		return script;
 	}
 
 	public static function removeScriptFromCachedPath(path:String, ?destroyScript:Bool = true):Script {
@@ -116,10 +122,14 @@ class ScriptLoader {
 		interp.variables.set("Std", Std);
 		interp.variables.set("StringTools", StringTools);
 		// flixel-specific
-		interp.variables.set("FlxG", FlxG);
-		interp.variables.set("state", FlxG.state);
+		interp.variables.set("FlxG", flixel.FlxG);
+		interp.variables.set("FlxSprite", gameplay.FunkinSprite);
+		interp.variables.set("state", flixel.FlxG.state);
 		// game
-		interp.variables.set("Paths", Paths);
+		interp.variables.set("Preferences", data.Preferences);
+		interp.variables.set("CoolUtil", util.CoolUtil);
+		interp.variables.set("Paths", util.Paths);
+
 		return interp;
 	}
 
@@ -143,27 +153,30 @@ class ScriptLoader {
 	 *
 	 * This mainly exists as a safety-net and you don't need to use it.
 	 *
-	 * It's just a way of checking of the file exists.
+	 * I guess the main benefit is that you won't need to include the extension in the scriptName, but ultimately...
+	 *
+	 * It's just a way of checking if the file exists.
 	 * @param dir String Directory
 	 * @param scriptName String Script Name without extensions ("MainMenu" not "MainMenu.hx")
 	 * @return String
 	 */
 	public static function getScriptFile(dir:String, scriptName:String):String {
 		var file:String = null;
-		if (!Paths.fileExists(dir))
-			return "null (Folder not found)";
-		// file already the extension so leave early
-		if (acceptedExtensions.contains(Path.extension(scriptName)))
-			file = Path.addTrailingSlash(dir) + scriptName;
-		else { // find a file with a script extension
-			for (i in Paths.listFiles(dir)) {
-				var full:String = Path.addTrailingSlash(dir) + i;
-				if (acceptedExtensions.contains(Path.extension(i))) {
-					file = full;
-					break;
+		if (Paths.fileExists(dir)) {
+			// file already the extension so leave early
+			if (acceptedExtensions.contains(Path.extension(scriptName)))
+				file = Path.addTrailingSlash(dir) + scriptName;
+			else { // find a file with a script extension
+				for (i in Paths.listFiles(dir)) {
+					var full:String = Path.addTrailingSlash(dir) + i;
+					if (acceptedExtensions.contains(Path.extension(i))) {
+						file = full;
+						break;
+					}
 				}
 			}
 		}
+		trace(file);
 		return file;
 	}
 
@@ -218,6 +231,10 @@ class ScriptLoader {
 					interp: customInterp == null ? makeInterpreter() : customInterp,
 					priority: 0,
 				};
+				script.setVar("trace", function(v:Dynamic) trace(v, {
+					fileName: script.fileName,
+					lineNumber: script.getPosInfos(),
+				}));
 				return script;
 			}
 			catch (e:haxe.Exception)

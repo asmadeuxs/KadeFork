@@ -11,9 +11,12 @@ import moonchart.formats.fnf.legacy.FNFLegacy.FNFLegacyMetaValues;
 import ui.HealthIcon;
 
 class Kade extends BaseHUD {
+	public var healthBar:FlxBar;
 	public var healthBarBG:FlxSprite;
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
+
+	public var scoreTxt:FlxText;
 	public var judgesTxt:FlxText;
 
 	var songPos:Float = 0;
@@ -33,7 +36,7 @@ class Kade extends BaseHUD {
 			songPosBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
 			add(songPosBar);
 
-			var songName = new FlxText(songPosBG.x + (songPosBG.width / 2) - 20, songPosBG.y, 0, PlayState.moonMeta.title, 16);
+			var songName = new FlxText(songPosBG.x + (songPosBG.width * 0.5) - 20, songPosBG.y, 0, PlayState.moonMeta.title, 16);
 			if (Preferences.user.scrollType == 1)
 				songName.y -= 3;
 			songName.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -51,9 +54,9 @@ class Kade extends BaseHUD {
 		healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
 		add(healthBar);
 
-		scoreTxt = new FlxText(FlxG.width / 2 - 235, healthBarBG.y + 50, 0, "", 20);
+		scoreTxt = new FlxText(FlxG.width * 0.5 - 235, healthBarBG.y + 50, 0, "", 20);
 		if (!Preferences.user.accuracyDisplay)
-			scoreTxt.x = healthBarBG.x + healthBarBG.width / 2;
+			scoreTxt.x = healthBarBG.x + healthBarBG.width * 0.5;
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
 		add(scoreTxt);
 		if (Preferences.user.showJudgeCounts) {
@@ -72,11 +75,11 @@ class Kade extends BaseHUD {
 		add(songText);
 
 		iconP1 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_1) ?? "bf", true);
-		iconP1.y = healthBar.y - (iconP1.height / 2);
+		iconP1.y = healthBar.y - (iconP1.height * 0.5);
 		add(iconP1);
 
 		iconP2 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_2) ?? "bf", false);
-		iconP2.y = healthBar.y - (iconP2.height / 2);
+		iconP2.y = healthBar.y - (iconP2.height * 0.5);
 		add(iconP2);
 	}
 
@@ -125,13 +128,21 @@ class Kade extends BaseHUD {
 			layout = '';
 		if (Preferences.user.accuracyDisplay) {
 			layout += 'Score: ${PlayState.songScore}';
-			layout += ' | Misses: ${PlayState.misses}';
+			layout += ' | Combo Breaks: ${PlayState.comboBreaks}';
 			layout += ' | Accuracy: ${FlxMath.roundDecimal(PlayState.accuracy, 2)}% | ${generateRanking()}';
 		} else
 			layout += 'Score: ${PlayState.songScore}';
 		scoreTxt.text = layout;
 		if (judgesTxt != null)
-			judgesTxt.text = PlayState.judgementData.listCounts();
+			judgesTxt.text = getJudgeCounts();
+	}
+
+	public function getJudgeCounts() {
+		var str:String = '';
+		if (PlayState.judgementData != null && PlayState.judgementData.activeList.length > 0)
+			for (idx => judge in PlayState.judgementData.activeList)
+				str += '${judge.name}: ${judge.hits}\n';
+		return str;
 	}
 
 	override function beatHit(beat:Int):Void {

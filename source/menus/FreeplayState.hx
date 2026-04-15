@@ -19,10 +19,6 @@ import ui.HealthIcon;
 
 using StringTools;
 
-#if discord_rpc
-import Discord.DiscordClient;
-#end
-
 class FreeplayState extends MusicBeatState {
 	var songs:Array<SongMetadata> = [];
 	var lastDifficultyArray:Array<String> = null;
@@ -41,6 +37,11 @@ class FreeplayState extends MusicBeatState {
 	var iconArray:Array<HealthIcon> = [];
 
 	override function create() {
+		#if hxdiscord_rpc
+		DiscordClient.changePresence('Freeplay Menu', "Browsing Menus");
+		#end
+		if (FlxG.sound.music == null)
+			FlxG.sound.playMusic(Paths.music("freakyMenu"), 0.7);
 		Conductor.current.active = false;
 		Conductor.setTime(0.0);
 
@@ -81,10 +82,6 @@ class FreeplayState extends MusicBeatState {
 		// cool we don't need the array anymore
 		foldersPushed.resize(0);
 		foldersPushed = null;
-
-		#if discord_rpc
-		DiscordClient.changePresence("In the Freeplay Menu", null);
-		#end
 
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('ui/backgrounds/menuBGBlue'));
 		add(bg);
@@ -168,7 +165,7 @@ class FreeplayState extends MusicBeatState {
 		// check to prevent null difficulties
 		if (lastDifficultyArray != difficulties) {
 			lastDifficultyArray = difficulties;
-			curDifficulty = Math.round(difficulties.length / 2);
+			curDifficulty = Math.round(difficulties.length * 0.5);
 			if (curDifficulty > difficulties.length - 1)
 				curDifficulty = 0;
 		}

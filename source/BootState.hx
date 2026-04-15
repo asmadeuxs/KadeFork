@@ -10,9 +10,9 @@ class BootState extends flixel.FlxState {
 			if (!sys.FileSystem.exists(Sys.getCwd() + "/assets/replays"))
 				sys.FileSystem.createDirectory(Sys.getCwd() + "/assets/replays");
 			#end */
-		#if discord_rpc
+		#if hxdiscord_rpc
 		DiscordClient.initialize();
-		Application.current.onExit.add(function(exitCode) DiscordClient.shutdown());
+		lime.app.Application.current.onExit.add(function(exitCode) DiscordClient.shutdown());
 		#end
 
 		// init user settings and scores

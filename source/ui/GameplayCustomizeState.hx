@@ -8,14 +8,10 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import openfl.ui.Keyboard;
-#if discord_rpc
-import Discord.DiscordClient;
-import sys.thread.Thread;
-#end
 
 class GameplayCustomizeState extends MusicBeatState {
 	var defaultX:Float = FlxG.width * 0.55 - 135;
-	var defaultY:Float = FlxG.height / 2 - 50;
+	var defaultY:Float = FlxG.height * 0.5 - 50;
 
 	var background:FlxSprite = new FlxSprite(-600, -200).loadGraphic(Paths.image('stages/week1/stageback'));
 	var curt:FlxSprite = new FlxSprite(-500, -300).loadGraphic(Paths.image('stages/week1/stagecurtains'));
@@ -32,7 +28,7 @@ class GameplayCustomizeState extends MusicBeatState {
 	private var camHUD:FlxCamera;
 
 	public override function create() {
-		#if discord_rpc // Updating Discord Rich Presence
+		#if hxdiscord_rpc // Updating Discord Rich Presence
 		DiscordClient.changePresence("Customizing Gameplay", null);
 		#end
 
@@ -113,8 +109,8 @@ class GameplayCustomizeState extends MusicBeatState {
 		camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, 0.95);
 
 		if (FlxG.mouse.overlaps(sick) && FlxG.mouse.pressed) {
-			sick.x = FlxG.mouse.x - sick.width / 2;
-			sick.y = FlxG.mouse.y - sick.height / 2;
+			sick.x = FlxG.mouse.x - sick.width * 0.5;
+			sick.y = FlxG.mouse.y - sick.height * 0.5;
 		}
 
 		if (FlxG.mouse.overlaps(sick) && FlxG.mouse.justReleased) {
@@ -187,7 +183,7 @@ class GameplayCustomizeState extends MusicBeatState {
 
 			babyArrow.animation.play('static');
 			babyArrow.x += 50;
-			babyArrow.x += ((FlxG.width / 2) * player);
+			babyArrow.x += ((FlxG.width * 0.5) * player);
 
 			strumLineNotes.add(babyArrow);
 		}

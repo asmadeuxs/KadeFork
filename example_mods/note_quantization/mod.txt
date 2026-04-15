@@ -1,0 +1,1 @@
+Note Quantization|1.0.0|Adds a setting to make the note colours be based on their placement in a chart.

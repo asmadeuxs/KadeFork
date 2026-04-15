@@ -4,7 +4,9 @@ import data.ScriptLoader;
 import flixel.FlxObject;
 import flixel.system.FlxAssets.GraphicLogo;
 import gameplay.FunkinSprite;
+import gameplay.PlayState;
 import haxe.io.Path;
+import moonchart.formats.fnf.legacy.FNFLegacy.FNFLegacyMetaValues;
 
 using StringTools;
 
@@ -14,6 +16,13 @@ class HealthIcon extends FunkinSprite {
 	var iconPath:String = null;
 	var iconScript:Script;
 	var animCount:Int = 1;
+
+	// so Custom HUDs can get icon data
+	public static function getPlayerIcon()
+		return PlayState.moonMeta?.extraData.get(PLAYER_1) ?? "bf";
+
+	public static function getOpponentIcon()
+		return PlayState.moonMeta?.extraData.get(PLAYER_2) ?? "bf";
 
 	public function new(char:String = 'bf', ?isPlayer:Bool = false) {
 		super(0, 0);

@@ -1,6 +1,6 @@
 [submodule "_dependencies/t-hscript"]
 	path = _dependencies/t-hscript
 	url = https://github.com/troll-slaiyers/t-hscript
-[submodule "_dependencies/linc_discord-rpc"]
-	path = _dependencies/linc_discord-rpc
-	url = https://github.com/Aidan63/linc_discord-rpc
+[submodule "_dependencies/hxdiscord_rpc"]
+	path = _dependencies/hxdiscord_rpc
+	url = https://github.com/MAJigsaw77/hxdiscord_rpc

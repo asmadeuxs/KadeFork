@@ -132,13 +132,4 @@ class JudgementData {
 				return judgement;
 		return activeList[activeList.length - 1];
 	}
-
-	public function listCounts() {
-		var str:String = '';
-		var breaks:Int = gameplay.PlayState.comboBreaks;
-		for (idx => judge in activeList)
-			str += '${judge.name}: ${judge.hits}\n';
-		str += 'Combo Breaks: $breaks';
-		return str;
-	}
 }

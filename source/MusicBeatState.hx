@@ -1,8 +1,5 @@
 package;
 
-#if discord_rpc
-import Discord.DiscordClient;
-#end
 import data.ScriptLoader;
 import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;

@@ -1,0 +1,10 @@
+{
+  "settings": [
+    {
+      "name": "Note Quantization",
+      "description": "Makes the note colours be based on their placement in a chart rather than their direction.",
+      "variable": "noteQuants",
+      "type": "checkmark"
+    }
+  ]
+}

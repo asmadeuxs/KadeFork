@@ -1,28 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
-	<!-- _________________________ Application Settings _________________________ -->
+<!-- Application Settings -->
 
 	<!-- If you're looking for "version" I moved it to Main.hx -->
-	<app title="Friday Night Funkin' (DEKA! Engine)" file="DekaEngine" packageName="com.funkincrew.funkin" package="com.funkincrew.funkin" main="Main" company="asmadeuxs" />
+	<app title="Friday Night Funkin' (Project Roots)" file="FunkinRoots" packageName="com.funkincrew.funkin" package="com.funkincrew.funkin" main="Main" company="asmadeuxs" />
 
-	<!-- ____________________________ Window Settings ___________________________ -->
+	<icon path="art/icon16.png" size='16'/>
+	<icon path="art/icon32.png" size='32'/>
+	<icon path="art/icon64.png" size='64'/>
+	<icon path="art/iconOG.png" />
 
-	<!--These window settings apply to all targets-->
-	<window width="1280" height="720" fps="" background="#000000" hardware="true" vsync="false" />
+<!-- Window Settings -->
 
-	<!--HTML5-specific-->
-	<window if="html5" resizable="true" />
-
-	<!--Desktop-specific-->
+	<window width="1280" height="720" fps="60" background="#000000" hardware="true" vsync="false" />
 	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" vsync="false"/>
-
-	<!--Mobile-specific-->
 	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false"/>
 
-	<!--Switch-specific-->
-	<window if="switch" orientation="landscape" fullscreen="true" width="0" height="0" resizable="true" />
-
-	<!-- _____________________________ Path Settings ____________________________ -->
+<!-- Path Settings -->
 
 	<set name="BUILD_DIR" value="export/debug" if="debug" />
 	<set name="BUILD_DIR" value="export/release" unless="debug" />
@@ -34,7 +28,7 @@
 	<assets path="assets"/>
 	<assets path='example_mods' rename='mods' if="FEATURE_MODS" />
 
-	<!-- _______________________________ Libraries ______________________________ -->
+<!-- Libraries -->
 
 	<haxelib name="lime" version="8.1.2"/>
 	<haxelib name="openfl" version="9.3.3"/>
@@ -47,37 +41,16 @@
 	<!--
 	These libraries are stored locally just in case
 	discord_rpc is deprecated but annoying to get through things like hmm
-	troll hscript is simply a library in case it ever makes major breaking changes
+	troll hscript is just a submodule on a locked commit in case it ever makes major breaking changes
 	we will update these accordingly if need be.
 	-->
-	<haxelib name="discord_rpc" if="cpp" path="_dependencies/linc_discord-rpc"/>
+	<haxelib name="hxdiscord_rpc" if="cpp" path="_dependencies/hxdiscord_rpc"/>
 	<haxelib name="t-hscript" if="cpp" path="_dependencies/t-hscript"/>
 	<haxedef name="hscriptPos" if="t-hscript" />
 
-	<!--<haxelib name="hxcpp-debug-server" if="cpp debug"/>-->
+	<haxelib name="hxcpp-debug-server" if="cpp debug"/>
 
-	<!-- ______________________________ Haxedefines _____________________________ -->
-
-	<!--Enable the Flixel core recording system-->
-	<!--<haxedef name="FLX_RECORD" />-->
-
-	<!--Disable the right and middle mouse buttons-->
-	<!-- <haxedef name="FLX_NO_MOUSE_ADVANCED" /> -->
-
-	<!--Disable the native cursor API on Flash-->
-	<!--<haxedef name="FLX_NO_NATIVE_CURSOR" />-->
-
-	<!--Optimise inputs, be careful you will get null errors if you don't use conditionals in your game-->
-	<!-- <haxedef name="FLX_NO_MOUSE" if="mobile" /> -->
-	<!-- <haxedef name="FLX_NO_KEYBOARD" if="mobile" /> -->
-	<!-- <haxedef name="FLX_NO_TOUCH" if="desktop" /> -->
-	<!--<haxedef name="FLX_NO_GAMEPAD" />-->
-
-	<!--Disable the Flixel core sound tray-->
-	<!--<haxedef name="FLX_NO_SOUND_TRAY" />-->
-
-	<!--Disable the Flixel sound management code-->
-	<!--<haxedef name="FLX_NO_SOUND_SYSTEM" />-->
+<!-- Haxedefines -->
 
 	<!--Disable the Flixel core focus lost screen-->
 	<haxedef name="FLX_NO_FOCUS_LOST_SCREEN" />
@@ -89,11 +62,4 @@
 	<haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
 
 	<!--<haxedef name="message.reporting" value="pretty" />-->
-
-	<!-- _________________________________ Custom _______________________________ -->
-
-	<icon path="art/icon16.png" size='16'/>
-	<icon path="art/icon32.png" size='32'/>
-	<icon path="art/icon64.png" size='64'/>
-	<icon path="art/iconOG.png" />
 </project>
