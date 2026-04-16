@@ -180,13 +180,13 @@ class KadeForkChart extends BasicFormat<KFCFormat, KFCMeta> {
 								var noteInfo = token.split(",");
 								if (noteInfo.length < 2)
 									continue;
-								var time:Float = Std.parseFloat(noteInfo[0]);
+								var beat:Float = Std.parseFloat(noteInfo[0]);
 								var lane:Int = Std.parseInt(noteInfo[1]);
 								var type:String = Std.string(noteInfo[2]);
 								var length:Float = Std.parseFloat(noteInfo[3]);
 								var owner:Int = strumlineIndex;
 								// @formatter:off
-								currentStrumline.notes.push({time: time, lane: lane, type: type, length: length, owner: owner});
+								currentStrumline.notes.push({time: beat, lane: lane, type: type, length: length, owner: owner});
 								// @formatter:on
 							}
 					}

@@ -1,6 +1,7 @@
 package;
 
-import data.ScriptLoader;
+import data.hscript.Script;
+import data.hscript.ScriptLoader;
 import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.ui.FlxUIState;

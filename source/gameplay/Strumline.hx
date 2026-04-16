@@ -1,7 +1,8 @@
 package gameplay;
 
 import data.Noteskin;
-import data.ScriptLoader;
+import data.hscript.Script;
+import data.hscript.ScriptLoader;
 import flixel.FlxG;
 import flixel.group.FlxSpriteGroup;
 import gameplay.FunkinSprite;

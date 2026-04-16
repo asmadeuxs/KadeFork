@@ -48,9 +48,10 @@ class Conductor extends flixel.FlxBasic {
 	public var music:FlxSound;
 	public var tracks:Array<FlxSound> = [];
 
-	public function new() {
+	public function new():Void {
 		super();
 		current = this;
+		active = false;
 	}
 
 	public static function setTime(newTime:Float):Void {
@@ -58,6 +59,9 @@ class Conductor extends flixel.FlxBasic {
 		Conductor.lastSongPosition = newTime;
 		Conductor.current.update(1.0);
 	}
+
+	public static function toggleActive(active:Bool)
+		Conductor.current.active = active;
 
 	public function loadMusic(stream:Sound):FlxSound {
 		if (music == null) {
@@ -140,7 +144,7 @@ class Conductor extends flixel.FlxBasic {
 	}
 
 	override function update(elapsed:Float):Void {
-		if (!active)
+		if (current == null || !active)
 			return;
 		// if (lastSongPosition > songPosition)
 		//	songPosition = lastSongPosition;

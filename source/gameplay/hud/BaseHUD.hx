@@ -1,6 +1,7 @@
 package gameplay.hud;
 
-import data.ScriptLoader;
+import data.hscript.Script;
+import data.hscript.ScriptLoader;
 import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar;

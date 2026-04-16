@@ -18,26 +18,28 @@ class ObjectPool<T:flixel.FlxObject> {
 	public function initiatePool():Void {
 		for (_ in 0..._size) {
 			var obj = _constructor(_);
-			obj.visible = false;
-			obj.active = false;
+			obj.kill();
 			_pool.push(obj);
 		}
 	}
 
 	public function get():Null<T> {
 		for (obj in _pool) {
-			if (!obj.visible && !obj.active) {
-				obj.visible = true;
-				obj.active = true;
+			if (!obj.exists) {
+				obj.revive();
 				return obj;
 			}
 		}
 		return null;
 	}
 
+	public function grow() {
+		this._size++;
+		return this._size;
+	}
+
 	public function release(obj:T):Void {
-		obj.visible = false;
-		obj.active = false;
+		obj.kill();
 	}
 
 	public function getSize():Int

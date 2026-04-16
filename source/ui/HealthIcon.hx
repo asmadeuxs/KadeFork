@@ -1,6 +1,7 @@
 package ui;
 
-import data.ScriptLoader;
+import data.hscript.Script;
+import data.hscript.ScriptLoader;
 import flixel.FlxObject;
 import flixel.system.FlxAssets.GraphicLogo;
 import gameplay.FunkinSprite;

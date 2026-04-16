@@ -45,6 +45,8 @@ class BootState extends flixel.FlxState {
 		}*/
 		#if FREEPLAY
 		FlxG.switchState(new menus.FreeplayState());
+		#elseif CHARTING
+		FlxG.switchState(new editor.ChartEditor());
 		#else
 		FlxG.switchState(Type.createInstance(Main.initialState, []));
 		#end

@@ -1,6 +1,7 @@
 package gameplay;
 
-import data.ScriptLoader;
+import data.hscript.Script;
+import data.hscript.ScriptLoader;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.effects.FlxSkewedSprite;
@@ -64,7 +65,7 @@ class Note extends gameplay.FunkinSprite {
 		super(0, 4000);
 	}
 
-	public function setup(strumTime:Float, noteData:Int, ?sustainLength:Float = 0.0, ?prevNote:Note):Note {
+	public function setup(strumTime:Float, noteData:Int, ?sustainLength:Float = 0.0, ?noteType:String, ?prevNote:Note):Note {
 		setPosition(0, 4000);
 
 		this.isMine = false;
@@ -78,6 +79,7 @@ class Note extends gameplay.FunkinSprite {
 		if (this.strumTime < 0)
 			this.strumTime = 0;
 		this.noteData = noteData;
+		this.noteType = noteType;
 
 		// reset gameplay values
 		this.wasGoodHit = false;

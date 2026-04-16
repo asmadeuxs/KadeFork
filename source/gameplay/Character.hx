@@ -1,6 +1,7 @@
 package gameplay;
 
-import data.ScriptLoader;
+import data.hscript.Script;
+import data.hscript.ScriptLoader;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
 import haxe.Json5;

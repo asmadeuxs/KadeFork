@@ -63,6 +63,7 @@ class Main extends Sprite {
 		 */
 
 		game = new FlxGame(gameWidth, gameHeight, BootState, framerate, framerate, skipSplash, startFullscreen);
+		flixel.FlxG.plugins.add(new Conductor());
 		addChild(game);
 
 		#if !mobile
@@ -70,8 +71,6 @@ class Main extends Sprite {
 		addChild(fpsCounter);
 		toggleFPS(true);
 		#end
-
-		flixel.FlxG.plugins.add(new Conductor());
 	}
 
 	var game:FlxGame;

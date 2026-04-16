@@ -146,7 +146,7 @@ class DummyPlayState extends MusicBeatState {
 			var strumline:Strumline = strumlines.members[nextNote.owner];
 			if (strumline != null) {
 				var oldNote:Note = (notes.members.length > 1) ? notes.members[notes.members.length - 1] : null;
-				var swagNote:Note = notes.recycle(Note).setup(nextNote.time, nextNote.lane, nextNote.length, oldNote);
+				var swagNote:Note = notes.recycle(Note).setup(nextNote.time, nextNote.lane, nextNote.length, nextNote.type, oldNote);
 				strumline.noteskin.generateArrow(nextNote.lane, swagNote);
 				swagNote.mustPress = (strumline == playerStrums);
 			}
