@@ -102,8 +102,8 @@ class ChartEditor extends MusicBeatState {
 			placedNotes.push([]);
 	}
 
-	function addNote(time:Float, id:Int, type:String):Note {
-		var noteSprite = new Note().setup(time, id, 0.0, type);
+	function addNote(time:Float, id:Int, owner:Int, type:String):Note {
+		var noteSprite = new Note().setup(time, id, 0, owner, type);
 		noteGroup.add(noteSprite);
 		return noteSprite;
 	}

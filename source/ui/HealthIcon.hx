@@ -84,6 +84,7 @@ class HealthIcon extends FunkinSprite {
 					if (frames.frames.length > 2)
 						animation.add("winning", [2]);
 				}
+				antialiasing = !character.endsWith('-pixel');
 				animCount = animation.exists("winning") ? 3 : (animation.exists("losing") ? 2 : 1);
 				switchState("idle", true);
 		}

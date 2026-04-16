@@ -21,7 +21,7 @@ class BaseHUD extends FlxSpriteGroup {
 	}
 
 	public static function loadHUD(hudName:String):BaseHUD {
-		//var path:String = ScriptLoader.getScriptFile(Paths.getPath('data/huds'), hudName);
+		//var path:String = ScriptLoader.getScriptFile(Paths.getPath('scripts/huds'), hudName);
 		//var custom = ScriptLoader.findScript(path, true);
 		//return custom == null ? new gameplay.hud.Kade() : new gameplay.hud.BaseHUD(custom);
 

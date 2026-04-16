@@ -17,18 +17,23 @@ class Note extends gameplay.FunkinSprite {
 	public var noteData:Int = 0;
 	public var strumTime:Float = 0;
 	public var sustainLength:Float = 0;
+	public var noteOwner:Int = -1;
 	public var prevNote:Note;
 
 	public var noteType(default, set):String = null;
 
+	@:allow(gameplay.PlayState, gameplay.DummyPlayState)
 	private var noteScript:Script;
 
 	function set_noteType(type:String):String {
 		noteType = type;
 		switch type {
 			default:
-				noteScript = ScriptLoader.findScript(Paths.getPath('scripts/notetypes/$type'));
-				noteScript?.callFunc('generateNoteType', [this]);
+				var file:String = ScriptLoader.getScriptFile(Paths.getPath('scripts/notetypes'), type);
+				if (file != null) {
+					noteScript = ScriptLoader.findScript(file);
+					noteScript?.callFunc('generateNoteType', [this]);
+				}
 		}
 		return noteType;
 	}
@@ -65,7 +70,7 @@ class Note extends gameplay.FunkinSprite {
 		super(0, 4000);
 	}
 
-	public function setup(strumTime:Float, noteData:Int, ?sustainLength:Float = 0.0, ?noteType:String, ?prevNote:Note):Note {
+	public function setup(strumTime:Float, noteData:Int, noteOwner:Int, ?sustainLength:Float = 0.0, ?noteType:String, ?prevNote:Note):Note {
 		setPosition(0, 4000);
 
 		this.isMine = false;
@@ -79,13 +84,13 @@ class Note extends gameplay.FunkinSprite {
 		if (this.strumTime < 0)
 			this.strumTime = 0;
 		this.noteData = noteData;
+		this.noteOwner = noteOwner;
 		this.noteType = noteType;
 
 		// reset gameplay values
 		this.wasGoodHit = false;
 		this.tooLate = false;
 		this.missed = false;
-
 		noteScript?.callFunc("noteRegenerated", [this, strumTime, noteData, sustainLength, prevNote]);
 
 		// old checks

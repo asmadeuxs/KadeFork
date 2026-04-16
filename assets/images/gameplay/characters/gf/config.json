@@ -3,6 +3,7 @@
 	"singDuration": 4.0,
 	"defaultFramerate": 24,
 	"idleAnimations": [ "danceLeft", "danceRight" ],
+	"antialiasing": true,
 	"beatsToDance": 2,
 	"animations": {
 		"cheer": "GF Cheer",

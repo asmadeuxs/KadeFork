@@ -47,22 +47,27 @@ class Kade extends BaseHUD {
 		if (Preferences.user.scrollType == 1)
 			healthBarBG.y = 50;
 		healthBarBG.screenCenter(X);
+		healthBarBG.antialiasing = true;
 		add(healthBarBG);
 
 		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8),
 			PlayState.current, 'health', 0, 2);
 		healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
+		healthBar.antialiasing = true;
 		add(healthBar);
 
 		scoreTxt = new FlxText(FlxG.width * 0.5 - 235, healthBarBG.y + 50, 0, "", 20);
 		if (!Preferences.user.accuracyDisplay)
 			scoreTxt.x = healthBarBG.x + healthBarBG.width * 0.5;
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
+		scoreTxt.antialiasing = true;
 		add(scoreTxt);
+
 		if (Preferences.user.showJudgeCounts) {
 			judgesTxt = new FlxText(5, 0, FlxG.width, "");
 			judgesTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT);
 			judgesTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.0);
+			judgesTxt.antialiasing = true;
 			judgesTxt.screenCenter(Y);
 			judgesTxt.y -= 30;
 			add(judgesTxt);
@@ -72,6 +77,7 @@ class Kade extends BaseHUD {
 		var songText:FlxText = new FlxText(5, 0, 0, '${PlayState.moonMeta.title} ${PlayState.difficulty.toUpperCase()} - KE v${Main.versions.KADE}', 12);
 		songText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
 		songText.y = (FlxG.height - songText.height) - 3;
+		songText.antialiasing = true;
 		add(songText);
 
 		iconP1 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_1) ?? "bf", true);

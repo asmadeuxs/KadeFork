@@ -6,6 +6,7 @@
   "idleAnimations": [ "idle" ],
   "singAnimations": [ "left", "down", "up", "right" ],
   "missAnimations": [ "missleft", "missdown", "missup", "missright" ],
+  "antialiasing": true,
   "facesLeft": true,
   "animationTimers": {
     "hey": 1.0

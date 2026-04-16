@@ -24,8 +24,10 @@ class ScriptLoader {
 		if (script != null && @:privateAccess script._noCache)
 			removeScriptFromCache(script);
 		script = loadScript(path);
-		@:privateAccess script._noCache = noCache;
-		scriptCache.set(origin + path, script);
+		if (script != null) {
+			@:privateAccess script._noCache = noCache;
+			scriptCache.set(origin + path, script);
+		}
 		return script;
 	}
 
@@ -105,36 +107,26 @@ class ScriptLoader {
 	 * @return String
 	 */
 	public static function getScriptFile(dir:String, scriptName:String):String {
-		var file:String = null;
-		if (Paths.fileExists(dir)) {
-			// file already the extension so leave early
-			if (acceptedExtensions.contains(Path.extension(scriptName)))
-				file = Path.addTrailingSlash(dir) + scriptName;
-			else { // find a file with a script extension
-				for (i in Paths.listFiles(dir)) {
-					var full:String = Path.addTrailingSlash(dir) + i;
-					if (acceptedExtensions.contains(Path.extension(i))) {
-						file = full;
-						break;
-					}
+		var file:String = Path.addTrailingSlash(dir) + scriptName;
+		if (!acceptedExtensions.contains(Path.extension(file))) {
+			for (ext in acceptedExtensions)
+				if (Paths.fileExists('$file.$ext')) {
+					file += '.$ext';
+					break;
 				}
-			}
 		}
-		trace(file);
 		return file;
 	}
 
 	public static function loadScript(filepath:String):Script {
 		var script:Script = null;
-		if (Paths.fileExists(filepath)) {
-			if (acceptedExtensions.contains(Path.extension(filepath))) {
-				script = parseScript(Paths.getText(filepath));
-				script.fileName = Path.withoutExtension(Path.withoutDirectory(filepath));
-				script.filePath = filepath;
-				script.interp.execute(script.code);
-				// not needed for this case
-				// script.priority = script.interp.variables.get("priority");
-			}
+		if (Paths.fileExists(filepath) && acceptedExtensions.contains(Path.extension(filepath))) {
+			script = parseScript(Paths.getText(filepath));
+			script.fileName = Path.withoutExtension(Path.withoutDirectory(filepath));
+			script.filePath = filepath;
+			script.interp.execute(script.code);
+			// not needed for this case
+			// script.priority = script.interp.variables.get("_priority");
 		}
 		return script;
 	}

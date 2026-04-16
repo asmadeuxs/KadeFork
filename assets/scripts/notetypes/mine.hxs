@@ -1,14 +1,13 @@
 function generateNoteType(note) {
 	note.loadGraphic(Paths.image('gameplay/notetypes/mine'));
-	note.scale.set(6, 6);
-	note.antialiasing = true;
-
+	note.scale.set(3, 3);
+	note.antialiasing = false;
 	note.isMine = true;
+	note.isFake = true; // so CPUs ignore it.
 	// nerf early and late hitboxes
 	note.hitMultiplier[0] = 0.8;
 	note.hitMultiplier[1] = 0.8;
+
+	note.isSustainNote = false;
+	note.x += 50;
 }
-
-function generateNoteSplash(splash) {}
-
-function update(elapsed, note) {}

@@ -16,6 +16,8 @@ class Character extends gameplay.FunkinSprite {
 	public static final DEFAULT_SING_ANIMATIONS:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
 	public static final DEFAULT_MISS_ANIMATIONS:Array<String> = ["singLEFTmiss", "singDOWNmiss", "singUPmiss", "singRIGHTmiss"];
 
+	public static final DEFAULT_ANTIALIASING:Bool = true;
+
 	public var displayName:String = "idk";
 	public var characterId:String = DEFAULT_CHARACTER;
 	public var healthIconPath:String;
@@ -162,6 +164,7 @@ class Character extends gameplay.FunkinSprite {
 					this.singDuration = file.singDuration ?? 4.0;
 					this.displayName = file.name ?? file.displayName ?? "idk";
 					this.isPlayer = file.facesLeft ?? file.isPlayer ?? false;
+					this.antialiasing = file.antialiasing ?? DEFAULT_ANTIALIASING;
 
 					// TODO: file.atlasType, OR auto-detection based on files in folder -asmadeuxs
 					if (file.texture != null)

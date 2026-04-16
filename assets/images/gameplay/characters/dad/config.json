@@ -3,6 +3,7 @@
 	"singDuration": 6.1,
 	"defaultFramerate": 24,
 	"cameraOffset": [150, -100],
+	"antialiasing": true,
 	"animations": {
 		"idle": "Dad idle dance",
 		"singLEFT": "Dad Sing Note LEFT",

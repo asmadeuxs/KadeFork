@@ -2,6 +2,7 @@
   "name": "Classic",
   "author": "PhantomArcade",
   "defaultAtlas": { "path": "gameplay/noteskins/NOTE_assets" },
+  "antialiasing": true,
   "keyCount": 4,
   "strums": {
     "animations": {

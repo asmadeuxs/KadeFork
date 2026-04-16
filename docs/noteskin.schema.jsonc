@@ -59,6 +59,7 @@
    */
 
   "strums": { // Strum-specific animations
+    "antialiasing": true,
     "scale": 0.7,
     "animations": {
       "animStatic": [ "arrowLEFT", "arrowDOWN", "arrowUP", "arrowRIGHT" ],
@@ -68,16 +69,19 @@
     }
   },
   "arrows": { // Arrow-specific animations
+    "antialiasing": true,
     "scale": 0.7,
     "animations": [ "purple0", "blue0", "green0", "red0" ]
   },
   "holds": { // Sustain-specific animations
+    "antialiasing": true,
     "animations": [
       "purple hold piece", "blue hold piece", "green hold piece", "red hold piece",
       "pruple end hold", "blue hold end", "green hold end", "red hold end"
     ]
   },
   "splashes": { // Note splash specific animations
+    "antialiasing": true,
     "scale": 0.7,
     "atlas": { "path": "gameplay/noteskins/noteSplashes" }, // This one overrides the atlas
     "animations": [

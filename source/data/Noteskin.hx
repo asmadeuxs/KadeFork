@@ -23,7 +23,7 @@ private typedef StrumAnimations = {
 // TODO: make this typedef just a general mod thing and not exclusive to this file
 // this file *in general* is very useful
 private typedef TextureConfig = {path:String, ?atlasType:String}
-private typedef AnimationConfig = {animations:Array<ModAnimation>, ?atlas:TextureConfig};
+private typedef AnimationConfig = {?antialiasing:Bool, animations:Array<ModAnimation>, ?atlas:TextureConfig};
 
 typedef NoteskinFile = {
 	?name:String,
@@ -33,7 +33,7 @@ typedef NoteskinFile = {
 	?defaultFramerate:Int,
 	?offsets:Array<OneOfTwo<Dynamic, Array<Float>>>,
 	defaultAtlas:TextureConfig,
-	strums:{animations:StrumAnimations, ?atlas:TextureConfig, ?scale:Float},
+	strums:{?antialiasing:Bool, animations:StrumAnimations, ?atlas:TextureConfig, ?scale:Float},
 	arrows:AnimationConfig & {?scale:Float},
 	?holds:AnimationConfig,
 	?splashes:AnimationConfig & {?scale:Float},
@@ -49,6 +49,7 @@ class Noteskin {
 		defaultFramerate: 24,
 		keyCount: 4,
 		strums: {
+			antialiasing: true,
 			scale: 0.7,
 			animations: {
 				animStatic: ["arrowLEFT", "arrowDOWN", "arrowUP", "arrowRIGHT"],
@@ -58,16 +59,19 @@ class Noteskin {
 			}
 		},
 		arrows: {
+			antialiasing: true,
 			scale: 0.7,
 			animations: ["purple0", "blue0", "green0", "red0"]
 		},
 		holds: {
+			antialiasing: true,
 			animations: [
 				"purple hold piece", "blue hold piece", "green hold piece", "red hold piece",
 				  "pruple end hold",   "blue hold end",   "green hold end",   "red hold end"
 			]
 		},
 		splashes: {
+			antialiasing: true,
 			scale: 1.0,
 			atlas: {path: "gameplay/noteskins/noteSplashes"},
 			animations: [
@@ -84,6 +88,10 @@ class Noteskin {
 	private var strumScale:Float = 0.7;
 	private var arrowScale:Float = 0.7;
 	private var splashScale:Float = 1.0;
+
+	private var strumAA:Bool = true;
+	private var arrowAA:Bool = true;
+	private var splashAA:Bool = true;
 
 	private var staticAnimNames:Array<String>;
 	private var pressedAnimNames:Array<String>;
@@ -164,6 +172,10 @@ class Noteskin {
 		strumScale = conf.strums.scale ?? DEFAULT_SKIN.strums.scale;
 		arrowScale = conf.arrows.scale ?? DEFAULT_SKIN.arrows.scale;
 		splashScale = conf.splashes.scale ?? DEFAULT_SKIN.splashes.scale;
+
+		strumAA = conf.strums.antialiasing ?? DEFAULT_SKIN.strums.antialiasing;
+		arrowAA = conf.arrows.antialiasing ?? DEFAULT_SKIN.arrows.antialiasing;
+		splashAA = conf.splashes.antialiasing ?? DEFAULT_SKIN.splashes.antialiasing;
 	}
 
 	private static function _animMapper(anim:ModAnimation):String {
@@ -200,6 +212,7 @@ class Noteskin {
 		strum.animation.addByPrefix("pressed", pressedName, defaultFramerate, false);
 		strum.animation.addByPrefix("confirm", confirmName, defaultFramerate, false);
 		strum.setGraphicSize(Std.int(strum.width * strumScale));
+		strum.antialiasing = strumAA;
 		strum.playAnim('static', true);
 		return strum;
 	}
@@ -217,6 +230,7 @@ class Noteskin {
 		arrow.animation.addByPrefix('${noteData}Scroll', scrollName, defaultFramerate, false);
 		arrow.setGraphicSize(Std.int(arrow.width * arrowScale));
 		arrow.playAnim('${noteData}Scroll', true);
+		arrow.antialiasing = arrowAA;
 		return arrow;
 	}
 
@@ -230,6 +244,7 @@ class Noteskin {
 			for (j in 0...splashAnimNames[i].length)
 				splash.animation.addByPrefix('splash$j-$i', splashAnimNames[i][j], defaultFramerate, false);
 		splash.setGraphicSize(Std.int(splash.width * splashScale));
+		splash.antialiasing = splashAA;
 		splash.updateHitbox();
 		return splash;
 	}
