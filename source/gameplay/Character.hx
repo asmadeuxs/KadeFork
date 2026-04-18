@@ -99,16 +99,17 @@ class Character extends gameplay.FunkinSprite {
 
 	private function findCharacterFile(character:String):String {
 		var paths = [
-			Paths.getPath('images/gameplay/characters/$character/config.json'),
-			Paths.getPath('images/gameplay/characters/$character/$character.json'),
-			Paths.getPath('images/gameplay/characters/$character/$character-config.json')
+			Paths.getPath('images/gameplay/characters/$character/config'),
+			Paths.getPath('images/gameplay/characters/$character/$character'),
+			Paths.getPath('images/gameplay/characters/$character/$character-config')
 		];
-		var path:String = paths[0];
-		var found:Bool = false;
+		var path:String = paths[0] + '.json';
 		for (i in paths) {
-			if (Paths.fileExists(i)) {
-				path = i;
-				break;
+			for (ext in Paths.jsonExtensions) {
+				if (Paths.fileExists(i + ext)) {
+					path = i;
+					break;
+				}
 			}
 		}
 		return path;

@@ -189,14 +189,6 @@ class PlayState extends MusicBeatState {
 		#if hxdiscord_rpc
 		iconRPC = moonMeta.extraData.get(PLAYER_2) ?? "bf";
 
-		// To avoid having duplicate images in Discord assets
-		iconRPC = switch iconRPC {
-			case 'senpai-angry': 'senpai';
-			case 'monster-christmas': 'monster';
-			case 'mom-car': 'mom';
-			case _: iconRPC;
-		}
-
 		// String that contains the mode defined here so it isn't necessary to call changePresence for each mode
 		detailsText = isStoryMode ? 'on Story Mode (Level $storyWeek)' : "in Freeplay";
 
@@ -215,53 +207,27 @@ class PlayState extends MusicBeatState {
 		if (moonSong == null)
 			moonSong = Song.loadFromFile('tutorial');
 
-		switch (moonMeta.extraData.exists(STAGE) ? moonMeta.extraData.get(STAGE) : "stage") {
-			default:
-				defaultCamZoom = 0.9;
-				curStage = 'stage';
-				var bg:FlxSprite = new FlxSprite(-600, -200).loadGraphic(Paths.image('stages/week1/stageback'));
-				bg.scrollFactor.set(0.9, 0.9);
-				bg.antialiasing = true;
-				bg.active = false;
-				add(bg);
-
-				var stageFront:FlxSprite = new FlxSprite(-650, 600).loadGraphic(Paths.image('stages/week1/stagefront'));
-				stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
-				stageFront.scrollFactor.set(0.9, 0.9);
-				stageFront.updateHitbox();
-				stageFront.antialiasing = true;
-				stageFront.active = false;
-				add(stageFront);
-
-				if (!Preferences.user.lowQualityMode) { // the fuck else am i supposed to hide? -asmadeuxs
-					var stageCurtains:FlxSprite = new FlxSprite(-500, -300).loadGraphic(Paths.image('stages/week1/stagecurtains'));
-					stageCurtains.setGraphicSize(Std.int(stageCurtains.width * 0.9));
-					stageCurtains.scrollFactor.set(1.3, 1.3);
-					stageCurtains.updateHitbox();
-					stageCurtains.antialiasing = true;
-					stageCurtains.active = false;
-					add(stageCurtains);
-				}
-		}
+		curStage = moonMeta.extraData.exists(STAGE) ? moonMeta.extraData.get(STAGE) : "stage";
+		var stage = new gameplay.StageBG(curStage);
+		defaultCamZoom = stage.cameraZoom;
+		add(stage);
 
 		var gfVersion:String = 'gf';
-		gf = new Character(400, 130, gfVersion);
+		gf = new Character(400, 130, moonMeta.extraData.exists(PLAYER_3) ? moonMeta.extraData.get(PLAYER_3) : "gf");
 		dad = new Character(100, 100, moonMeta.extraData.exists(PLAYER_2) ? moonMeta.extraData.get(PLAYER_2) : "bf");
 		boyfriend = new Character(770, 450, moonMeta.extraData.exists(PLAYER_1) ? moonMeta.extraData.get(PLAYER_1) : "bf", true);
 		gf.scrollFactor.set(0.95, 0.95);
 
-		var camPos:FlxPoint = new FlxPoint(dad.getGraphicMidpoint().x, dad.getGraphicMidpoint().y);
-		switch (moonMeta.extraData.exists(PLAYER_2) ? moonMeta.extraData.get(PLAYER_2) : "bf") {
-			case 'gf':
-				dad.setPosition(gf.x, gf.y);
-				gf.visible = false;
-				if (isStoryMode) {
-					camPos.x += 600;
-					tweenCamIn();
-				}
-			case 'dad':
-				camPos.x += 400;
+		var mid = dad.getMidpoint();
+		var off = dad.cameraOffset;
+		var camPos:FlxPoint = new FlxPoint(mid.x + off.x, mid.y + off.y);
+		if (dad.characterId == gf.characterId) {
+			dad.setPosition(gf.x, gf.y);
+			gf.visible = false;
+			if (isStoryMode)
+				tweenCamIn();
 		}
+
 		add(gf);
 		add(dad);
 		add(boyfriend);
@@ -901,7 +867,7 @@ class PlayState extends MusicBeatState {
 		health += judgementData.getHealthBonus(missJudge, health);
 		popUpRating(missJudge.image);
 		popUpCombo(combo, missJudge);
-		//if (daNote != null && Preferences.user.etternaMode)
+		// if (daNote != null && Preferences.user.etternaMode)
 		//		totalNotesHit += util.EtternaFunctions.wife3(Math.abs(daNote.strumTime - Conductor.songPosition), 1.7);
 		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 		boyfriend.miss(direction, true);
@@ -954,10 +920,10 @@ class PlayState extends MusicBeatState {
 	private function scoreNote(daNote:Note):Void {
 		var score:Float = daNote.judgement.score;
 		var noteDiff:Float = Math.abs(Conductor.songPosition - daNote.strumTime);
-		//if (Preferences.user.etternaMode)
+		// if (Preferences.user.etternaMode)
 		//	totalNotesHit += util.EtternaFunctions.wife3(judgementData.maxHitWindow, noteDiff);
-		//else
-			totalNotesHit += daNote.judgement.accuracy;
+		// else
+		totalNotesHit += daNote.judgement.accuracy;
 		health += judgementData.getHealthBonus(daNote.judgement, health);
 		daNote.judgement.hits++;
 		songScore += Math.round(score);

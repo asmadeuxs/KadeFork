@@ -23,7 +23,7 @@ keScoreText,Score: {1} | Combo Breaks: {2} | Accuracy: {3}% | {4}
 keScoreTextNoAcc,Score: {1}
 
 pause_resumeSong,Resume
-pause_restartSong,Restart Song
+pause_restartSong,Restart
 pause_exit,Exit
 
 judge_Sick,Sick

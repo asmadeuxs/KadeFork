@@ -28,7 +28,7 @@ keScoreText,Pontos: {1} | Combo Breaks: {2} | Precisão: {3}% | {4}
 keScoreTextNoAcc,Pontos: {1}
 
 pause_resumeSong,Continuar
-pause_restartSong,Reiniciar Musica
+pause_restartSong,Reiniciar sica
 pause_exit,Sair
 
 judge_Sick,Sick
