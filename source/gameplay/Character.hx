@@ -141,8 +141,12 @@ class Character extends gameplay.FunkinSprite {
 	}
 
 	public function loadCharacter(characterName:String):Character {
-		switch (characterName) {
+		switch characterName {
 			default:
+				if (characterName == null) {
+					visible = false;
+					return loadPlaceholder();
+				}
 				var file:String = findCharacterFile(characterName);
 				if (!Paths.fileExists(file))
 					return loadPlaceholder();

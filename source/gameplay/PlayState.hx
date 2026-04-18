@@ -5,7 +5,6 @@ import data.JudgementData;
 import data.hscript.Script;
 import data.hscript.ScriptLoader;
 import data.song.KadeForkChart.NoteData;
-import data.song.Song.Section;
 import data.song.Song;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -28,7 +27,8 @@ import flixel.util.FlxTimer;
 import gameplay.Strumline;
 import gameplay.hud.*;
 import moonchart.formats.BasicFormat;
-import moonchart.formats.fnf.legacy.FNFLegacy;
+import moonchart.formats.fnf.legacy.FNFLegacy.FNFLegacyMetaValues;
+import moonchart.formats.fnf.legacy.FNFPsych;
 import openfl.events.KeyboardEvent;
 import openfl.filters.ShaderFilter;
 import sys.FileSystem;
@@ -60,10 +60,10 @@ class PlayState extends MusicBeatState {
 	}
 
 	static function get_SONG()
-		return (moonSong is FNFLegacy) ? cast(moonSong, FNFLegacy).data.song : null; // for now (menacing face cuz i can so do that) -srt
+		return (moonSong is FNFPsych) ? cast(moonSong).data.song : null; // for now (menacing face cuz i can so do that) -srt
 
 	static function set_SONG(to:SwagSong) {
-		moonSong = new FNFLegacy(to);
+		moonSong = new FNFPsych(to);
 		return to;
 	}
 
@@ -212,8 +212,7 @@ class PlayState extends MusicBeatState {
 		defaultCamZoom = stage.cameraZoom;
 		add(stage);
 
-		var gfVersion:String = 'gf';
-		gf = new Character(400, 130, moonMeta.extraData.exists(PLAYER_3) ? moonMeta.extraData.get(PLAYER_3) : "gf");
+		gf = new Character(400, 130, moonMeta.extraData.exists(PLAYER_3) ? moonMeta.extraData.get(PLAYER_3) : "bf");
 		dad = new Character(100, 100, moonMeta.extraData.exists(PLAYER_2) ? moonMeta.extraData.get(PLAYER_2) : "bf");
 		boyfriend = new Character(770, 450, moonMeta.extraData.exists(PLAYER_1) ? moonMeta.extraData.get(PLAYER_1) : "bf", true);
 		gf.scrollFactor.set(0.95, 0.95);

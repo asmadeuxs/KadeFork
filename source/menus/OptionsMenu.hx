@@ -275,7 +275,9 @@ class OptionsMenu extends MusicBeatSubstate {
 		if (playSound)
 			FlxG.sound.play(Paths.sound('scrollMenu'));
 		curCatOptions[curSelected].change(by);
-		catOptions.members[curSelected * 2 + 1].text = curCatOptions[curSelected].valueString();
+
+		var val:FlxText = catOptions.members[curSelected * 2 + 1];
+		val.text = curCatOptions[curSelected].valueString();
 	}
 
 	public function changeSelection(next:Int = 0, ?playSound:Bool = true) {
@@ -300,18 +302,17 @@ class OptionsMenu extends MusicBeatSubstate {
 	}
 
 	public function updateCat() {
-		curSelected = 0;
+		while (catOptions.members.length > 0)
+			catOptions.members.pop().destroy();
+		curCatOptions = optionStash.get(currentCat);
+		if (curSelected < 0 || curSelected > curCatOptions.length - 1)
+			curSelected = 0;
 		if (catNameText != null)
 			catNameText.text = 'Viewing: $currentCat\nPress Q/E to change category\nPress Left/Right to change option';
 
-		while (catOptions.members.length > 0)
-			catOptions.members.pop().destroy();
-
-		var i:Int = 0;
-		curCatOptions = optionStash.get(currentCat);
-		for (option in curCatOptions) {
-			var nameText = new FlxText(20, 50 + i * 40, 0, Translator.translateString('option_${option.variable}'), 24);
-			var valText = new FlxText(catFrame.width - 100, nameText.y, 0, option.valueString(), 24);
+		for (i=>option in curCatOptions) {
+			var nameText = new FlxText(20, 50 + i * 40, catFrame.width, Translator.translateString('option_${option.variable}'), 24);
+			var valText = new FlxText(0, nameText.y, catFrame.width - 20, option.valueString(), 24);
 			valText.font = optionsFont;
 			valText.alignment = RIGHT;
 			nameText.font = optionsFont;
@@ -319,7 +320,6 @@ class OptionsMenu extends MusicBeatSubstate {
 			nameText.ID = i;
 			catOptions.add(nameText);
 			catOptions.add(valText);
-			i++;
 		}
 		changeSelection();
 	}

@@ -28,7 +28,7 @@ keScoreText,Pontos: {1} | Combo Breaks: {2} | Precisão: {3}% | {4}
 keScoreTextNoAcc,Pontos: {1}
 
 pause_resumeSong,Continuar
-pause_restartSong,Reiniciar sica
+pause_restartSong,Reiniciar
 pause_exit,Sair
 
 judge_Sick,Sick
@@ -44,6 +44,13 @@ judge_Good_plural,Goods
 judge_Bad_plural,Bads
 judge_Shit_plural,Shits
 judge_Miss_plural,Erros
+
+optionval_ON,LIG.
+optionval_OFF,DESLIG.
+optionval_Up,Cima
+optionval_Down,Baixo
+optionval_Strums,Notas
+optionval_Stage,Cenário
 
 option_frameRate,Taxa de Quadros
 option_scrollType,Tipo de Scroll

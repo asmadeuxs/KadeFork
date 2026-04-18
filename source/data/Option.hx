@@ -52,19 +52,21 @@ using StringTools;
 	//
 	public function valueString():String {
 		var value:Dynamic = Reflect.field(Preferences.user, this.variable);
-		switch validateType(this.type) {
-			case "checkmark":
-				return value == true ? "ON" : "OFF";
-			case "number":
-				return Std.string(value);
-			case "choice":
-				if (value is Int)
-					return choices[value];
-				else
-					return Std.string(value); // probably already a string
-			case _:
-				return Std.string(value);
+		var str:String = switch validateType(this.type) {
+			case "checkmark": value == true ? "ON" : "OFF";
+			case "number": Std.string(value);
+			case "choice": (value is Int) ? choices[value] : Std.string(value);
+			case _: Std.string(value);
+		};
+		if (variable == 'language')
+			str = Translator.getNativeLangName(str);
+		else {
+			var transStr:String = 'optionval_$str';
+			var translated:String = Translator.translateString(transStr);
+			if (translated != transStr)
+				str = translated;
 		}
+		return str;
 	}
 
 	public function validateType(type:String):String {
