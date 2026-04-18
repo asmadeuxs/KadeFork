@@ -34,21 +34,21 @@ class OptionsMenu extends MusicBeatSubstate {
 				description: "Changes where the notes scroll to",
 				choices: ["Up", "Down"],
 			},
-			{
+			/*{
 				name: "Center Strums",
 				variable: "centerStrums",
 				description: "Centers your strums and hides the opponent's"
-			},
+			},*/
 			{
 				name: "Ghost Tapping",
 				description: "Lets you mash without penalty",
 				variable: "ghostTapping"
 			},
-			{
+			/*{
 				name: "Wife3 Accuracy",
 				description: "Changes the accuracy system to use Wife3\nIt's way more complex (math-wise) for the sake of encouraging super accurate hits\nBut may feel mean to newer players",
 				variable: "etternaMode"
-			},
+			},*/
 			{
 				type: "number",
 				name: "Scroll Speed",
@@ -92,15 +92,16 @@ class OptionsMenu extends MusicBeatSubstate {
 			},
 			{
 				name: "Distractions",
-				description: "Disables certain sounds and effects that may be distracting.",
+				description: "Disables certain sounds and effects that may be distracting",
 				variable: "distractions"
 			},
-			/*{
+			{
 				name: "Language",
-				description: "Changes the game's text interfaces to be on a different language.",
+				description: "Changes the game's text interfaces to be on a different language",
+				variable: "language",
 				type: "choice",
-				choices: Locale.list(),
-			},*/
+				choices: Translator.getAvailableLanguageIDs()
+			},
 			{
 				type: "number",
 				name: "Interface Dim",
@@ -145,6 +146,11 @@ class OptionsMenu extends MusicBeatSubstate {
 	override function create():Void {
 		super.create();
 		currentCat = categoryOrder[catSelected];
+
+		// it wouldn't let me do it up there
+		for (i in optionStash.get(categoryOrder[1]))
+			if (i.variable == 'language')
+				i.setFunc = onLanguageChanged;
 
 		var bgCover:FlxSprite = new FlxSprite().makeGraphic(1, 1, 0xFF000000);
 		bgCover.scale.set(FlxG.width, FlxG.height);
@@ -281,7 +287,9 @@ class OptionsMenu extends MusicBeatSubstate {
 			for (entry in catOptions)
 				entry.alpha = entry.ID == curSelected ? 1.0 : 0.6;
 		if (curCatOptions != null) {
-			descriptionThingy.text = curCatOptions[curSelected].description;
+			var option = curCatOptions[curSelected];
+			// descriptionThingy.text = option.description;
+			descriptionThingy.text = Translator.translateString('optiondesc_${option.variable}');
 			descriptionThingy.y = catFrame.y + catFrame.height + 10;
 		}
 	}
@@ -302,7 +310,7 @@ class OptionsMenu extends MusicBeatSubstate {
 		var i:Int = 0;
 		curCatOptions = optionStash.get(currentCat);
 		for (option in curCatOptions) {
-			var nameText = new FlxText(20, 50 + i * 40, 0, option.name, 24);
+			var nameText = new FlxText(20, 50 + i * 40, 0, Translator.translateString('option_${option.variable}'), 24);
 			var valText = new FlxText(catFrame.width - 100, nameText.y, 0, option.valueString(), 24);
 			valText.font = optionsFont;
 			valText.alignment = RIGHT;
@@ -314,5 +322,10 @@ class OptionsMenu extends MusicBeatSubstate {
 			i++;
 		}
 		changeSelection();
+	}
+
+	function onLanguageChanged(lang:String) {
+		Translator.setLocale(lang);
+		updateCat();
 	}
 }

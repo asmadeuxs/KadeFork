@@ -74,7 +74,8 @@ class Kade extends BaseHUD {
 		}
 		updateScoreText();
 
-		var songText:FlxText = new FlxText(5, 0, 0, '${PlayState.moonMeta.title} ${PlayState.difficulty.toUpperCase()} - KE v${Main.versions.KADE}', 12);
+		var diff:String =Translator.translateString('difficulty_' + PlayState.difficulty);
+		var songText:FlxText = new FlxText(5, 0, 0, '${PlayState.moonMeta.title} ${diff.toUpperCase()} - KE v${Main.versions.KADE}', 12);
 		songText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
 		songText.y = (FlxG.height - songText.height) - 3;
 		songText.antialiasing = true;
@@ -132,12 +133,11 @@ class Kade extends BaseHUD {
 			layout = '${PlayState.nps} / ${PlayState.maxNps} NPS | ';
 		else
 			layout = '';
-		if (Preferences.user.accuracyDisplay) {
-			layout += 'Score: ${PlayState.songScore}';
-			layout += ' | Combo Breaks: ${PlayState.comboBreaks}';
-			layout += ' | Accuracy: ${FlxMath.roundDecimal(PlayState.accuracy, 2)}% | ${generateRanking()}';
-		} else
-			layout += 'Score: ${PlayState.songScore}';
+		if (Preferences.user.accuracyDisplay)
+			layout += Translator.translateFormat('keScoreText', PlayState.songScore, PlayState.comboBreaks, FlxMath.roundDecimal(PlayState.accuracy, 2),
+				generateRanking());
+		else
+			layout += Translator.translateFormat('keScoreTextNoAcc', PlayState.songScore);
 		scoreTxt.text = layout;
 		if (judgesTxt != null)
 			judgesTxt.text = getJudgeCounts();
@@ -147,7 +147,7 @@ class Kade extends BaseHUD {
 		var str:String = '';
 		if (PlayState.judgementData != null && PlayState.judgementData.activeList.length > 0)
 			for (idx => judge in PlayState.judgementData.activeList)
-				str += '${judge.name}: ${judge.hits}\n';
+				str += '${Translator.translateString('judge_' + judge.name)}: ${judge.hits}\n';
 		return str;
 	}
 

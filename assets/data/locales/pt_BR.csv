@@ -1,0 +1,80 @@
+#key,translationString
+#some of these keys don't have {number} values
+#these are useful for formatting, yes
+#but if you're intentionally updating some text every frame
+#DO NOT use those as they can be a little bit expensive
+
+name,Portuguese (Brazil)
+nativeName,Português (Brasil)
+
+The Funkin' Crew Inc,A Funkin' Crew.
+present,apresenta
+In Partnership,Em parceria
+with,com
+Newgrounds,Newgrounds
+
+freeplay_PB,RECORDE PESSOAL:
+
+difficulty_easy,Fácil
+difficulty_normal,Normal
+difficulty_hard,Difícil
+difficulty_erect,Durão
+difficulty_nightmare,Medonho
+
+score,Pontos: {1}
+comboBreaks,Combo Breaks: {1}
+accuracy,Precisão: {1}
+keScoreText,Pontos: {1} | Combo Breaks: {2} | Precisão: {3}% | {4}
+keScoreTextNoAcc,Pontos: {1}
+
+pause_resumeSong,Continuar
+pause_restartSong,Reiniciar Musica
+pause_exit,Sair
+
+judge_Sick,Sick
+judge_Great,Great
+judge_Good,Good
+judge_Bad,Bad
+judge_Shit,Shit
+judge_Miss,Erro
+
+judge_Sick_plural,Sicks
+judge_Great_plural,Greats
+judge_Good_plural,Goods
+judge_Bad_plural,Bads
+judge_Shit_plural,Shits
+judge_Miss_plural,Erros
+
+option_frameRate,Taxa de Quadros
+option_scrollType,Tipo de Scroll
+option_centerStrums,Centralizar Notas
+option_ghostTapping,Ghost Tapping
+option_etternaMode,Precisão Avançada
+option_scrollSpeed,Velocidade das Notas
+option_lowQualityMode,Qualidade Baixa
+option_accuracyDisplay,Mais Estatísticas
+option_showSongPosition,Barra de Progresso
+option_showJudgeCounts,Contador de Classificações
+option_showNps,Notas por Segundo
+option_noteSplashes,Note Splashes
+option_distractions,Distrações
+option_language,Idioma
+option_strumUnderlay,Escurecer Interface
+option_strumUnderlayType,Tipo de Escuridão
+
+optiondesc_frameRate,Quantas vezes o jogo é atualizado e mostrado na tela
+optiondesc_scrollType,Muda a direção de deslize das notas
+optiondesc_centerStrums,Centraliza suas notas e esconde as do seu oponente
+optiondesc_ghostTapping,Deixa tu apertar teclas quando não há notas pra se acertar, sem penalidade.
+optiondesc_etternaMode,Muda a calculadora de precisão pra usar o sistema do Etterna\nTe encoraja a jogar bem, mas é meio maldoso com novos jogadores 
+optiondesc_scrollSpeed,Substitui a velocidade das notas com sua própria\nSe aplicará se o valór não for 1
+optiondesc_lowQualityMode,Esconde certos elementos no fundo para ajudar com o carregamento (em algums casos, pode ajudar com desempenho)
+optiondesc_accuracyDisplay,Mostra Erros e Precisão no Texto de Pontuação
+optiondesc_showSongPosition,Auto-explicativo, Afeta o HUD
+optiondesc_showJudgeCounts,Mostra um contador de classificações na esquerda do HUD
+optiondesc_showNps,Mostra um contador de Notas por Segundo no HUD
+optiondesc_noteSplashes,Acertar um Sick/Great mostrará um efeito legal que te da uma ereção sinistra
+optiondesc_distractions,Desativa certos sons e efeitos que podem te distrair
+optiondesc_language,Muda todos os textos no jogo para usar um idioma diferente
+optiondesc_strumUnderlay,Mostra um fundo escuro atrás de suas notas ou no cenário
+optiondesc_strumUnderlayType,Decide onde o fundo escuro da opção acima se mostrará

@@ -72,6 +72,7 @@ class ScriptLoader {
 		interp.variables.set("FlxColor", new data.hscript.FlxColorWrapper());
 		interp.variables.set("state", flixel.FlxG.state);
 		// game
+		interp.variables.set("Translator", data.Locale.current);
 		interp.variables.set("Preferences", data.Preferences);
 		interp.variables.set("CoolUtil", util.CoolUtil);
 		interp.variables.set("Paths", util.Paths);

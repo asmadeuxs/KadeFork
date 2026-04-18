@@ -18,22 +18,19 @@ using util.CoolUtil;
 
 class PauseSubstate extends MusicBeatSubstate {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
-
 	var menuItems:Array<SimpleMenuButton> = null;
+
 	var curSelected:Int = 0;
-
 	var pauseMusic:FlxSound;
-
-	var offsetChanged:Bool = false;
 
 	public function new(x:Float, y:Float) {
 		super();
 
 		menuItems = [
-			{name: 'Resume', func: () -> close()},
-			{name: 'Restart Song', func: () -> FlxG.resetState()},
+			{name: Translator.translateString('pause_resumeSong'), func: () -> close()},
+			{name: Translator.translateString('pause_restartSong'), func: () -> FlxG.resetState()},
 			{
-				name: 'Exit to menu',
+				name: Translator.translateString('pause_exit'),
 				func: () -> {
 					if (!FlxG.sound.music.playing) {
 						FlxG.sound.playMusic(Paths.inst(PlayState.songName), 0);
@@ -64,7 +61,7 @@ class PauseSubstate extends MusicBeatSubstate {
 		add(levelInfo);
 
 		var levelDifficulty:FlxText = new FlxText(20, 15 + 32, 0, "", 32);
-		levelDifficulty.text += PlayState.difficulty.toUpperCase();
+		levelDifficulty.text += Translator.translateString('difficulty_' + PlayState.difficulty).toUpperCase();
 		levelDifficulty.scrollFactor.set();
 		levelDifficulty.setFormat(Paths.font('vcr.ttf'), 32);
 		levelDifficulty.updateHitbox();
@@ -114,15 +111,9 @@ class PauseSubstate extends MusicBeatSubstate {
 	}
 
 	function changeSelection(change:Int = 0):Void {
-		curSelected += change;
-
-		if (curSelected < 0)
-			curSelected = menuItems.length - 1;
-		if (curSelected >= menuItems.length)
-			curSelected = 0;
+		curSelected = flixel.math.FlxMath.wrap(curSelected + change, 0, menuItems.length - 1);
 
 		var bullShit:Int = 0;
-
 		for (item in grpMenuShit.members) {
 			item.targetY = bullShit - curSelected;
 			bullShit++;

@@ -901,12 +901,8 @@ class PlayState extends MusicBeatState {
 		health += judgementData.getHealthBonus(missJudge, health);
 		popUpRating(missJudge.image);
 		popUpCombo(combo, missJudge);
-
-		if (daNote != null) {
-			var noteDiff:Float = Math.abs(daNote.strumTime - Conductor.songPosition);
-			if (Preferences.user.etternaMode)
-				totalNotesHit += util.EtternaFunctions.wife3(noteDiff, 1.7);
-		}
+		//if (daNote != null && Preferences.user.etternaMode)
+		//		totalNotesHit += util.EtternaFunctions.wife3(Math.abs(daNote.strumTime - Conductor.songPosition), 1.7);
 		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 		boyfriend.miss(direction, true);
 		boyfriend.danceCooldown = (Conductor.semiquaver) * 0.2;
@@ -958,9 +954,9 @@ class PlayState extends MusicBeatState {
 	private function scoreNote(daNote:Note):Void {
 		var score:Float = daNote.judgement.score;
 		var noteDiff:Float = Math.abs(Conductor.songPosition - daNote.strumTime);
-		if (Preferences.user.etternaMode)
-			totalNotesHit += util.EtternaFunctions.wife3(judgementData.maxHitWindow, noteDiff);
-		else
+		//if (Preferences.user.etternaMode)
+		//	totalNotesHit += util.EtternaFunctions.wife3(judgementData.maxHitWindow, noteDiff);
+		//else
 			totalNotesHit += daNote.judgement.accuracy;
 		health += judgementData.getHealthBonus(daNote.judgement, health);
 		daNote.judgement.hits++;

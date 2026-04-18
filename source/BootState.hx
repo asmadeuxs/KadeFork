@@ -20,6 +20,7 @@ class BootState extends flixel.FlxState {
 		data.Highscore.load();
 		Preferences.setFPSCap(Preferences.user.frameRate);
 		// init other data
+		new data.Locale(Preferences.user.language);
 		new Controls(Controls.defaultActions.copy());
 
 		util.Mods.scan(true);

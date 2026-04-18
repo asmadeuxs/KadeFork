@@ -40,17 +40,19 @@ class CoolUtil {
 
 	private var commentStarters = ["//", "#", "--"];
 
-	public static function coolTextFile(path:String):Array<String> {
-		var daList:Array<String> = Paths.getText(path).trim().split('\n');
+	public static function isComment(line:String):Bool
+		return line.startsWith("#") || line.startsWith("//") || line.startsWith("--") || line.startsWith("/*") && line.endsWith("*/");
+
+	public static function coolTextFile(path:String, ?noTrim:Bool = false):Array<String> {
+		var file:String = Paths.getText(path);
+		if (!noTrim)
+			file = file.trim();
+		var daList:Array<String> = file.split('\n');
 		for (i => t in daList) {
 			t = t.trim();
-			if (t.length == 0
-				|| t.startsWith("#")
-				|| t.startsWith("//")
-				|| t.startsWith("--")
-				|| (t.startsWith("/*") && t.endsWith("*/")))
+			if (t.length == 0 || isComment(t))
 				daList.remove(t);
 		}
-		return [for (i in 0...daList.length) daList[i] = daList[i].trim()];
+		return [for (i in 0...daList.length) daList[i] = !noTrim ? daList[i].trim() : daList[i]];
 	}
 }
