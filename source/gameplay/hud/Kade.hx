@@ -74,7 +74,7 @@ class Kade extends BaseHUD {
 		}
 		updateScoreText();
 
-		var diff:String =Translator.translateString('difficulty_' + PlayState.difficulty);
+		var diff:String = Translator.translateString('difficulty_' + PlayState.difficulty);
 		var songText:FlxText = new FlxText(5, 0, 0, '${PlayState.moonMeta.title} ${diff.toUpperCase()} - KE v${Main.versions.KADE}', 12);
 		songText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
 		songText.y = (FlxG.height - songText.height) - 3;
@@ -133,11 +133,13 @@ class Kade extends BaseHUD {
 			layout = '${PlayState.nps} / ${PlayState.maxNps} NPS | ';
 		else
 			layout = '';
-		if (Preferences.user.accuracyDisplay)
-			layout += Translator.translateFormat('keScoreText', PlayState.songScore, PlayState.comboBreaks, FlxMath.roundDecimal(PlayState.accuracy, 2),
-				generateRanking());
-		else
-			layout += Translator.translateFormat('keScoreTextNoAcc', PlayState.songScore);
+		var score:Int = PlayState.session?.score ?? 0;
+		if (Preferences.user.accuracyDisplay) {
+			var cbs:Int = PlayState.session?.comboBreaks ?? 0;
+			var acc:Float = PlayState.session?.calculateAccuracy() ?? 0.0;
+			layout += Translator.translateFormat('keScoreText', score, cbs, FlxMath.roundDecimal(acc, 2), generateRanking());
+		} else
+			layout += Translator.translateFormat('keScoreTextNoAcc', score);
 		scoreTxt.text = layout;
 		if (judgesTxt != null)
 			judgesTxt.text = getJudgeCounts();
@@ -145,8 +147,8 @@ class Kade extends BaseHUD {
 
 	public function getJudgeCounts() {
 		var str:String = '';
-		if (PlayState.judgementData != null && PlayState.judgementData.activeList.length > 0)
-			for (idx => judge in PlayState.judgementData.activeList)
+		if (PlayState.session != null && PlayState.session.judgeMan.activeList?.length > 0)
+			for (idx => judge in PlayState.session.judgeMan.activeList)
 				str += '${Translator.translateString('judge_' + judge.name)}: ${judge.hits}\n';
 		return str;
 	}
@@ -163,16 +165,17 @@ class Kade extends BaseHUD {
 	}
 
 	function generateRanking():String {
-		if (PlayState.current == null || PlayState.accuracy <= 0.0)
+		var acc:Float = PlayState.session?.calculateAccuracy() ?? 0.0;
+		if (PlayState.current == null || acc <= 0.0)
 			return "N/A";
-		var ranking:String = PlayState.judgementData.getClearFlag();
+		var ranking:String = PlayState.session?.judgeMan?.getClearFlag() ?? 'N/A';
 		if (ranking == "N/A")
 			return ranking;
 		else
 			ranking = '($ranking) ';
 
 		// WIFE TIME :)))) (based on Wife3)
-		ranking += switch PlayState.accuracy {
+		ranking += switch acc {
 			case(_ >= 99.9935) => true: "AAAAA";
 			case(_ >= 99.980) => true: "AAAA:";
 			case(_ >= 99.970) => true: "AAAA.";

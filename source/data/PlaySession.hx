@@ -1,0 +1,60 @@
+package data;
+
+import data.JudgementManager;
+
+class PlaySession {
+	public var score:Int = 0;
+	public var misses:Int = 0;
+	public var comboBreaks:Int = 0;
+	public var invalid:Bool = false;
+	public var combo:Int = 0;
+
+	public var totalNotesHit:Float = 0.0;
+	public var totalPlayed:Int = 0;
+
+	public var judgeMan:JudgementManager;
+
+	public function new():Void {
+		judgeMan = new JudgementManager();
+	}
+
+	public function reset():Void {
+		judgeMan = new JudgementManager();
+		this.comboBreaks = 0;
+		this.misses = 0;
+		this.score = 0;
+		this.combo = 0;
+	}
+
+	public function scoreNote(daNote:gameplay.Note):Void {
+		var noteDiff:Float = Math.abs(Conductor.songPosition - daNote.strumTime);
+		if (daNote.judgement == null)
+			daNote.judgement = judgeMan.judgeTime(noteDiff);
+		// if (Preferences.user.etternaMode)
+		//	totalNotesHit += util.EtternaFunctions.wife3(judgementData.maxHitWindow, noteDiff);
+		// else
+		totalNotesHit += daNote.judgement.accuracy;
+		score += Math.round(daNote.judgement.score);
+		daNote.judgement.hits++;
+		if (daNote.judgement.comboBreak == true)
+			breakCombo();
+	}
+
+	public function increaseCombo(by:Int = 1):Int {
+		if (combo < 0)
+			combo = 0;
+		combo += by;
+		return combo;
+	}
+
+	public function breakCombo():Void {
+		comboBreaks++;
+		if (combo > 0)
+			combo = 0;
+		else
+			combo--;
+	}
+
+	public function calculateAccuracy():Float
+		return totalNotesHit < 1 ? 0.00 : Math.max(0, totalNotesHit / totalPlayed * 100);
+}

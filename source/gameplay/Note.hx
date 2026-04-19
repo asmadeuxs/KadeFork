@@ -1,5 +1,6 @@
 package gameplay;
 
+import data.JudgementManager.Judgement;
 import data.hscript.Script;
 import data.hscript.ScriptLoader;
 import flixel.FlxG;
@@ -44,7 +45,7 @@ class Note extends gameplay.FunkinSprite {
 		if (!mustPress || wasGoodHit || missed || tooLate)
 			return false;
 		var pos:Float = Conductor.songPosition;
-		var safeZone:Float = PlayState.judgementData?.maxHitWindow ?? 180.0;
+		var safeZone:Float = PlayState.session?.judgeMan?.maxHitWindow ?? 180.0;
 		return strumTime >= pos - (safeZone * hitMultiplier[0]) && strumTime <= pos + (safeZone * hitMultiplier[1]);
 	}
 
@@ -62,7 +63,7 @@ class Note extends gameplay.FunkinSprite {
 	 */
 	public var hitMultiplier:Array<Float> = [1.0, 1.0];
 
-	public var judgement:data.JudgementData.Judgement;
+	public var judgement:Judgement;
 
 	var colorArray:Array<String> = ["purple", "blue", "green", "red"];
 

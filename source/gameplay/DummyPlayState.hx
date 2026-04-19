@@ -136,20 +136,16 @@ class DummyPlayState extends MusicBeatState {
 		noteTypes.resize(0);
 		noteTypes = null;
 		generatedMusic = true;
-
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, keyShit);
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, keyUnshit);
 	}
 
 	override function destroy() {
 		Conductor.current.active = false;
 		Conductor.current.stopMusic();
 		Conductor.current.clearTracks();
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, keyUnshit);
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, keyShit);
 	}
 
 	var starting:Bool = true;
+	var holdInputs:Array<Bool> = [false, false, false, false];
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
@@ -172,6 +168,16 @@ class DummyPlayState extends MusicBeatState {
 				swagNote.mustPress = (strumline == playerStrums);
 			}
 			noteSpawnIndex++;
+		}
+
+		var noteActions = PlayState.noteActions;
+		for (i in 0...noteActions.length) {
+			var action = noteActions[i];
+			if (Controls.current.justPressed(action))
+				keyShit(i);
+			holdInputs[i] = Controls.current.pressed(noteActions[i]);
+			if (Controls.current.justReleased(action))
+				keyUnshit(i);
 		}
 
 		if (generatedMusic) {
@@ -229,10 +235,7 @@ class DummyPlayState extends MusicBeatState {
 		}
 	}
 
-	public var holdInputs:Array<Bool> = [false, false, false, false];
-
-	public function keyShit(event:KeyboardEvent):Void {
-		var key:Int = gameplay.PlayState.getStrumFromKey(event.keyCode);
+	public function keyShit(key:Int = -1):Void {
 		if (perfectMode || key == -1)
 			return;
 
@@ -254,8 +257,7 @@ class DummyPlayState extends MusicBeatState {
 			playerStrums.playAnim(key, "pressed");
 	}
 
-	public function keyUnshit(event:KeyboardEvent):Void {
-		var key:Int = gameplay.PlayState.getStrumFromKey(event.keyCode);
+	public function keyUnshit(key:Int = -1):Void {
 		if (perfectMode || key < 0)
 			return;
 		holdInputs[key] = false;

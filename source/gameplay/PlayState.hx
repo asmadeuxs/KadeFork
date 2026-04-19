@@ -1,7 +1,8 @@
 package gameplay;
 
 import data.Highscore;
-import data.JudgementData;
+import data.JudgementManager.Judgement;
+import data.PlaySession;
 import data.hscript.Script;
 import data.hscript.ScriptLoader;
 import data.song.KadeForkChart.NoteData;
@@ -14,7 +15,6 @@ import flixel.FlxState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
-import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.sound.FlxSound;
@@ -29,7 +29,6 @@ import gameplay.hud.*;
 import moonchart.formats.BasicFormat;
 import moonchart.formats.fnf.legacy.FNFLegacy.FNFLegacyMetaValues;
 import moonchart.formats.fnf.legacy.FNFPsych;
-import openfl.events.KeyboardEvent;
 import openfl.filters.ShaderFilter;
 import sys.FileSystem;
 import ui.HealthIcon;
@@ -44,6 +43,7 @@ class PlayState extends MusicBeatState {
 	public static var SONG(get, set):SwagSong;
 	public static var moonSong(default, set):DynamicFormat;
 	public static var moonMeta:BasicMetaData;
+
 	public static var curStage:String = '';
 	public static var isStoryMode:Bool = false;
 	public static var storyWeek:Int = 0;
@@ -70,44 +70,11 @@ class PlayState extends MusicBeatState {
 	static function get_songTitle():String
 		return moonMeta?.title ?? songName ?? 'Unknown Song';
 
-	// okay seriously we really need to replace this
-	// I'm thinking some shit like this
-	/*
-		typedef PlaySession = {
-			story:Bool,
-			difficulty:String, // not a number
-			levelName:String, // level file instead of level ID
-		}
-	 */
-	// then we pass it on PlayState.new
-	// also ofc softcoding curStage and gfVersion because we're not caveman
-	// probabgly once moonchart is implemented
-	// -asmadeuxs
-	// level info end
-	public static var judgementData:JudgementData;
-	public static var invalidSession:Bool = false;
-
 	public static var campaignScore:Int = 0;
-
-	// Score shit | TODO: move this to a class so we can save and load
-	// probably after highscore rewrite -asmadeuxs
-	public static var songScore:Int = 0;
-
-	// keeping this variable around just for compatibility sake
-	public static var misses(get, never):Int;
-
-	static function get_misses():Int
-		return judgementData?.getMiss()?.hits ?? 0;
-
-	public static var comboBreaks:Int = 0;
-	public static var combo:Int = 0;
+	public static var session:PlaySession;
 
 	public static var nps:Int = 0;
 	public static var maxNps:Int = 0;
-
-	public static var accuracy:Float = 0.00;
-	public static var totalNotesHit:Float = 0;
-	public static var totalPlayed:Int = 0;
 
 	public var dad:Character;
 	public var gf:Character;
@@ -167,15 +134,6 @@ class PlayState extends MusicBeatState {
 	**/
 	var stunningPausesInput:Bool = false;
 
-	public function resetScoring() {
-		combo = 0;
-		songScore = 0;
-		comboBreaks = 0;
-		totalNotesHit = 0;
-		totalPlayed = 0;
-		accuracy = 0;
-	}
-
 	override public function create() {
 		super.create();
 		current = this;
@@ -183,8 +141,10 @@ class PlayState extends MusicBeatState {
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
-		resetScoring();
-		judgementData = new JudgementData();
+		if (session != null)
+			session.reset();
+		else
+			session = new PlaySession();
 
 		#if hxdiscord_rpc
 		iconRPC = moonMeta.extraData.get(PLAYER_2) ?? "bf";
@@ -320,9 +280,7 @@ class PlayState extends MusicBeatState {
 		Conductor.current.active = false;
 		Conductor.current.stopMusic();
 		Conductor.current.clearTracks();
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, keyUnshit);
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, keyShit);
-		judgementData = null;
+		session.judgeMan = null;
 		current = null;
 	}
 
@@ -332,6 +290,7 @@ class PlayState extends MusicBeatState {
 	function startCountdown():Void {
 		inCutscene = false;
 		startedCountdown = true;
+		inputEnabled = true;
 
 		Conductor.current.active = true;
 		Conductor.setTime(-Conductor.crotchet * 6.7);
@@ -438,9 +397,6 @@ class PlayState extends MusicBeatState {
 
 		noteTypes.resize(0);
 		noteTypes = null;
-
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, keyShit);
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, keyUnshit);
 		generatedMusic = true;
 	}
 
@@ -492,17 +448,24 @@ class PlayState extends MusicBeatState {
 		paused = true;
 	}
 
+	// find a way to customise this later          VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+	public static var noteActions:Array<String> = ["note_left", "note_down", "note_up", "note_right"];
+
+	public var holdInputs:Array<Bool> = [false, false, false, false];
+
+	public var inputEnabled:Bool = false;
+
 	override public function update(elapsed:Float) { // debug keys
 		#if debug
 		if (FlxG.keys.justPressed.ONE) {
-			invalidSession = true;
+			session.invalid = true;
 			endSong();
 		}
 		if (FlxG.keys.justPressed.SEVEN && startedCountdown)
 			FlxG.switchState(new editor.ChartEditor());
 		#end
 		if (FlxG.keys.justPressed.F6) {
-			invalidSession = true;
+			session.invalid = true;
 			perfectMode = !perfectMode;
 			perfectText.visible = perfectMode;
 		}
@@ -552,21 +515,29 @@ class PlayState extends MusicBeatState {
 			DiscordClient.changePresence('${moonMeta.title} (${difficulty.toUpperCase()})', 'Game Over!', iconRPC);
 			#end
 		}
-
-		while (noteSpawnIndex < unspawnNotes.length) {
-			var nextNote:NoteData = unspawnNotes[noteSpawnIndex];
-			if (nextNote.time - Conductor.songPosition > 1500)
-				break;
-			var strumline:Strumline = strumlines.members[nextNote.owner];
-			if (strumline != null) {
-				var oldNote:Note = (notes.members.length > 0) ? notes.members[notes.members.length - 1] : null;
-				var swagNote:Note = notes.recycle(Note).setup(nextNote.time, nextNote.lane, nextNote.owner, nextNote.length, nextNote.type, oldNote);
-				if (nextNote.type == null || nextNote.type == 'default' || nextNote.type == '0')
-					strumline.noteskin.generateArrow(nextNote.lane, swagNote);
-				swagNote.mustPress = (strumline == playerStrums);
-			}
-			noteSpawnIndex++;
+		for (i in 0...noteActions.length) {
+			var action = noteActions[i];
+			if (Controls.current.justPressed(action))
+				keyShit(i);
+			holdInputs[i] = Controls.current.pressed(noteActions[i]);
+			if (Controls.current.justReleased(action))
+				keyUnshit(i);
 		}
+		for (i in 0...noteActions.length)
+			while (noteSpawnIndex < unspawnNotes.length) {
+				var nextNote:NoteData = unspawnNotes[noteSpawnIndex];
+				if (nextNote.time - Conductor.songPosition > 1500)
+					break;
+				var strumline:Strumline = strumlines.members[nextNote.owner];
+				if (strumline != null) {
+					var oldNote:Note = (notes.members.length > 0) ? notes.members[notes.members.length - 1] : null;
+					var swagNote:Note = notes.recycle(Note).setup(nextNote.time, nextNote.lane, nextNote.owner, nextNote.length, nextNote.type, oldNote);
+					if (nextNote.type == null || nextNote.type == 'default' || nextNote.type == '0')
+						strumline.noteskin.generateArrow(nextNote.lane, swagNote);
+					swagNote.mustPress = (strumline == playerStrums);
+				}
+				noteSpawnIndex++;
+			}
 
 		if (generatedMusic) {
 			notes.forEachAlive(function(daNote:Note) {
@@ -618,7 +589,7 @@ class PlayState extends MusicBeatState {
 						noteKill = false;
 					}
 				} else if (daNote.mustPress) {
-					var safeZone:Float = judgementData.maxHitWindow ?? 180.0;
+					var safeZone:Float = session.judgeMan.maxHitWindow ?? 180.0;
 					if (daNote.strumTime < Conductor.songPosition - safeZone)
 						daNote.tooLate = true;
 					if (!daNote.missed && daNote.strumTime - Conductor.songPosition < -(150 + daNote.sustainLength)) {
@@ -642,12 +613,12 @@ class PlayState extends MusicBeatState {
 	function endSong():Void {
 		canPause = false;
 		Conductor.current.stopMusic();
-		if (!invalidSession)
-			Highscore.saveScore(songName, Math.round(songScore), difficulty);
+		if (!session.invalid)
+			Highscore.saveScore(songName, Math.round(session.score), difficulty);
 
 		/*
 			if (isStoryMode) {
-				campaignScore += Math.round(songScore);
+				campaignScore += Math.round(session.score);
 				storyPlaylist.remove(storyPlaylist[0]);
 
 				if (storyPlaylist.length <= 0) {
@@ -657,7 +628,7 @@ class PlayState extends MusicBeatState {
 					transOut = FlxTransitionableState.defaultTransOut;
 					FlxG.switchState(new StoryMenuState());
 					StoryMenuState.weekUnlocked[Std.int(Math.min(storyWeek + 1, StoryMenuState.weekUnlocked.length - 1))] = true;
-					if (!invalidSession)
+					if (!session.invalid)
 						Highscore.saveWeekScore(storyWeek, campaignScore, difficulty);
 					FlxG.save.data.weekUnlocked = StoryMenuState.weekUnlocked;
 					FlxG.save.flush();
@@ -687,13 +658,14 @@ class PlayState extends MusicBeatState {
 	var endingSong:Bool = false;
 	var hits:Array<Float> = [];
 	var currentTimingShown:FlxText = null;
-	var showJudgement:Bool = true;
+	var showRating:Bool = true;
 	var showComboNumbers:Bool = true;
 	var showComboSprite:Bool = false;
 
 	public function popUpScore(daNote:Note):Void {
-		popUpRating(daNote.judgement.image);
-		popUpCombo(combo, daNote.judgement);
+		if (showRating)
+			popUpRating(daNote.judgement.image);
+		popUpCombo(session.combo, daNote.judgement);
 		var noteDiff:Float = Math.abs(Conductor.songPosition - daNote.strumTime);
 		popUpMillisecondDisplay(FlxMath.roundDecimal(noteDiff, 3), daNote.judgement);
 	}
@@ -736,8 +708,8 @@ class PlayState extends MusicBeatState {
 		if (showComboSprite)
 			comboDisplay.add(comboSpr);
 
-		var seperatedScore:Array<String> = Std.string(combo).split('');
 		var numScoreScale:Float = 0.5;
+		var seperatedScore:Array<String> = Std.string(combo).split('');
 		for (daLoop => i in seperatedScore) {
 			var numScore:FlxSprite = new FlxSprite(0, comboSpr.y + 30).loadGraphic(Paths.image('gameplay/ui/score/num$i'));
 			numScore.setGraphicSize(Std.int(numScore.width * numScoreScale));
@@ -748,7 +720,8 @@ class PlayState extends MusicBeatState {
 			numScore.acceleration.y = FlxG.random.int(200, 300);
 			numScore.velocity.y -= FlxG.random.int(140, 160);
 			numScore.velocity.x = FlxG.random.float(-5, 5);
-			comboDisplay.add(numScore);
+			if (showComboNumbers)
+				comboDisplay.add(numScore);
 
 			FlxTween.tween(numScore, {alpha: 0}, 0.2, {
 				onComplete: (tween:FlxTween) -> numScore.destroy(),
@@ -794,33 +767,14 @@ class PlayState extends MusicBeatState {
 		});
 	}
 
-	// find a way to customise this later          VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-	private static var noteActions:Array<String> = ["note_left", "note_down", "note_up", "note_right"];
-
-	public var holdInputs:Array<Bool> = [false, false, false, false];
-
-	public static function getStrumFromKey(key:FlxKey):Int {
-		if (key != NONE) {
-			for (i in 0...noteActions.length) { // it didn't let me just use `controls.` for some reason.
-				var keys:Array<FlxKey> = Controls.current.actions[noteActions[i]];
-				for (noteKey in keys)
-					if (key == noteKey && (FlxG.keys.checkStatus(key, JUST_PRESSED) || FlxG.keys.checkStatus(key, JUST_RELEASED)))
-						return i;
-			}
-		}
-		return -1;
-	}
-
-	public function keyShit(event:KeyboardEvent):Void {
-		var key:Int = getStrumFromKey(event.keyCode);
+	public function keyShit(key:Int = -1):Void {
 		var stunned:Bool = boyfriend.stunned && stunningPausesInput;
-		if (perfectMode || key == -1 || paused || inCutscene || !generatedMusic || endingSong || stunned)
+		if (key == -1 || perfectMode || paused || inCutscene || !generatedMusic || endingSong || stunned)
 			return;
 
 		var strum = playerStrums.members[key];
 		var gottaHits:Array<Note> = notes.members.filter(function(nt:Note):Bool return nt != null && nt.canBeHit && !nt.isSustainNote && nt.noteData == key);
 		gottaHits.sort(function(a:Note, b:Note):Int return Std.int(a.strumTime - b.strumTime));
-		holdInputs[key] = true;
 
 		if (gottaHits.length != 0) {
 			if (gottaHits[0].isMine)
@@ -835,12 +789,10 @@ class PlayState extends MusicBeatState {
 		}
 	}
 
-	public function keyUnshit(event:KeyboardEvent):Void {
-		var key:Int = getStrumFromKey(event.keyCode);
+	public function keyUnshit(key:Int = -1):Void {
 		var stunned:Bool = boyfriend.stunned && stunningPausesInput;
 		if (perfectMode || key == -1 || paused || inCutscene || !generatedMusic || endingSong || stunned)
 			return;
-		holdInputs[key] = false;
 		playerStrums.playAnim(key, "static");
 	}
 
@@ -853,32 +805,24 @@ class PlayState extends MusicBeatState {
 			if (caller == ScriptLoader.STOP_FUNC)
 				return;
 		}
-		songScore -= 10;
-		if (combo > 5 && gf.animOffsets.exists('sad'))
+		session.score -= 10;
+		if (session.combo > 5 && gf.animOffsets.exists('sad'))
 			gf.playAnim('sad');
-		comboBreaks++;
-		if (combo > 0)
-			combo = 0;
-		else
-			combo--;
-		var missJudge = judgementData.getMiss();
-		missJudge.hits++;
-		health += judgementData.getHealthBonus(missJudge, health);
-		popUpRating(missJudge.image);
-		popUpCombo(combo, missJudge);
+		session.breakCombo();
+		var missJudge = session.judgeMan.getMiss();
+		if (missJudge != null) {
+			missJudge.hits++;
+			health += session.judgeMan.getHealthBonus(missJudge, health);
+			popUpRating(missJudge.image);
+			popUpCombo(session.combo, missJudge);
+		}
 		// if (daNote != null && Preferences.user.etternaMode)
-		//		totalNotesHit += util.EtternaFunctions.wife3(Math.abs(daNote.strumTime - Conductor.songPosition), 1.7);
+		//		session.totalNotesHit += util.EtternaFunctions.wife3(Math.abs(daNote.strumTime - Conductor.songPosition), 1.7);
 		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 		boyfriend.miss(direction, true);
 		boyfriend.danceCooldown = (Conductor.semiquaver) * 0.2;
-		updateAccuracy();
 		if (currentHUD != null)
 			currentHUD.updateScoreText();
-	}
-
-	function updateAccuracy() {
-		totalPlayed += 1;
-		accuracy = Math.max(0, totalNotesHit / totalPlayed * 100);
 	}
 
 	function goodNoteHit(note:Note):Void {
@@ -888,22 +832,17 @@ class PlayState extends MusicBeatState {
 				return;
 		}
 
-		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition);
-		note.judgement = judgementData.judgeTime(noteDiff);
-
-		if (!note.isSustainNote)
-			notesHitArray.push(Date.now());
-
 		if (!note.isSustainNote) {
-			scoreNote(note);
-			if (combo < 0)
-				combo = 0;
-			combo += 1;
-			popUpScore(note);
+			session.scoreNote(note);
+			session.increaseCombo(1);
+			health += session.judgeMan.getHealthBonus(note.judgement, health);
 			if (Preferences.user.noteSplashes && note.judgement.splash)
 				playerStrums.spawnSplash(note.noteData);
+			notesHitArray.push(Date.now());
+			popUpScore(note);
 		} else
-			totalNotesHit += 1;
+			session.totalNotesHit += 1;
+		session.totalPlayed += 1;
 
 		boyfriend.sing(note.noteData, true);
 		boyfriend.danceCooldown = (Conductor.semiquaver) + note.sustainLength;
@@ -911,25 +850,8 @@ class PlayState extends MusicBeatState {
 		for (vocal in Conductor.current.tracks)
 			vocal.volume = 1;
 		note.kill();
-		updateAccuracy();
 		if (currentHUD != null)
 			currentHUD.updateScoreText();
-	}
-
-	private function scoreNote(daNote:Note):Void {
-		var score:Float = daNote.judgement.score;
-		var noteDiff:Float = Math.abs(Conductor.songPosition - daNote.strumTime);
-		// if (Preferences.user.etternaMode)
-		//	totalNotesHit += util.EtternaFunctions.wife3(judgementData.maxHitWindow, noteDiff);
-		// else
-		totalNotesHit += daNote.judgement.accuracy;
-		health += judgementData.getHealthBonus(daNote.judgement, health);
-		daNote.judgement.hits++;
-		songScore += Math.round(score);
-		if (daNote.judgement.comboBreak == true) {
-			comboBreaks++; // unused until I figure something out
-			combo = 0;
-		}
 	}
 
 	override function beatHit(curBeat:Int) {

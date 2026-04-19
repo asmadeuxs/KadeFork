@@ -148,9 +148,10 @@ class OptionsMenu extends MusicBeatSubstate {
 		currentCat = categoryOrder[catSelected];
 
 		// it wouldn't let me do it up there
-		for (i in optionStash.get(categoryOrder[1]))
-			if (i.variable == 'language')
-				i.setFunc = onLanguageChanged;
+		for (cat in optionStash.keys())
+			for (i in optionStash.get(cat))
+				if (i.variable == 'language')
+					i.setFunc = onLanguageChanged;
 
 		var bgCover:FlxSprite = new FlxSprite().makeGraphic(1, 1, 0xFF000000);
 		bgCover.scale.set(FlxG.width, FlxG.height);
@@ -310,7 +311,7 @@ class OptionsMenu extends MusicBeatSubstate {
 		if (catNameText != null)
 			catNameText.text = 'Viewing: $currentCat\nPress Q/E to change category\nPress Left/Right to change option';
 
-		for (i=>option in curCatOptions) {
+		for (i => option in curCatOptions) {
 			var nameText = new FlxText(20, 50 + i * 40, catFrame.width, Translator.translateString('option_${option.variable}'), 24);
 			var valText = new FlxText(0, nameText.y, catFrame.width - 20, option.valueString(), 24);
 			valText.font = optionsFont;

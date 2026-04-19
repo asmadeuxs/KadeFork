@@ -16,16 +16,15 @@ import flixel.util.FlxColor;
 	@:optional public var splash:Bool = false;
 }
 
-class JudgementData {
+class JudgementManager {
 	public var maxHitWindow:Float = 200.0;
 	public var activeList:Array<Judgement>;
 
 	public function new(?maxHitWindow:Null<Float>):Void {
 		activeList = getDefaultJudgements();
-		// maybe I need a miss judgement
 		if (maxHitWindow != null && maxHitWindow > 0.0)
 			this.maxHitWindow = maxHitWindow;
-	};
+	}
 
 	public function getPerfect()
 		return activeList[0];
@@ -104,7 +103,7 @@ class JudgementData {
 	// if you do add a judgement, modify this function, just in case it has a clear flag
 
 	public function getClearFlag():String {
-		var misses:Int = gameplay.PlayState.misses;
+		var misses:Int = getMiss().hits ?? 0;
 		if (misses > 0) // Single Miss = Miss Flag | <10 Misses = Single Digit Combo Breaks
 			return misses == 1 ? "MF" : misses < 10 ? "SDCB" : "Clear";
 		// get lowest judgement fc
@@ -114,7 +113,7 @@ class JudgementData {
 				lowestFC = i;
 		if (lowestFC == -1)
 			return "N/A";
-		var breaks:Int = gameplay.PlayState.comboBreaks;
+		var breaks:Int = gameplay.PlayState.session?.comboBreaks ?? 0;
 		return switch lowestFC {
 			case 0: "MFC"; // Marvelous (Sick) Full Combo
 			case 1: activeList[1].hits == 1 ? "WF" : "GFC+"; // White Flag / Great Full Combo
