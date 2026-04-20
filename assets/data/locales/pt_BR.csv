@@ -58,6 +58,18 @@ option_centerStrums,Centralizar Notas
 option_ghostTapping,Ghost Tapping
 option_etternaMode,Precisão Avançada
 option_scrollSpeed,Velocidade das Notas
+
+option_note_left,Nota Esquerda
+option_note_down,Nota Baixo
+option_note_up,Nota Cima
+option_note_right,Nota Direita
+option_ui_left,Menu Esquerda
+option_ui_down,Menu Baixo
+option_ui_up,Menu Cima
+option_ui_right,Menu Direita
+option_ui_accept,Menu Aceitar
+option_ui_back,Menu Voltar
+
 option_lowQualityMode,Qualidade Baixa
 option_accuracyDisplay,Mais Estatísticas
 option_showSongPosition,Barra de Progresso
@@ -75,6 +87,18 @@ optiondesc_centerStrums,Centraliza suas notas e esconde as do seu oponente
 optiondesc_ghostTapping,Deixa tu apertar teclas quando não há notas pra se acertar, sem penalidade.
 optiondesc_etternaMode,Muda a calculadora de precisão pra usar o sistema do Etterna\nTe encoraja a jogar bem, mas é meio maldoso com novos jogadores 
 optiondesc_scrollSpeed,Substitui a velocidade das notas com sua própria\nSe aplicará se o valór não for 1
+
+optiondesc_note_left,Tecla para acertar Notas apontando para à Esquerda
+optiondesc_note_down,Tecla para acertar Notas apontando para Baixo
+optiondesc_note_up,Tecla para acertar Notas apontando para Cima
+optiondesc_note_right,Tecla para acertar Notas apontando para à Direita
+optiondesc_ui_left,Tecla para ir à Esquerda em qualquer menu
+optiondesc_ui_down,Tecla para ir para Baixo em qualquer menu
+optiondesc_ui_up,Tecla para ir para Cima em qualquer menu
+optiondesc_ui_right,Tecla para ir à Direita em qualquer menu
+optiondesc_ui_accept,Tecla para confirmar ou ativar um elemento em um menu
+optiondesc_ui_back,Tecla para recusar ou sair de um menu
+
 optiondesc_lowQualityMode,Esconde certos elementos no fundo para ajudar com o carregamento (em algums casos, pode ajudar com desempenho)
 optiondesc_accuracyDisplay,Mostra Erros e Precisão no Texto de Pontuação
 optiondesc_showSongPosition,Auto-explicativo, Afeta o HUD

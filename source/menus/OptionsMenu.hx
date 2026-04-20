@@ -7,125 +7,152 @@ import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
+import flixel.input.keyboard.FlxKey;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
+import openfl.events.KeyboardEvent;
 import ui.FunkinCamera;
 
 using flixel.util.FlxSpriteUtil;
 
+typedef OptionCategory = {
+	name:String,
+	?type:Int,
+	options:Array<Option>
+}
+
 // I JUST MADE SOME BULLLLLLLLLLLLLLLLLLSHIT -asmadeuxs
 class OptionsMenu extends MusicBeatSubstate {
-	public var optionStash:Map<String, Array<Option>> = [
-		"Preferences" => [
-			{
-				type: "number",
-				name: "Framerate",
-				variable: "frameRate",
-				description: "How many times the game is updated and drawn to your screen",
-				numberStep: 1,
-				numberBoundLeft: 30,
-				numberBoundRight: 360,
-				setFunc: Preferences.setFPSCap
-			},
-			{
-				type: "choice",
-				name: "Scroll Type",
-				variable: "scrollType",
-				description: "Changes where the notes scroll to",
-				choices: ["Up", "Down"],
-			},
-			/*{
-				name: "Center Strums",
-				variable: "centerStrums",
-				description: "Centers your strums and hides the opponent's"
-			},*/
-			{
-				name: "Ghost Tapping",
-				description: "Lets you mash without penalty",
-				variable: "ghostTapping"
-			},
-			/*{
-				name: "Wife3 Accuracy",
-				description: "Changes the accuracy system to use Wife3\nIt's way more complex (math-wise) for the sake of encouraging super accurate hits\nBut may feel mean to newer players",
-				variable: "etternaMode"
-			},*/
-			{
-				type: "number",
-				name: "Scroll Speed",
-				variable: "scrollSpeed",
-				description: "Overrides the chart's scroll speed with your own\napplies if it's not set to 1",
-				numberStep: 0.1,
-				numberBoundLeft: 0.1,
-				numberBoundRight: 10.0
-			}
-		],
-		"Visuals" => [
-			{
-				name: "Low Quality",
-				description: "Disables certain background effects to increase loading times (and in some cases, performance.)",
-				variable: "lowQualityMode"
-			},
-			{
-				name: "Show More Stats",
-				description: "Shows Misses and Accuracy in the Score Text",
-				variable: "accuracyDisplay"
-			},
-			{
-				name: "Show Song Position",
-				description: "Shows a progress bar for the song in the HUD",
-				variable: "showSongPosition"
-			},
-			{
-				name: "Show Judgement Counts",
-				description: "Shows a judgement counter during gameplay on the left side of the screen",
-				variable: "showJudgeCounts"
-			},
-			{
-				name: "Notes per Second",
-				description: "Shows a NPS counter on the Score Text",
-				variable: "showNps"
-			},
-			{
-				name: "Note Splashes",
-				description: "Hitting a sick and above spawns a funny splash that gives you a boner", // thanks josh -asmadeuxs
-				variable: "noteSplashes",
-			},
-			{
-				name: "Distractions",
-				description: "Disables certain sounds and effects that may be distracting",
-				variable: "distractions"
-			},
-			{
-				name: "Language",
-				description: "Changes the game's text interfaces to be on a different language",
-				variable: "language",
-				type: "choice",
-				choices: Translator.getAvailableLanguageIDs()
-			},
-			{
-				type: "number",
-				name: "Interface Dim",
-				description: "Enables a background behind the strums or stage",
-				variable: "strumUnderlay",
-				// displayStyle: "{}%",
-				numberStep: 1.0,
-				numberBoundLeft: 0,
-				numberBoundRight: 100
-			},
-			{
-				name: "Dim Type",
-				description: "Where should the underlay be layered on",
-				variable: "strumUnderlayType",
-				choices: ["Strums", "Stage"],
-				type: "choice",
-			}
-		]
+	public var optionStash:Array<OptionCategory> = [
+		{
+			name: "Preferences",
+			options: [
+				{
+					type: "number",
+					name: "Framerate",
+					variable: "frameRate",
+					description: "How many times the game is updated and drawn to your screen",
+					numberStep: 1,
+					numberBoundLeft: 30,
+					numberBoundRight: 360,
+					setFunc: Preferences.setFPSCap
+				},
+				{
+					type: "choice",
+					name: "Scroll Type",
+					variable: "scrollType",
+					description: "Changes where the notes scroll to",
+					choices: ["Up", "Down"],
+				},
+				{type: "keybind", name: "Note Left", variable: "note_left"},
+				{type: "keybind", name: "Note Down", variable: "note_down"},
+				{type: "keybind", name: "Note Up", variable: "note_up"},
+				{type: "keybind", name: "Note Right", variable: "note_right"},
+				{
+					name: "Center Strums",
+					variable: "centerStrums",
+					description: "Centers your strums and hides the opponent's"
+				},
+				{
+					name: "Ghost Tapping",
+					description: "Lets you mash without penalty",
+					variable: "ghostTapping"
+				},
+				/*{
+					name: "Wife3 Accuracy",
+					description: "Changes the accuracy system to use Wife3\nIt's way more complex (math-wise) for the sake of encouraging super accurate hits\nBut may feel mean to newer players",
+					variable: "etternaMode"
+				},*/
+				{
+					type: "number",
+					name: "Scroll Speed",
+					variable: "scrollSpeed",
+					description: "Overrides the chart's scroll speed with your own\napplies if it's not set to 1",
+					numberStep: 0.1,
+					numberBoundLeft: 0.1,
+					numberBoundRight: 10.0
+				}
+			]
+		},
+		{
+			name: "Other Controls",
+			options: [
+				{type: "keybind", name: "UI Left", variable: "ui_left"},
+				{type: "keybind", name: "UI Down", variable: "ui_down"},
+				{type: "keybind", name: "UI Up", variable: "ui_up"},
+				{type: "keybind", name: "UI Right", variable: "ui_right"},
+				{type: "keybind", name: "Accept/Forward", variable: "ui_accept"},
+				{type: "keybind", name: "Cancel/Backward", variable: "ui_back"},
+			]
+		},
+		{
+			name: "Visuals",
+			options: [
+				{
+					name: "Low Quality",
+					description: "Disables certain background effects to increase loading times (and in some cases, performance.)",
+					variable: "lowQualityMode"
+				},
+				{
+					name: "Show More Stats",
+					description: "Shows Misses and Accuracy in the Score Text",
+					variable: "accuracyDisplay"
+				},
+				{
+					name: "Show Song Position",
+					description: "Shows a progress bar for the song in the HUD",
+					variable: "showSongPosition"
+				},
+				{
+					name: "Show Judgement Counts",
+					description: "Shows a judgement counter during gameplay on the left side of the screen",
+					variable: "showJudgeCounts"
+				},
+				{
+					name: "Notes per Second",
+					description: "Shows a NPS counter on the Score Text",
+					variable: "showNps"
+				},
+				{
+					name: "Note Splashes",
+					description: "Hitting a sick and above spawns a funny splash that gives you a boner", // thanks josh -asmadeuxs
+					variable: "noteSplashes",
+				},
+				{
+					name: "Distractions",
+					description: "Disables certain sounds and effects that may be distracting",
+					variable: "distractions"
+				},
+				{
+					name: "Language",
+					description: "Changes the game's text interfaces to be on a different language",
+					variable: "language",
+					type: "choice",
+					choices: Translator.getAvailableLanguageIDs()
+				},
+				{
+					type: "number",
+					name: "Interface Dim",
+					description: "Enables a background behind the strums or stage",
+					variable: "strumUnderlay",
+					// displayStyle: "{}%",
+					numberStep: 1.0,
+					numberBoundLeft: 0,
+					numberBoundRight: 100
+				},
+				{
+					name: "Dim Type",
+					description: "Where should the underlay be layered on",
+					variable: "strumUnderlayType",
+					choices: ["Strums", "Stage"],
+					type: "choice",
+				}
+			]
+		}
 	];
 
 	var catSelected:Int = 0;
-	var categoryOrder:Array<String> = ["Preferences", "Visuals"];
 	var curCatOptions:Array<Option> = null;
-	var currentCat:String = "none";
 	var curSelected:Int = 0;
 
 	var catNameText:FlxText;
@@ -138,6 +165,8 @@ class OptionsMenu extends MusicBeatSubstate {
 	var optionsFont = Paths.font("vcr.ttf");
 	var parent:MusicBeatState;
 
+	var binding:Bool = false;
+
 	public function new(parent:MusicBeatState) {
 		this.parent = parent;
 		super();
@@ -145,11 +174,9 @@ class OptionsMenu extends MusicBeatSubstate {
 
 	override function create():Void {
 		super.create();
-		currentCat = categoryOrder[catSelected];
-
 		// it wouldn't let me do it up there
-		for (cat in optionStash.keys())
-			for (i in optionStash.get(cat))
+		for (cat in 0...optionStash.length)
+			for (i in optionStash[cat].options)
 				if (i.variable == 'language')
 					i.setFunc = onLanguageChanged;
 
@@ -207,20 +234,34 @@ class OptionsMenu extends MusicBeatSubstate {
 		add(descriptionThingy);
 
 		updateCat();
+
+		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, setKeybind);
 	}
 
 	var closing:Bool = false;
 	var keyTimer:Float = 1.0;
+	var bindTimer:Float = 0.0;
 
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 		if (closing)
+			return;
+		if (bindTimer > 0.0)
+			bindTimer -= 0.1;
+		if (binding)
 			return;
 		var up:Bool = controls.UP_P;
 		if (up || controls.DOWN_P)
 			changeSelection((up ? -1 : 1) * (FlxG.keys.pressed.SHIFT ? 5 : 1));
 		// I genuinely hate this entire block of code and I'll probably change it later on -asmadeuxs
 		var curOption:Option = curCatOptions[curSelected];
+		if (controls.ACCEPT_P && curOption.type == 'keybind') {
+			catOptions.members[curSelected * 2 + 1].text = '(PRESS ANY KEY)';
+			bindTimer = 1.0;
+			binding = true;
+			return;
+		}
+
 		var leftp:Bool = controls.LEFT_P;
 		var rightp:Bool = controls.RIGHT_P;
 		// choice options
@@ -251,9 +292,8 @@ class OptionsMenu extends MusicBeatSubstate {
 		// rest of the controls
 		var leftCat:Bool = FlxG.keys.justPressed.Q;
 		if (leftCat || FlxG.keys.justPressed.E) {
-			catSelected = flixel.math.FlxMath.wrap(catSelected + (leftCat ? -1 : 1), 0, categoryOrder.length - 1);
+			catSelected = flixel.math.FlxMath.wrap(catSelected + (leftCat ? -1 : 1), 0, optionStash.length - 1);
 			FlxG.sound.play(Paths.sound('scrollMenu'));
-			currentCat = categoryOrder[catSelected];
 			updateCat();
 		}
 		if (controls.BACK_P) {
@@ -272,13 +312,39 @@ class OptionsMenu extends MusicBeatSubstate {
 		updateScroll();
 	}
 
+	override function destroy():Void {
+		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, setKeybind);
+		super.destroy();
+	}
+
+	public function setKeybind(key:KeyboardEvent):Void {
+		if (!binding)
+			return;
+		if (bindTimer > 0.0)
+			return;
+		if (key.keyCode == FlxKey.ESCAPE) {
+			binding = false;
+			return;
+		}
+		var curOption:Option = curCatOptions[curSelected];
+		if (!Controls.current.actions.exists(curOption.variable))
+			Controls.current.actions.set(curOption.variable, []);
+		Preferences.user.keybinds.get(curOption.variable)[0] = key.keyCode;
+		Controls.current.actions.get(curOption.variable)[0] = key.keyCode;
+		catOptions.members[curSelected * 2 + 1].text = curOption.valueString();
+		changeOption();
+		binding = false;
+	}
+
 	public function changeOption(by:Int = 0, ?playSound:Bool = true) {
 		if (playSound)
 			FlxG.sound.play(Paths.sound('scrollMenu'));
 		curCatOptions[curSelected].change(by);
 
+		var curOption:Option = curCatOptions[curSelected];
 		var val:FlxText = catOptions.members[curSelected * 2 + 1];
-		val.text = curCatOptions[curSelected].valueString();
+		if (curOption.type == "keybind")
+			val.text = curOption.valueString();
 	}
 
 	public function changeSelection(next:Int = 0, ?playSound:Bool = true) {
@@ -305,11 +371,11 @@ class OptionsMenu extends MusicBeatSubstate {
 	public function updateCat() {
 		while (catOptions.members.length > 0)
 			catOptions.members.pop().destroy();
-		curCatOptions = optionStash.get(currentCat);
+		curCatOptions = optionStash[catSelected].options;
 		if (curSelected < 0 || curSelected > curCatOptions.length - 1)
 			curSelected = 0;
 		if (catNameText != null)
-			catNameText.text = 'Viewing: $currentCat\nPress Q/E to change category\nPress Left/Right to change option';
+			catNameText.text = 'Viewing: ${optionStash[catSelected].name}\nPress Q/E to change category\nPress Left/Right to change option';
 
 		for (i => option in curCatOptions) {
 			var nameText = new FlxText(20, 50 + i * 40, catFrame.width, Translator.translateString('option_${option.variable}'), 24);

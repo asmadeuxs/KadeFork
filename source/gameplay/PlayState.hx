@@ -233,7 +233,11 @@ class PlayState extends MusicBeatState {
 		playerStrums = new Strumline(0, strumY);
 
 		opponentStrums.x = (FlxG.width - opponentStrums.width) * 0.05;
-		playerStrums.x = (FlxG.width - playerStrums.width) * 0.8;
+		if (Preferences.user.centerStrums) {
+			playerStrums.x = (FlxG.width - playerStrums.width) * 0.5;
+			opponentStrums.visible = false;
+		} else
+			playerStrums.x = (FlxG.width - playerStrums.width) * 0.8;
 		strumlines.add(opponentStrums);
 		strumlines.add(playerStrums);
 

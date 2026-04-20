@@ -20,10 +20,12 @@ class PlaySession {
 
 	public function reset():Void {
 		judgeMan = new JudgementManager();
-		this.comboBreaks = 0;
-		this.misses = 0;
-		this.score = 0;
-		this.combo = 0;
+		totalNotesHit = 0.0;
+		comboBreaks = 0;
+		totalPlayed = 0;
+		misses = 0;
+		score = 0;
+		combo = 0;
 	}
 
 	public function scoreNote(daNote:gameplay.Note):Void {

@@ -11,23 +11,6 @@ using StringTools;
 	Choice(choices:Array<String>)
 }*/
 @:structInit class Option {
-	public static final supportedOptionTypes:Array<String> = [
-		// Boolean
-		"bool",
-		"toggle",
-		"checkmark",
-		"checkbox",
-		// Number
-		"float",
-		"number",
-		"int",
-		"list",
-		// List
-		"map",
-		"array",
-		"choice"
-	];
-
 	@:optional public var setFunc:(value:Dynamic) -> Void;
 
 	public var name:String = null;
@@ -56,6 +39,7 @@ using StringTools;
 			case "checkmark": value == true ? "ON" : "OFF";
 			case "number": Std.string(value);
 			case "choice": (value is Int) ? choices[value] : Std.string(value);
+			case "keybind": Std.string(Controls.current.actions.get(this.variable)[0]);
 			case _: Std.string(value);
 		};
 		if (variable == 'language')
@@ -73,6 +57,7 @@ using StringTools;
 		return switch type.toLowerCase().trim() {
 			case "float", "number", "int": "number";
 			case "list", "map", "array", "choice": "choice";
+			case "control", "key", "keybind": "keybind";
 			case _: "checkmark";
 		}
 	}

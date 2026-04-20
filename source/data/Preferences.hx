@@ -1,6 +1,8 @@
 package data;
 
+import Controls.ActionMap;
 import flixel.FlxG;
+import flixel.input.keyboard.FlxKey;
 
 // this is just for code formatting.
 private enum abstract ScrollType(Int) from Int to Int {
@@ -60,6 +62,8 @@ private enum abstract StrumUnderlayType(Int) from Int to Int {
 	 */
 	var distractions:Bool = true;
 
+	var keybinds:ActionMap = Controls.defaultActions.copy();
+
 	public function new():Void {}
 }
 
@@ -100,6 +104,16 @@ class Preferences {
 			if (value == null)
 				value = Reflect.field(Preferences.deft, pref);
 			Reflect.setField(Preferences.user, pref, value);
+		}
+
+		for (action in Preferences.user.keybinds.keys()) {
+			if (!Controls.current.actions.exists(action))
+				Controls.current.actions.set(action, Preferences.user.keybinds.get(action).copy());
+			else {
+				var userKeys = Preferences.user.keybinds.get(action);
+				for (i in 0...userKeys.length)
+					Controls.current.actions.get(action)[i] = userKeys[i];
+			}
 		}
 		if (FlxG.save.data.mute != null)
 			FlxG.sound.muted = FlxG.save.data.mute;

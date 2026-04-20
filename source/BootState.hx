@@ -16,12 +16,10 @@ class BootState extends flixel.FlxState {
 		#end
 
 		// init user settings and scores
+		new Controls(Controls.defaultActions.copy());
 		data.Preferences.load();
 		data.Highscore.load();
-		Preferences.setFPSCap(Preferences.user.frameRate);
-		// init other data
 		new data.Locale(Preferences.user.language);
-		new Controls(Controls.defaultActions.copy());
 
 		util.Mods.scan(true);
 		// yes we're calling them levels and not weeks

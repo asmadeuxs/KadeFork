@@ -46,6 +46,18 @@ option_centerStrums,Center Strums
 option_ghostTapping,Ghost Tapping
 option_etternaMode,Wife3 Accuracy
 option_scrollSpeed,Scroll Speed
+
+option_note_left,Note Left
+option_note_down,Note Down
+option_note_up,Note Up
+option_note_right,Note Right
+option_ui_left,UI Left
+option_ui_down,UI Down
+option_ui_up,UI Up
+option_ui_right,UI Right
+option_ui_accept,UI Accept
+option_ui_back,UI Back
+
 option_lowQualityMode,Low Quality
 option_accuracyDisplay,Show More Stats
 option_showSongPosition,Show Song Position
@@ -63,6 +75,18 @@ optiondesc_centerStrums,Centers your strums and hides the opponent's
 optiondesc_ghostTapping,Lets you mash without penalty
 optiondesc_etternaMode,Changes the accuracy system to use Wife3\nIt's way more complex (math-wise) for the sake of encouraging super accurate hits\nBut may feel mean to newer players
 optiondesc_scrollSpeed,Overrides the chart's scroll speed with your own\napplies if it's not set to 1
+
+optiondesc_note_left,Key to hit the left Note
+optiondesc_note_down,Key to hit the down Note
+optiondesc_note_up,Key to hit the up Note
+optiondesc_note_right,Key to hit the right Note
+optiondesc_ui_left,Key to go left in any menu
+optiondesc_ui_down,Key to go down in any menu
+optiondesc_ui_up,Key to go up in any menu
+optiondesc_ui_right,Key to go right in any menu
+optiondesc_ui_accept,Key to confirm or activate a menu element
+optiondesc_ui_back,Key to decline or leave a menu
+
 optiondesc_lowQualityMode,Disables certain background effects to increase loading times (and in some cases, performance.)
 optiondesc_accuracyDisplay,Shows Misses and Accuracy in the Score Text
 optiondesc_showSongPosition,Shows a progress bar for the song in the HUD
