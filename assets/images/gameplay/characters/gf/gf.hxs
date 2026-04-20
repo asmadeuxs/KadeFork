@@ -1,0 +1,20 @@
+var lastSing:Int = -1;
+
+function onSing(_, d) lastSing = d;
+function onMiss(_, d) lastSing = d;
+
+function preDance(gf) {
+  // restoring old behavior from tutorial
+  if (lastSing == 0)
+    gf.currentDance = 1;
+  else if (lastSing == 3)
+    gf.currentDance = 0;
+  else if (lastSing == 1 || lastSing == 2) {
+    if (gf.currentDance == 0)
+      gf.currentDance = 1;
+    else
+      gf.currentDance = 0;
+  }
+  // clear it here after we're done
+  lastSing = -1;
+}

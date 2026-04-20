@@ -203,7 +203,7 @@ class PlayState extends MusicBeatState {
 				add(underlay);
 		}
 
-		currentHUD = BaseHUD.loadHUD('example');
+		currentHUD = BaseHUD.loadHUD(/*Preferences.user.hudType*/);
 		comboDisplay = new FlxSpriteGroup();
 		strumlines = new FlxTypedSpriteGroup();
 		notes = new FlxTypedGroup<Note>();
@@ -301,8 +301,6 @@ class PlayState extends MusicBeatState {
 
 		var swagCounter:Int = 0;
 		startTimer = new FlxTimer().start(Conductor.crotchet * 0.001, function(tmr:FlxTimer) {
-			characterDance(swagCounter + 1);
-
 			var introPath:String = 'gameplay/ui/countdown/';
 			var introAlts:Array<String> = ['ready', 'set', 'go'];
 			var altSuffix:String = "";

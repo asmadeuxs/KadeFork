@@ -20,13 +20,11 @@ class BaseHUD extends FlxSpriteGroup {
 		}
 	}
 
-	public static function loadHUD(hudName:String):BaseHUD {
-		//var path:String = ScriptLoader.getScriptFile(Paths.getPath('scripts/huds'), hudName);
-		//var custom = ScriptLoader.findScript(path, true);
-		//return custom == null ? new gameplay.hud.Kade() : new gameplay.hud.BaseHUD(custom);
-
-		// ^ scripted huds are very unstable right now and we might think about it a little bit more before adding...
-		return new gameplay.hud.Kade();
+	public static function loadHUD(?hudName:String = null):BaseHUD {
+		if (hudName == null)
+			return new gameplay.hud.Kade();
+		var custom = ScriptLoader.findScript(ScriptLoader.getScriptFile(Paths.getPath('scripts/huds'), hudName), true);
+		return custom == null ? new gameplay.hud.Kade() : new gameplay.hud.BaseHUD(custom);
 	}
 
 	override function update(elapsed:Float):Void {

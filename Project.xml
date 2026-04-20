@@ -23,6 +23,7 @@
 	<set name="BUILD_DIR" value="export/32bit" if="32bit" />
 
 	<define name="FEATURE_MODS" if="cpp" />
+	<define name="FEATURE_TRANSLATIONS" if="cpp" />
 
 	<classpath name="source" />
 	<assets path="assets"/>

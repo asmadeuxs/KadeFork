@@ -16,18 +16,11 @@ class ScriptLoader {
 	// this is mainly useful for note scripts, not so much for gameplay scripts and whatnot
 	public static var scriptCache:Map<String, Script> = [];
 
-	public static final acceptedExtensions:Array<String> = ["hx", "hxc", "hxs"];
-
 	public static function findScript(path:String, ?noCache:Bool = false):Script {
 		var origin:String = Paths.getAssetOrigin(path);
-		var script = scriptCache.get(origin + path);
-		if (script != null && @:privateAccess script._noCache)
-			removeScriptFromCache(script);
-		script = loadScript(path);
-		if (script != null) {
-			@:privateAccess script._noCache = noCache;
+		var script:Script = noCache ? loadScript(path) : scriptCache.get(origin + path);
+		if (script != null && !noCache)
 			scriptCache.set(origin + path, script);
-		}
 		return script;
 	}
 
@@ -109,8 +102,8 @@ class ScriptLoader {
 	 */
 	public static function getScriptFile(dir:String, scriptName:String):String {
 		var file:String = Path.addTrailingSlash(dir) + scriptName;
-		if (!acceptedExtensions.contains(Path.extension(file))) {
-			for (ext in acceptedExtensions)
+		if (!Paths.scriptExtensions.contains(Path.extension(file))) {
+			for (ext in Paths.scriptExtensions)
 				if (Paths.fileExists('$file.$ext')) {
 					file += '.$ext';
 					break;
@@ -121,7 +114,7 @@ class ScriptLoader {
 
 	public static function loadScript(filepath:String):Script {
 		var script:Script = null;
-		if (Paths.fileExists(filepath) && acceptedExtensions.contains(Path.extension(filepath))) {
+		if (Paths.fileExists(filepath) && Paths.scriptExtensions.contains(Path.extension(filepath))) {
 			script = parseScript(Paths.getText(filepath));
 			script.fileName = Path.withoutExtension(Path.withoutDirectory(filepath));
 			script.filePath = filepath;
@@ -137,14 +130,14 @@ class ScriptLoader {
 		var files:Array<String> = Paths.listFiles(directory);
 		for (i in 0...files.length) {
 			var path:String = Path.addTrailingSlash(directory) + files[i];
-			if (acceptedExtensions.contains(Path.extension(path))) {
+			if (Paths.scriptExtensions.contains(Path.extension(path))) {
 				if (scripts == null)
 					scripts = [];
 				var p:Script = parseScript(Paths.getText(path));
 				p.fileName = Path.withoutExtension(files[i]);
 				p.filePath = path;
 				p.interp.execute(p.code);
-				p.priority = p.interp.variables.get("_priority");
+				p.priority = p.getVar("_priority") ?? 0;
 				scripts.push(p);
 			}
 		}
@@ -166,12 +159,8 @@ class ScriptLoader {
 					code: program,
 					codeString: scriptStr,
 					interp: customInterp == null ? makeInterpreter() : customInterp,
-					priority: 0,
 				};
-				script.setVar("trace", function(v:Dynamic) trace(v, {
-					fileName: script.fileName,
-					lineNumber: script.getPosInfos(),
-				}));
+				script.setVar("trace", function(v:Dynamic) Sys.println('[${script.fileName}:${script.getPosInfos().lineNumber}] $v'));
 				return script;
 			}
 			catch (e:haxe.Exception) {

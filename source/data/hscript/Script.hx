@@ -11,20 +11,23 @@ typedef HScriptFunction = {
 }
 
 @:structInit @:publicFields class Script {
-	var priority:Int = 0;
+	@:optional var priority:Int = 0;
 	var fileName:String = "hscript";
 	var filePath:String = null;
 	var codeString:String = null;
 	var code:Any = null; // fuck if i know.
 	var interp:Interp;
 
-	private var _noCache:Bool = false;
-
 	function callFunc(funcName:String, ?args:Array<Dynamic>):HScriptFunction {
+		var caller:HScriptFunction = null;
+		if (this.interp == null) {
+			Sys.println('Script Error (${this.fileName}) - The script interpret is null (destroyed? value is: $interp)');
+			return caller;
+		}
+
 		if (args == null)
 			args = [];
 		var info = this.interp.posInfos();
-		var caller:HScriptFunction = null;
 		try {
 			var func = this.interp.variables.get(funcName);
 			if (func != null && Reflect.isFunction(func)) {
@@ -41,21 +44,22 @@ typedef HScriptFunction = {
 		return caller;
 	}
 
-	function getPosInfos()
+	function getPosInfos():haxe.PosInfos
 		return this.interp.posInfos();
 
-	function hasFunction(funcName:String) {
-		var func = this.interp.variables.get(funcName);
-		return func != null && Reflect.isFunction(funcName);
+	function hasVar(varname:String):Bool
+		return getVar(varname) != null;
+
+	function getVar(varname:String):Dynamic
+		return this.interp != null && this.interp.variables != null ? this.interp.variables.get(varname) : null;
+
+	function setVar(varname:String, value:Dynamic):Dynamic {
+		if (this.interp != null && this.interp.variables != null)
+			this.interp.variables.set(varname, value);
+		return getVar(varname);
 	}
 
-	function getVar(varname:String)
-		this.interp.variables.get(varname);
-
-	function setVar(varname:String, value:Dynamic)
-		this.interp.variables.set(varname, value);
-
-	function destroy() {
+	function destroy():Void {
 		code = null;
 		interp = null;
 		codeString = null;

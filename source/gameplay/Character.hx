@@ -62,6 +62,9 @@ class Character extends gameplay.FunkinSprite {
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 		if (!placeholder) {
+			var v = scriptFuncCall('update', [this, elapsed]);
+			if (v != null && v.value == ScriptLoader.STOP_FUNC)
+				return;
 			if (isSinging()) {
 				danceCooldown -= elapsed * (singDuration * (Conductor.semiquaver * 0.25));
 				if (danceCooldown <= 0.0)
@@ -69,6 +72,7 @@ class Character extends gameplay.FunkinSprite {
 			}
 			if (isMissing() && animation.curAnim.finished)
 				dance(true, false, 10);
+			scriptFuncCall('postUpdate', [this]);
 		}
 	}
 
@@ -81,20 +85,26 @@ class Character extends gameplay.FunkinSprite {
 	public function dance(?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
 		if (placeholder)
 			return;
+		scriptFuncCall('preDance', [this, force, reversed, frame]);
 		playAnim(idleAnimations[currentDance] + idleSuffix, force, reversed, frame);
 		currentDance = flixel.math.FlxMath.wrap(currentDance + 1, 0, idleAnimations.length - 1);
+		scriptFuncCall('onDance', [this, force, reversed, frame]);
 	}
 
 	public function sing(direction:Int, ?suffix:String = "", ?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
 		if (placeholder)
 			return;
+		scriptFuncCall('preSing', [this, direction, suffix, force, reversed, frame]);
 		playAnim(singAnimations[direction] + suffix, force, reversed, frame);
+		scriptFuncCall('onSing', [this, direction, suffix, force, reversed, frame]);
 	}
 
 	public function miss(direction:Int, ?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
 		if (placeholder)
 			return;
+		scriptFuncCall('preMiss', [this, direction, force, reversed, frame]);
 		playAnim(missAnimations[direction], force, reversed, frame);
+		scriptFuncCall('onMiss', [this, direction, force, reversed, frame]);
 	}
 
 	private function findCharacterFile(character:String):String {
@@ -113,6 +123,12 @@ class Character extends gameplay.FunkinSprite {
 			}
 		}
 		return path;
+	}
+
+	public function scriptFuncCall(funcName:String, ?args:Array<Dynamic>):HScriptFunction {
+		if (characterScript == null)
+			return null;
+		return characterScript.callFunc(funcName, args);
 	}
 
 	private function parseJsonIndicesField(field:Dynamic):Array<Int> {
@@ -152,6 +168,11 @@ class Character extends gameplay.FunkinSprite {
 					return loadPlaceholder();
 				try {
 					trace('loading character $characterName');
+					if (characterScript != null) {
+						scriptFuncCall('onCharacterChange', [this.characterId, characterName]);
+						characterScript.destroy();
+						characterScript = null;
+					}
 					var file:Dynamic = Json5.parse(Paths.getText(file));
 					this.idleAnimations = file.idleAnimations ?? DEFAULT_IDLE_ANIMATIONS;
 					this.singAnimations = file.singAnimations ?? DEFAULT_SING_ANIMATIONS;
@@ -181,6 +202,11 @@ class Character extends gameplay.FunkinSprite {
 					if (file.animations != null)
 						AnimationHelper.addFromJson(this, file.animations, file.defaultFramerate ?? 24);
 					placeholder = false; // make sure this is disabled
+
+					var scriptPath:String = Paths.getPath('images/gameplay/characters/$characterName');
+					characterScript = ScriptLoader.findScript(ScriptLoader.getScriptFile(scriptPath, characterName), true);
+					characterScript?.callFunc('onLoad', [this]);
+					this.characterId = characterName;
 					dance(true);
 				}
 				catch (e:haxe.Exception) {

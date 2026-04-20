@@ -24,6 +24,7 @@ class ChartingGrid extends FlxSprite {
 
 	public function new(x:Float, y:Float, columns:Int, rows:Int, cellSize:Int):Void {
 		super(x, y);
+		antialiasing = false;
 		this.columns = columns;
 		this.cellSize = cellSize;
 		this.rows = rows;

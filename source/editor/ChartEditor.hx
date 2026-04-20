@@ -42,6 +42,7 @@ class ChartEditor extends MusicBeatState {
 
 	public function new():Void {
 		super();
+		Conductor.setTime(0.0);
 		if (PlayState.current != null) {
 			songName = PlayState.songTitle;
 			rawSongName = PlayState.songName;
