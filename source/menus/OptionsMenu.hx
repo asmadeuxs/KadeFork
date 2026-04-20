@@ -265,30 +265,32 @@ class OptionsMenu extends MusicBeatSubstate {
 		var leftp:Bool = controls.LEFT_P;
 		var rightp:Bool = controls.RIGHT_P;
 		// choice options
-		if ((leftp || rightp) && curOption.type != "number")
-			changeOption(leftp ? -1 : 1);
-		// number options
-		var lefth:Bool = controls.LEFT;
-		var righth:Bool = controls.RIGHT;
-		if ((leftp || rightp || lefth || righth) && curOption.type == "number") {
-			var change:Bool = false;
-			if (leftp || rightp)
-				change = true;
-			else if (lefth || righth) {
-				// TODO: implement keyRepeat in Controls so I don't have to do this shit manually -asmadeuxs
-				keyTimer += 0.1;
-				if (keyTimer >= 1.0) {
+		if (curOption.type != "keybind") {
+			if ((leftp || rightp) && curOption.type != "number")
+				changeOption(leftp ? -1 : 1);
+			// number options
+			var lefth:Bool = controls.LEFT;
+			var righth:Bool = controls.RIGHT;
+			if ((leftp || rightp || lefth || righth) && curOption.type == "number") {
+				var change:Bool = false;
+				if (leftp || rightp)
 					change = true;
-					keyTimer = 0.0;
+				else if (lefth || righth) {
+					// TODO: implement keyRepeat in Controls so I don't have to do this shit manually -asmadeuxs
+					keyTimer += 0.1;
+					if (keyTimer >= 1.0) {
+						change = true;
+						keyTimer = 0.0;
+					}
 				}
-			}
-			if (change) {
-				var inc:Int = FlxG.keys.pressed.SHIFT ? 4 : 1;
-				var left:Bool = leftp || lefth;
-				changeOption(left ? -inc : inc);
-			}
-		} else if (controls.LEFT_R || controls.RIGHT_R)
-			keyTimer = 0.0;
+				if (change) {
+					var inc:Int = FlxG.keys.pressed.SHIFT ? 4 : 1;
+					var left:Bool = leftp || lefth;
+					changeOption(left ? -inc : inc);
+				}
+			} else if (controls.LEFT_R || controls.RIGHT_R)
+				keyTimer = 0.0;
+		}
 		// rest of the controls
 		var leftCat:Bool = FlxG.keys.justPressed.Q;
 		if (leftCat || FlxG.keys.justPressed.E) {
@@ -343,7 +345,7 @@ class OptionsMenu extends MusicBeatSubstate {
 
 		var curOption:Option = curCatOptions[curSelected];
 		var val:FlxText = catOptions.members[curSelected * 2 + 1];
-		if (curOption.type == "keybind")
+		if (curOption.type != "keybind")
 			val.text = curOption.valueString();
 	}
 
