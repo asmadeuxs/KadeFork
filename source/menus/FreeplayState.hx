@@ -127,7 +127,11 @@ class FreeplayState extends MusicBeatState {
 		if (Math.abs(lerpScore - intendedScore) <= 10)
 			lerpScore = intendedScore;
 
+		#if FEATURE_TRANSLATIONS
 		scoreText.text = '${Translator.translateString('freeplay_PB')}$lerpScore';
+		#else
+		scoreText.text = 'PERSONAL BEST:$lerpScore';
+		#end
 
 		var upP = controls.UP_P;
 		var downP = controls.DOWN_P;
@@ -171,10 +175,11 @@ class FreeplayState extends MusicBeatState {
 		}
 		var diffic:String = difficulties[curDifficulty];
 		intendedScore = Highscore.getScore(songs[curSelected].songFolder, diffic);
+		var diffn:String = #if FEATURE_TRANSLATIONS Translator.translateString('difficulty_${diffic.toLowerCase()}') #else diffic #end;
 		if (difficulties.length > 1)
-			diffText.text = '< ${Translator.translateString('difficulty_$diffic').toUpperCase()} >';
+			diffText.text = '< ${diffn.toUpperCase()} >';
 		else
-			diffText.text = Translator.translateString('difficulty_$diffic').toUpperCase();
+			diffText.text = diffn.toUpperCase();
 	}
 
 	function changeSelection(change:Int = 0) {

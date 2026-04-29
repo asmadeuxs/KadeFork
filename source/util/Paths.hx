@@ -44,7 +44,7 @@ class Paths {
 
 	static private var avoidClearing:Array<String> = ["core:images/ui/alphabet.png"];
 
-	static public final scriptExtensions:Array<String> = ["hx", "hxc", "hxs"];
+	static public final scriptExtensions:Array<String> = ["hx", "hxc", "hxs", "hscript"];
 	static public final jsonExtensions:Array<String> = ["json", "json5", "jsonc"];
 
 	static private var textureRegistry = new AssetRegistry<FlxGraphic>((key, graphic) -> {

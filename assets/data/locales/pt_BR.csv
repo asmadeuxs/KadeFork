@@ -45,10 +45,11 @@ judge_Bad_plural,Bads
 judge_Shit_plural,Shits
 judge_Miss_plural,Erros
 
-optionval_ON,LIG.
-optionval_OFF,DESLIG.
+optionval_ON,LIGADO
+optionval_OFF,DESLIGADO
 optionval_Up,Cima
 optionval_Down,Baixo
+optionval_Split,Dividido
 optionval_Strums,Notas
 optionval_Stage,Cenário
 

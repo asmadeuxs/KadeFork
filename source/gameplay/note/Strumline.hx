@@ -1,4 +1,4 @@
-package gameplay;
+package gameplay.note;
 
 import data.Noteskin;
 import data.hscript.Script;
@@ -17,10 +17,11 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 
 	public var strums:Array<FunkinSprite> = [];
 
+	private var downscroll:Array<Int> = [];
 	private var splashPool:ObjectPool<FunkinSprite>;
 
-	public function new(x:Float = 0, y:Float = 0, ?keyCount:Int = 4):Void {
-		super(x, y);
+	public function new(?keyCount:Int = 4):Void {
+		super(0, 0);
 		this.keyCount = keyCount;
 		var skin:String = 'default'; // hardcoded for now
 		noteskin = Noteskin.loadNoteskinFile(skin);
@@ -60,11 +61,25 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 	public function getStrum(noteData:Int)
 		return strums[noteData];
 
+	public function getDownscrollMult(noteData:Int):Int
+		return downscroll[noteData];
+
+	public function isStrumDownscroll(noteData:Int):Bool
+		return downscroll[noteData] == -1;
+
 	public function generateStrums():Void {
 		var spacing:Float = 160;
+		downscroll.resize(this.keyCount);
 		for (i in 0...this.keyCount) {
+			downscroll[i] = switch Preferences.user.scrollType {
+				case 2: (i % 4 >= 2) ? -1 : 1; // Split
+				case 1: -1; // Downscroll
+				case _: 1; // Default upscroll
+			};
+			var strumY:Float = (downscroll[i] == -1) ? FlxG.height - 185 : 30;
 			var strum:FunkinSprite = noteskin.generateStrum(i);
 			strum.x = (spacing * strum.scale.x) * i;
+			strum.y = strumY;
 			// strum.updateHitbox();
 			strums.push(strum);
 			add(strum);

@@ -120,7 +120,7 @@ class Locale {
 
 	public function format(id:String, ...rest:Dynamic):String {
 		var result = id;
-		for (i in 0...rest.length) 
+		for (i in 0...rest.length)
 			result = result.split('{${i + 1}}').join(Std.string(rest[i]));
 		return result;
 	}

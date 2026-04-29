@@ -102,7 +102,7 @@ class MainMenuState extends MusicBeatState {
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 
 		if (!selectedSomethin) {
-			if (FlxG.keys.justPressed.F5) {
+			if (FlxG.keys.justPressed.SEVEN) {
 				FlxG.sound.music.stop();
 				FlxG.switchState(new gameplay.DummyPlayState());
 				selectedSomethin = true;

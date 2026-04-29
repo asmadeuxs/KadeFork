@@ -1,6 +1,7 @@
 package data;
 
 import data.JudgementManager;
+import gameplay.note.Note;
 
 class PlaySession {
 	public var score:Int = 0;
@@ -28,8 +29,8 @@ class PlaySession {
 		combo = 0;
 	}
 
-	public function scoreNote(daNote:gameplay.Note):Void {
-		var noteDiff:Float = Math.abs(Conductor.songPosition - daNote.strumTime);
+	public function scoreNote(daNote:Note):Void {
+		var noteDiff:Float = Math.abs(Conductor.time - daNote.strumTime);
 		if (daNote.judgement == null)
 			daNote.judgement = judgeMan.judgeTime(noteDiff);
 		// if (Preferences.user.etternaMode)

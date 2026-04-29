@@ -31,8 +31,8 @@ class Conductor extends flixel.FlxBasic {
 	public static var crotchet:Float = ((60 / bpm) * 1000); // beats in milliseconds
 	public static var semiquaver:Float = crotchet / denominator; // steps in milliseconds
 
-	public static var songPosition:Float = 0;
-	public static var lastSongPosition:Float = 0;
+	public static var time:Float = 0;
+	public static var lastTime:Float = 0;
 	public static var offset:Float = 0;
 
 	public static var timingPoints:Array<TimingPoint> = [{}];
@@ -55,8 +55,8 @@ class Conductor extends flixel.FlxBasic {
 	}
 
 	public static function setTime(newTime:Float):Void {
-		Conductor.songPosition = newTime;
-		Conductor.lastSongPosition = newTime;
+		Conductor.time = newTime;
+		Conductor.lastTime = newTime;
 		Conductor.current.update(1.0);
 	}
 
@@ -113,6 +113,8 @@ class Conductor extends flixel.FlxBasic {
 			music.pause();
 		else
 			music.play(false, music.time);
+		if (!pause)
+			checkNeedResync();
 	}
 
 	public function pauseMusic():Void
@@ -138,17 +140,17 @@ class Conductor extends flixel.FlxBasic {
 		for (i in tracks)
 			i.pause();
 		music.play(false, music.time);
-		Conductor.songPosition = music.time;
+		Conductor.time = music.time;
 		for (i in tracks)
-			i.play(false, Conductor.songPosition);
+			i.play(false, Conductor.time);
 	}
 
 	override function update(elapsed:Float):Void {
 		if (current == null || !active)
 			return;
-		// if (lastSongPosition > songPosition)
-		//	songPosition = lastSongPosition;
-		songPosition += elapsed * 1000;
+		// if (lastTime > time)
+		//	time = lastTime;
+		time += elapsed * 1000;
 
 		var lastBeat = Math.floor(currentBeat);
 		var lastStep = Math.floor(currentStep);
@@ -160,7 +162,7 @@ class Conductor extends flixel.FlxBasic {
 		var pointBar = 0.0;
 		final sixtyDiv = 1 / 60;
 		for (i in 1...timingPoints.length) {
-			if (songPosition < timingPoints[i].time)
+			if (time < timingPoints[i].time)
 				break;
 			final beatDist = (timingPoints[i].time - curPoint.time) * 0.001 * (curPoint.bpm * sixtyDiv);
 
@@ -172,7 +174,7 @@ class Conductor extends flixel.FlxBasic {
 		denominator = curPoint.denominator;
 		numerator = curPoint.numerator;
 		bpm = curPoint.bpm;
-		final beatDist = (songPosition - curPoint.time) * 0.001 * (curPoint.bpm * sixtyDiv);
+		final beatDist = (time - curPoint.time) * 0.001 * (curPoint.bpm * sixtyDiv);
 		currentStep = pointStep + (beatDist * denominator);
 		currentBeat = pointBeat + beatDist;
 		currentBar = pointBar + (beatDist / numerator);
@@ -183,15 +185,19 @@ class Conductor extends flixel.FlxBasic {
 		if (lastBeat != newBeat)
 			beatHit.dispatch(newBeat);
 		if (lastStep != newStep) {
-			if (music != null && music.playing && tracks.length != 0)
-				if (music.time > Conductor.songPosition + 20 || music.time < Conductor.songPosition - 20)
-					resyncTracks();
+			checkNeedResync();
 			stepHit.dispatch(newStep);
 		}
 		if (lastBar != newBar)
 			barHit.dispatch(newBar);
 
-		lastSongPosition = songPosition;
+		lastTime = time;
+	}
+
+	public function checkNeedResync():Void {
+		if (music != null && music.playing && tracks.length != 0)
+			if (music.time > Conductor.time + 20 || music.time < Conductor.time - 20)
+				resyncTracks();
 	}
 
 	public static function mapTimingPoints(song:DynamicFormat) {

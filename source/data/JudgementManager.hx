@@ -7,6 +7,7 @@ import flixel.util.FlxColor;
 	public var image:String = "combo";
 	public var hitWindow:Float = 0.0;
 
+	@:optional public var hittable:Bool = true;
 	@:optional public var healthBonus:Float->Float = null;
 	@:optional public var comboBreak:Bool = false;
 	@:optional public var accuracy:Float = 0.0;
@@ -93,7 +94,7 @@ class JudgementManager {
 				image: "miss",
 				healthBonus: (_:Float) -> return -0.04,
 				color: 0xFFFF0000,
-				hitWindow: -1, // unhittable?
+				hittable: false,
 				accuracy: 0.0,
 				score: -350,
 			}
@@ -127,7 +128,7 @@ class JudgementManager {
 
 	public function judgeTime(noteDiff:Float):Null<Judgement> {
 		for (judgement in activeList)
-			if (noteDiff <= judgement.hitWindow)
+			if (judgement.hittable == true && noteDiff <= judgement.hitWindow)
 				return judgement;
 		return activeList[activeList.length - 1];
 	}

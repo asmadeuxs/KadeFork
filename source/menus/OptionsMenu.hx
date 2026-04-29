@@ -42,7 +42,7 @@ class OptionsMenu extends MusicBeatSubstate {
 					name: "Scroll Type",
 					variable: "scrollType",
 					description: "Changes where the notes scroll to",
-					choices: ["Up", "Down"],
+					choices: ["Up", "Down", "Split"],
 				},
 				{type: "keybind", name: "Note Left", variable: "note_left"},
 				{type: "keybind", name: "Note Down", variable: "note_down"},
@@ -123,6 +123,7 @@ class OptionsMenu extends MusicBeatSubstate {
 					description: "Disables certain sounds and effects that may be distracting",
 					variable: "distractions"
 				},
+				#if FEATURE_TRANSLATIONS
 				{
 					name: "Language",
 					description: "Changes the game's text interfaces to be on a different language",
@@ -130,6 +131,7 @@ class OptionsMenu extends MusicBeatSubstate {
 					type: "choice",
 					choices: Translator.getAvailableLanguageIDs()
 				},
+				#end
 				{
 					type: "number",
 					name: "Interface Dim",
@@ -359,8 +361,11 @@ class OptionsMenu extends MusicBeatSubstate {
 				entry.alpha = entry.ID == curSelected ? 1.0 : 0.6;
 		if (curCatOptions != null) {
 			var option = curCatOptions[curSelected];
-			// descriptionThingy.text = option.description;
+			#if FEATURE_TRANSLATIONS
 			descriptionThingy.text = Translator.translateString('optiondesc_${option.variable}');
+			#else
+			descriptionThingy.text = option.description;
+			#end
 			descriptionThingy.y = catFrame.y + catFrame.height + 10;
 		}
 	}

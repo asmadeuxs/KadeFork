@@ -1,20 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <project>
 <!-- Application Settings -->
 
 	<!-- If you're looking for "version" I moved it to Main.hx -->
-	<app title="Friday Night Funkin' (Project Roots)" file="FunkinRoots" packageName="com.funkincrew.funkin" package="com.funkincrew.funkin" main="Main" company="asmadeuxs" />
+	<app main="Main" title="Friday Night Funkin' (Project Roots)" file="FunkinRoots" company="asmadeuxs" />
+	<app packageName="com.asmadeuxs.kadeRoots" package="com.asmadeuxs.kadeRoots" />
 
-	<icon path="art/icon16.png" size='16'/>
-	<icon path="art/icon32.png" size='32'/>
-	<icon path="art/icon64.png" size='64'/>
+	<icon path="art/icon16.png" size='16' />
+	<icon path="art/icon32.png" size='32' />
+	<icon path="art/icon64.png" size='64' />
 	<icon path="art/iconOG.png" />
 
 <!-- Window Settings -->
 
 	<window width="1280" height="720" fps="60" background="#000000" hardware="true" vsync="false" />
-	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" vsync="false"/>
-	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false"/>
+	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" vsync="false" />
+	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false" />
 
 <!-- Path Settings -->
 
@@ -24,20 +25,21 @@
 
 	<define name="FEATURE_MODS" if="cpp" />
 	<define name="FEATURE_TRANSLATIONS" if="cpp" />
+	<define name="FEATURE_HSCRIPT" unless="cpp" />
 
 	<classpath name="source" />
-	<assets path="assets"/>
+	<assets path="assets" />
 	<assets path='example_mods' rename='mods' if="FEATURE_MODS" />
 
 <!-- Libraries -->
 
-	<haxelib name="lime" version="8.1.2"/>
-	<haxelib name="openfl" version="9.3.3"/>
-	<haxelib name="flixel" version="5.5.0"/>
-	<haxelib name="flixel-addons" version="3.2.0"/>
-	<haxelib name="flixel-ui" version="2.6.0"/>
-	<haxelib name="moonchart" version="0.5.1"/>
-	<haxelib name="json5hx" version="1.0.2"/>
+	<haxelib name="lime" version="8.1.2" />
+	<haxelib name="openfl" version="9.3.3" />
+	<haxelib name="flixel" version="5.5.0" />
+	<haxelib name="flixel-addons" version="3.2.0" />
+	<haxelib name="flixel-ui" version="2.6.0" />
+	<haxelib name="moonchart" version="0.5.1" />
+	<haxelib name="json5hx" version="1.0.2" />
 
 	<!--
 	These libraries are stored locally just in case
@@ -45,11 +47,11 @@
 	troll hscript is just a submodule on a locked commit in case it ever makes major breaking changes
 	we will update these accordingly if need be.
 	-->
-	<haxelib name="hxdiscord_rpc" if="cpp" path="_dependencies/hxdiscord_rpc"/>
-	<haxelib name="t-hscript" if="cpp" path="_dependencies/t-hscript"/>
+	<haxelib name="hxdiscord_rpc" if="sys" path="./_dependencies/hxdiscord_rpc" />
+	<haxelib name="t-hscript" if="FEATURE_HSCRIPT" path="./_dependencies/t-hscript" />
 	<haxedef name="hscriptPos" if="t-hscript" />
 
-	<haxelib name="hxcpp-debug-server" if="cpp debug"/>
+	<haxelib name="hxcpp-debug-server" if="windows" />
 
 <!-- Haxedefines -->
 

@@ -85,25 +85,29 @@ class Character extends gameplay.FunkinSprite {
 	public function dance(?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
 		if (placeholder)
 			return;
-		scriptFuncCall('preDance', [this, force, reversed, frame]);
-		playAnim(idleAnimations[currentDance] + idleSuffix, force, reversed, frame);
-		currentDance = flixel.math.FlxMath.wrap(currentDance + 1, 0, idleAnimations.length - 1);
+		var v = scriptFuncCall('preDance', [this, force, reversed, frame]);
+		if (v == null || v.value != ScriptLoader.STOP_FUNC) {
+			playAnim(idleAnimations[currentDance] + idleSuffix, force, reversed, frame);
+			currentDance = flixel.math.FlxMath.wrap(currentDance + 1, 0, idleAnimations.length - 1);
+		}
 		scriptFuncCall('onDance', [this, force, reversed, frame]);
 	}
 
 	public function sing(direction:Int, ?suffix:String = "", ?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
 		if (placeholder)
 			return;
-		scriptFuncCall('preSing', [this, direction, suffix, force, reversed, frame]);
-		playAnim(singAnimations[direction] + suffix, force, reversed, frame);
+		var v = scriptFuncCall('preSing', [this, direction, suffix, force, reversed, frame]);
+		if (v == null || v.value != ScriptLoader.STOP_FUNC)
+			playAnim(singAnimations[direction] + suffix, force, reversed, frame);
 		scriptFuncCall('onSing', [this, direction, suffix, force, reversed, frame]);
 	}
 
 	public function miss(direction:Int, ?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
 		if (placeholder)
 			return;
-		scriptFuncCall('preMiss', [this, direction, force, reversed, frame]);
-		playAnim(missAnimations[direction], force, reversed, frame);
+		var v = scriptFuncCall('preMiss', [this, direction, force, reversed, frame]);
+		if (v == null || v.value != ScriptLoader.STOP_FUNC)
+			playAnim(missAnimations[direction], force, reversed, frame);
 		scriptFuncCall('onMiss', [this, direction, force, reversed, frame]);
 	}
 
@@ -205,8 +209,8 @@ class Character extends gameplay.FunkinSprite {
 
 					var scriptPath:String = Paths.getPath('images/gameplay/characters/$characterName');
 					characterScript = ScriptLoader.findScript(ScriptLoader.getScriptFile(scriptPath, characterName), true);
-					characterScript?.callFunc('onLoad', [this]);
 					this.characterId = characterName;
+					scriptFuncCall('onLoad', [this]);
 					dance(true);
 				}
 				catch (e:haxe.Exception) {

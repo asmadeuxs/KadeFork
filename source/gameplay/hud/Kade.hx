@@ -56,6 +56,14 @@ class Kade extends BaseHUD {
 		healthBar.antialiasing = true;
 		add(healthBar);
 
+		iconP1 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_1) ?? "bf", true);
+		iconP1.y = healthBar.y - (iconP1.height * 0.5);
+		add(iconP1);
+
+		iconP2 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_2) ?? "bf", false);
+		iconP2.y = healthBar.y - (iconP2.height * 0.5);
+		add(iconP2);
+
 		scoreTxt = new FlxText(FlxG.width * 0.5 - 235, healthBarBG.y + 50, 0, "", 20);
 		if (!Preferences.user.accuracyDisplay)
 			scoreTxt.x = healthBarBG.x + healthBarBG.width * 0.5;
@@ -74,25 +82,20 @@ class Kade extends BaseHUD {
 		}
 		updateScoreText();
 
-		var diff:String = Translator.translateString('difficulty_' + PlayState.difficulty);
+		var diff:String = PlayState.difficulty;
+		#if FEATURE_TRANSLATIONS
+		diff = Translator.translateString('difficulty_' + PlayState.difficulty);
+		#end
 		var songText:FlxText = new FlxText(5, 0, 0, '${PlayState.moonMeta.title} ${diff.toUpperCase()} - KE v${Main.versions.KADE}', 12);
 		songText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
 		songText.y = (FlxG.height - songText.height) - 3;
 		songText.antialiasing = true;
 		add(songText);
-
-		iconP1 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_1) ?? "bf", true);
-		iconP1.y = healthBar.y - (iconP1.height * 0.5);
-		add(iconP1);
-
-		iconP2 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_2) ?? "bf", false);
-		iconP2.y = healthBar.y - (iconP2.height * 0.5);
-		add(iconP2);
 	}
 
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
-		songPos = Conductor.songPosition;
+		songPos = Conductor.time;
 		// icon
 		var iconOffset:Int = 26;
 		var hpCenter:Float = healthBar.x + healthBar.width * (1 - healthBar.percent * 0.01);
@@ -134,12 +137,22 @@ class Kade extends BaseHUD {
 		else
 			layout = '';
 		var score:Int = PlayState.session?.score ?? 0;
+		var scoreMoney:String = flixel.util.FlxStringUtil.formatMoney(score, false, true);
+		#if FEATURE_TRANSLATIONS
 		if (Preferences.user.accuracyDisplay) {
 			var cbs:Int = PlayState.session?.comboBreaks ?? 0;
 			var acc:Float = PlayState.session?.calculateAccuracy() ?? 0.0;
-			layout += Translator.translateFormat('keScoreText', score, cbs, FlxMath.roundDecimal(acc, 2), generateRanking());
+			layout += Translator.translateFormat('keScoreText', scoreMoney, cbs, FlxMath.roundDecimal(acc, 2), generateRanking());
 		} else
-			layout += Translator.translateFormat('keScoreTextNoAcc', score);
+			layout += Translator.translateFormat('keScoreTextNoAcc', scoreMoney);
+		#else
+		if (Preferences.user.accuracyDisplay) {
+			var cbs:Int = PlayState.session?.comboBreaks ?? 0;
+			var acc:Float = PlayState.session?.calculateAccuracy() ?? 0.0;
+			layout += 'Score: $scoreMoney | Combo Breaks: $cbs | Accuracy: ${FlxMath.roundDecimal(acc, 2)} | ${generateRanking()}';
+		} else
+			layout += 'Score: $scoreMoney';
+		#end
 		scoreTxt.text = layout;
 		if (judgesTxt != null)
 			judgesTxt.text = getJudgeCounts();
@@ -148,8 +161,15 @@ class Kade extends BaseHUD {
 	public function getJudgeCounts() {
 		var str:String = '';
 		if (PlayState.session != null && PlayState.session.judgeMan.activeList?.length > 0)
-			for (idx => judge in PlayState.session.judgeMan.activeList)
-				str += '${Translator.translateString('judge_' + judge.name)}: ${judge.hits}\n';
+			for (idx => judge in PlayState.session.judgeMan.activeList) {
+				var judgeName:String = null;
+				#if FEATURE_TRANSLATIONS
+				judgeName = Translator.translatePlural('judge_' + judge.name);
+				#else
+				judgeName = judge.name;
+				#end
+				str += '$judgeName: ${judge.hits}\n';
+			}
 		return str;
 	}
 
@@ -164,6 +184,8 @@ class Kade extends BaseHUD {
 		}
 	}
 
+	final gradeSet:String = "wife3";
+
 	function generateRanking():String {
 		var acc:Float = PlayState.session?.calculateAccuracy() ?? 0.0;
 		if (PlayState.current == null || acc <= 0.0)
@@ -174,25 +196,36 @@ class Kade extends BaseHUD {
 		else
 			ranking = '($ranking) ';
 
-		// WIFE TIME :)))) (based on Wife3)
-		ranking += switch acc {
-			case(_ >= 99.9935) => true: "AAAAA";
-			case(_ >= 99.980) => true: "AAAA:";
-			case(_ >= 99.970) => true: "AAAA.";
-			case(_ >= 99.955) => true: "AAAA";
-			case(_ >= 99.90) => true: "AAA:";
-			case(_ >= 99.80) => true: "AAA.";
-			case(_ >= 99.70) => true: "AAA";
-			case(_ >= 99) => true: "AA:";
-			case(_ >= 96.50) => true: "AA.";
-			case(_ >= 93) => true: "AA";
-			case(_ >= 90) => true: "A:";
-			case(_ >= 85) => true: "A.";
-			case(_ >= 80) => true: "A";
-			case(_ >= 70) => true: "B";
-			case(_ >= 60) => true: "C";
-			case(_ < 60) => true: "D";
-			case _: "N/A";
+		ranking += switch gradeSet {
+			case "vslice": switch acc {
+					case(_ >= 100) => true: "P+";
+					case(_ >= 99.999) => true: "P";
+					case(_ >= 90) => true: "E";
+					case(_ >= 80) => true: "G+";
+					case(_ >= 70) => true: "G";
+					case(_ < 60) => true: "S";
+					case _: "N/A";
+				}
+			case _: switch acc {
+					// WIFE TIME :)))) (based on Wife3)
+					case(_ >= 99.9935) => true: "AAAAA";
+					case(_ >= 99.980) => true: "AAAA:";
+					case(_ >= 99.970) => true: "AAAA.";
+					case(_ >= 99.955) => true: "AAAA";
+					case(_ >= 99.90) => true: "AAA:";
+					case(_ >= 99.80) => true: "AAA.";
+					case(_ >= 99.70) => true: "AAA";
+					case(_ >= 99) => true: "AA:";
+					case(_ >= 96.50) => true: "AA.";
+					case(_ >= 93) => true: "AA";
+					case(_ >= 90) => true: "A:";
+					case(_ >= 85) => true: "A.";
+					case(_ >= 80) => true: "A";
+					case(_ >= 70) => true: "B";
+					case(_ >= 60) => true: "C";
+					case(_ < 60) => true: "D";
+					case _: "N/A";
+				}
 		}
 		return ranking;
 	}

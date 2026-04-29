@@ -9,7 +9,7 @@ import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import gameplay.Note;
+import gameplay.note.Note;
 import gameplay.PlayState;
 import moonchart.formats.BasicFormat;
 import moonchart.formats.fnf.legacy.FNFLegacy;
@@ -104,7 +104,7 @@ class ChartEditor extends MusicBeatState {
 	}
 
 	function addNote(time:Float, id:Int, owner:Int, type:String):Note {
-		var noteSprite = new Note().setup(time, id, 0, owner, type);
+		var noteSprite = new Note(); // .setup(time, id, 0, owner, type);
 		noteGroup.add(noteSprite);
 		return noteSprite;
 	}

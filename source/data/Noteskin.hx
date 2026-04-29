@@ -7,7 +7,7 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.typeLimit.OneOfTwo;
 import gameplay.FunkinSprite;
-import gameplay.Note;
+import gameplay.note.Note;
 import haxe.Json5;
 import util.AnimationHelper;
 
@@ -226,12 +226,29 @@ class Noteskin {
 			return arrow;
 		}
 		arrow.frames = frames;
+		arrow.setGraphicSize(Std.int(arrow.width * arrowScale));
 		var scrollName = getFromArray(scrollAnimNames, noteData);
 		arrow.animation.addByPrefix('${noteData}Scroll', scrollName, defaultFramerate, false);
-		arrow.setGraphicSize(Std.int(arrow.width * arrowScale));
 		arrow.playAnim('${noteData}Scroll', true);
 		arrow.antialiasing = arrowAA;
 		return arrow;
+	}
+
+	public function generateSustain(noteData:Int, isEnd:Bool = false):FlxSprite {
+		var sustain:FlxSprite = new FlxSprite();
+		noteData = FlxMath.wrap(noteData, 0, keyCount - 1);
+		var frames = getAtlas("arrows");
+		if (frames == null) {
+			sustain.makeGraphic(50, 50, 0xFF888888);
+			return sustain;
+		}
+		sustain.frames = frames;
+		var animName = isEnd ? getFromArray(holdEndAnimNames, noteData) : getFromArray(holdBodyAnimNames, noteData);
+		sustain.animation.addByPrefix('hold', animName, defaultFramerate, false);
+		sustain.setGraphicSize(Std.int(sustain.width * arrowScale));
+		sustain.antialiasing = arrowAA;
+		sustain.animation.play('hold');
+		return sustain;
 	}
 
 	public function generateNoteSplashSprite():FunkinSprite {

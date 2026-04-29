@@ -42,6 +42,7 @@ using StringTools;
 			case "keybind": Std.string(Controls.current.actions.get(this.variable)[0]);
 			case _: Std.string(value);
 		};
+		#if FEATURE_TRANSLATIONS
 		if (variable == 'language')
 			str = Translator.getNativeLangName(str);
 		else {
@@ -50,6 +51,7 @@ using StringTools;
 			if (translated != transStr)
 				str = translated;
 		}
+		#end
 		return str;
 	}
 

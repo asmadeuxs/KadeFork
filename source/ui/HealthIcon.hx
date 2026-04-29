@@ -61,7 +61,7 @@ class HealthIcon extends FunkinSprite {
 					}
 				}
 				if (fail) {
-					makeGraphic(100, 100, 0xFF00FFFF);
+					makeGraphic(30, 30, 0xFF00FFFF);
 					return this;
 				}
 				iconPath = mainPath;

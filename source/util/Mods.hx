@@ -27,7 +27,7 @@ class Mods {
 			return allMods;
 		}
 		for (modId in Paths.listFiles(modRoot)) {
-			if(!sys.FileSystem.isDirectory(modId))
+			if (!sys.FileSystem.isDirectory(modId))
 				continue;
 			if (!Paths.fileExists('$modRoot/$modId/mod.txt')) {
 				trace('Mod "$modId" not added (missing mod.txt file.)');

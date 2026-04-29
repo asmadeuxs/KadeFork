@@ -40,6 +40,14 @@ judge_Bad_plural,Bads
 judge_Shit_plural,Shits
 judge_Miss_plural,Misses
 
+optionval_ON,ON
+optionval_OFF,OFF
+optionval_Up,Up
+optionval_Down,Down
+optionval_Split,Split
+optionval_Strums,Strums
+optionval_Stage,Stages
+
 option_frameRate,Framerate
 option_scrollType,Scroll Type
 option_centerStrums,Center Strums

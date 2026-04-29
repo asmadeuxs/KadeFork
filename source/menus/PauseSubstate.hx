@@ -26,11 +26,20 @@ class PauseSubstate extends MusicBeatSubstate {
 	public function new(x:Float, y:Float) {
 		super();
 
+		#if FEATURE_TRANSLATIONS
+		var resume:String = Translator.translateString('pause_resumeSong');
+		var restart:String = Translator.translateString('pause_restartSong');
+		var exit:String = Translator.translateString('pause_exit');
+		#else
+		var resume:String = 'Resume';
+		var restart:String = 'Restart';
+		var exit:String = 'Exit';
+		#end
 		menuItems = [
-			{name: Translator.translateString('pause_resumeSong'), func: () -> close()},
-			{name: Translator.translateString('pause_restartSong'), func: () -> FlxG.resetState()},
+			{name: resume, func: () -> close()},
+			{name: restart, func: () -> FlxG.resetState()},
 			{
-				name: Translator.translateString('pause_exit'),
+				name: exit,
 				func: () -> {
 					if (!FlxG.sound.music.playing) {
 						FlxG.sound.playMusic(Paths.inst(PlayState.songName), 0);
@@ -60,8 +69,14 @@ class PauseSubstate extends MusicBeatSubstate {
 		levelInfo.updateHitbox();
 		add(levelInfo);
 
+		#if FEATURE_TRANSLATIONS
+		var diff:String = Translator.translateString('difficulty_' + PlayState.difficulty.toLowerCase());
+		#else
+		var diff:String = PlayState.difficulty;
+		#end
+
 		var levelDifficulty:FlxText = new FlxText(20, 15 + 32, 0, "", 32);
-		levelDifficulty.text += Translator.translateString('difficulty_' + PlayState.difficulty).toUpperCase();
+		levelDifficulty.text += diff.toUpperCase();
 		levelDifficulty.scrollFactor.set();
 		levelDifficulty.setFormat(Paths.font('vcr.ttf'), 32);
 		levelDifficulty.updateHitbox();

@@ -8,6 +8,7 @@ import flixel.input.keyboard.FlxKey;
 private enum abstract ScrollType(Int) from Int to Int {
 	final UP = 0;
 	final DOWN = 1;
+	final SPLIT = 2;
 }
 
 private enum abstract StrumUnderlayType(Int) from Int to Int {

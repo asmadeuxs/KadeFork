@@ -50,7 +50,9 @@ class ScriptLoader {
 	}
 
 	private static function makeInterpreter() {
-		var interp = new Interp();
+		var interp:InterpType = null;
+		#if FEATURE_HSCRIPT
+		var interp = new InterpType();
 		// script global
 		interp.variables.set("STOP", STOP_FUNC);
 		interp.variables.set("CONTINUE", CONTINUE_FUNC);
@@ -69,7 +71,7 @@ class ScriptLoader {
 		interp.variables.set("Preferences", data.Preferences);
 		interp.variables.set("CoolUtil", util.CoolUtil);
 		interp.variables.set("Paths", util.Paths);
-
+		#end
 		return interp;
 	}
 
@@ -114,6 +116,7 @@ class ScriptLoader {
 
 	public static function loadScript(filepath:String):Script {
 		var script:Script = null;
+		#if FEATURE_HSCRIPT
 		if (Paths.fileExists(filepath) && Paths.scriptExtensions.contains(Path.extension(filepath))) {
 			script = parseScript(Paths.getText(filepath));
 			script.fileName = Path.withoutExtension(Path.withoutDirectory(filepath));
@@ -122,11 +125,13 @@ class ScriptLoader {
 			// not needed for this case
 			// script.priority = script.interp.variables.get("_priority");
 		}
+		#end
 		return script;
 	}
 
 	public static function runScriptsAtDir(directory:String):Array<Script> {
 		var scripts:Array<Script> = null;
+		#if FEATURE_HSCRIPT
 		var files:Array<String> = Paths.listFiles(directory);
 		for (i in 0...files.length) {
 			var path:String = Path.addTrailingSlash(directory) + files[i];
@@ -142,10 +147,12 @@ class ScriptLoader {
 			}
 		}
 		scripts.sort(function(a, b) return Std.int(a.priority - b.priority));
+		#end
 		return scripts;
 	}
 
-	private static function parseScript(scriptStr:String, ?customInterp:Interp):Script {
+	private static function parseScript(scriptStr:String, ?customInterp:InterpType):Script {
+		#if FEATURE_HSCRIPT
 		if (scriptStr.length <= 0)
 			trace('Cannot load an empty script! (HScript error)');
 		else
@@ -166,6 +173,9 @@ class ScriptLoader {
 			catch (e:haxe.Exception) {
 				trace('Unexpected script error, ${e.message} (details: ${e.details()})');
 			}
+		#else
+		trace('Scripts are not enabled in this build! (HScript error)');
+		#end
 		return null;
 	}
 }

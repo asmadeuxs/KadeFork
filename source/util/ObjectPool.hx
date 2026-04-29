@@ -38,8 +38,9 @@ class ObjectPool<T:flixel.FlxObject> {
 		return this._size;
 	}
 
-	public function release(obj:T):Void {
+	public function release(obj:T):T {
 		obj.kill();
+		return obj;
 	}
 
 	public function getSize():Int

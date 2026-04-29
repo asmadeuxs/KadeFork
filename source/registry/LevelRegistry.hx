@@ -72,8 +72,8 @@ class LevelRegistry extends BaseRegistry<LevelData> {
 			else
 				trace('Level "$file" is not valid. (check spelling errors?)');
 		}
-		if (Paths.fileExists(Paths.getPath('data/levelList.txt')))
-			ordered = CoolUtil.coolList(Paths.getText(Paths.getPath('data/levelList.txt')));
+		if (Paths.fileExists(Paths.getPath('data/levelList.txt', null, mod)))
+			ordered = CoolUtil.coolList(Paths.getText(Paths.getPath('data/levelList.txt', null, mod)));
 	}
 
 	public function getOrderedLevels():Array<String>
