@@ -73,6 +73,7 @@ option_ui_back,Menu Voltar
 
 option_lowQualityMode,Qualidade Baixa
 option_accuracyDisplay,Mais Estatísticas
+option_showMissPopups,Mostrar Combo Negativo
 option_showSongPosition,Barra de Progresso
 option_showJudgeCounts,Contador de Classificações
 option_showNps,Notas por Segundo
@@ -86,7 +87,7 @@ optiondesc_frameRate,Quantas vezes o jogo é atualizado e mostrado na tela
 optiondesc_scrollType,Muda a direção de deslize das notas
 optiondesc_centerStrums,Centraliza suas notas e esconde as do seu oponente
 optiondesc_ghostTapping,Deixa tu apertar teclas quando não há notas pra se acertar, sem penalidade.
-optiondesc_etternaMode,Muda a calculadora de precisão pra usar o sistema do Etterna\nTe encoraja a jogar bem, mas é meio maldoso com novos jogadores 
+optiondesc_etternaMode,Muda a calculadora de precisão pra usar o sistema do Etterna\nTe encoraja a jogar bem, mas é meio maldoso com novos jogadores
 optiondesc_scrollSpeed,Substitui a velocidade das notas com sua própria\nSe aplicará se o valór não for 1
 
 optiondesc_note_left,Tecla para acertar Notas apontando para à Esquerda
@@ -102,6 +103,7 @@ optiondesc_ui_back,Tecla para recusar ou sair de um menu
 
 optiondesc_lowQualityMode,Esconde certos elementos no fundo para ajudar com o carregamento (em algums casos, pode ajudar com desempenho)
 optiondesc_accuracyDisplay,Mostra Erros e Precisão no Texto de Pontuação
+optiondesc_showMissPopups,Mostra quantas vezes tu errou notas em sequência
 optiondesc_showSongPosition,Auto-explicativo, Afeta o HUD
 optiondesc_showJudgeCounts,Mostra um contador de classificações na esquerda do HUD
 optiondesc_showNps,Mostra um contador de Notas por Segundo no HUD

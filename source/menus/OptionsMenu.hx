@@ -99,6 +99,11 @@ class OptionsMenu extends MusicBeatSubstate {
 					variable: "accuracyDisplay"
 				},
 				{
+					name: "Show Miss Combo",
+					description: "Displays miss popups with negative combo when you miss notes",
+					variable: "showMissPopups"
+				},
+				{
 					name: "Show Song Position",
 					description: "Shows a progress bar for the song in the HUD",
 					variable: "showSongPosition"

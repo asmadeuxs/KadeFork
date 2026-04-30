@@ -33,6 +33,7 @@ private enum abstract StrumUnderlayType(Int) from Int to Int {
 	var showNps:Bool = false; // Shows a NPS counter on the Score Text
 	var etternaMode:Bool = true; // Changes the accuracy system to use Wife3
 	var showJudgeCounts:Bool = true; // Displays a judgement counter during gameplay on the left side of the screen
+	var showMissPopups:Bool = true; // Displays miss popups when you miss notes
 
 	// I feel like this will be very annoying to implement for Alphabet
 	// I do have roughly an idea on how I wanna do it realistically

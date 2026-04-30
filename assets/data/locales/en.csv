@@ -68,6 +68,7 @@ option_ui_back,UI Back
 
 option_lowQualityMode,Low Quality
 option_accuracyDisplay,Show More Stats
+option_showMissPopups,Show Miss Combo
 option_showSongPosition,Show Song Position
 option_showJudgeCounts,Show Judgement Counts
 option_showNps,Notes per Second
@@ -97,6 +98,7 @@ optiondesc_ui_back,Key to decline or leave a menu
 
 optiondesc_lowQualityMode,Disables certain background effects to increase loading times (and in some cases, performance.)
 optiondesc_accuracyDisplay,Shows Misses and Accuracy in the Score Text
+optiondesc_showMissPopups,Displays miss popups with negative combo when you miss notes
 optiondesc_showSongPosition,Shows a progress bar for the song in the HUD
 optiondesc_showJudgeCounts,Shows a judgement counter during gameplay on the left side of the screen
 optiondesc_showNps,Shows a NPS counter on the Score Text

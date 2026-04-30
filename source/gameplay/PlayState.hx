@@ -765,8 +765,10 @@ class PlayState extends MusicBeatState {
 		if (missJudge != null) {
 			missJudge.hits++;
 			health += session.judgeMan.getHealthBonus(missJudge, health);
-			popUpRating(missJudge.image);
-			popUpCombo(session.combo, missJudge);
+			if (Preferences.user.showMissPopups) {
+				popUpRating(missJudge.image);
+				popUpCombo(session.combo, missJudge);
+			}
 		}
 		// if (daNote != null && Preferences.user.etternaMode)
 		//		session.totalNotesHit += util.EtternaFunctions.wife3(Math.abs(daNote.strumTime - Conductor.time), 1.7);
