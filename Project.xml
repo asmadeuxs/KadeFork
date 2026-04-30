@@ -23,9 +23,9 @@
 	<set name="BUILD_DIR" value="export/release" unless="debug" />
 	<set name="BUILD_DIR" value="export/32bit" if="32bit" />
 
-	<define name="FEATURE_MODS" if="cpp" />
-	<define name="FEATURE_TRANSLATIONS" if="cpp" />
-	<define name="FEATURE_HSCRIPT" unless="cpp" />
+	<define name="FEATURE_MODS" if="cpp || hl" />
+	<define name="FEATURE_TRANSLATIONS" if="cpp || hl" />
+	<define name="FEATURE_HSCRIPT" if="cpp || hl" />
 
 	<classpath name="source" />
 	<assets path="assets" />

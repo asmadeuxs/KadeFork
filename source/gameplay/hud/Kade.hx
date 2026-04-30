@@ -6,6 +6,8 @@ import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar;
 import flixel.util.FlxColor;
+import flixel.util.FlxSpriteUtil;
+import flixel.util.FlxStringUtil;
 import gameplay.PlayState;
 import moonchart.formats.fnf.legacy.FNFLegacy.FNFLegacyMetaValues;
 import ui.HealthIcon;
@@ -21,27 +23,31 @@ class Kade extends BaseHUD {
 	public var scoreTxt:FlxText;
 	public var judgesTxt:FlxText;
 
+	var songPosBG:FlxSprite;
+	var songName:FlxText;
+
 	var songPos:Float = 0;
+	var songLength:Float = 1;
 
 	override public function new():Void {
 		super();
-		if (Preferences.user.showSongPosition) // I dont wanna talk about this code :(
+		songLength = PlayState.songLength;
+		if (Preferences.user.showSongPosition) // I dont wanna talk about this code :( -KadeDev // I do -asmadeuxs
 		{
-			var songPosBG = new FlxSprite(0, 10).loadGraphic(Paths.image('gameplay/ui/healthBar'));
+			var songPosBar = new FlxBar(0, 10, LEFT_TO_RIGHT, 500, 25, this, 'songPos', 0, songLength);
+			songPosBar.createFilledBar(FlxColor.BLACK, FlxColor.fromRGB(0, 255, 128));
 			if (Preferences.user.scrollType == 1)
-				songPosBG.y = FlxG.height * 0.9 + 45;
-			songPosBG.screenCenter(X);
-			add(songPosBG);
+				songPosBar.y = FlxG.height * 0.9 + 45;
+			songPosBar.screenCenter(X);
 
-			var songPosBar = new FlxBar(songPosBG.x + 4, songPosBG.y + 4, LEFT_TO_RIGHT, Std.int(songPosBG.width - 8), Std.int(songPosBG.height - 8), this,
-				'songPos', 0, 90000);
-			songPosBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
+			songPosBG = new FlxSprite(songPosBar.x, songPosBar.y).makeGraphic(Std.int(songPosBar.width), Std.int(songPosBar.height), FlxColor.TRANSPARENT);
+			songName = new FlxText(0, songPosBG.y + 3, Std.int(songPosBG.width), "", 16);
+			songName.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			FlxSpriteUtil.drawRect(songPosBG, 0, 0, songPosBar.width, songPosBar.height, FlxColor.TRANSPARENT, {thickness: 4, color: FlxColor.BLACK});
+			updateSongPosition();
+
 			add(songPosBar);
-
-			var songName = new FlxText(songPosBG.x + (songPosBG.width * 0.5) - 20, songPosBG.y, 0, PlayState.moonMeta.title, 16);
-			if (Preferences.user.scrollType == 1)
-				songName.y -= 3;
-			songName.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			add(songPosBG);
 			add(songName);
 		}
 
@@ -89,16 +95,17 @@ class Kade extends BaseHUD {
 		#if FEATURE_TRANSLATIONS
 		diff = Translator.translateString('menus', 'difficulty_' + PlayState.difficulty);
 		#end
-		var songText:FlxText = new FlxText(5, 0, 0, '${PlayState.moonMeta.title} ${diff.toUpperCase()} - KE v${Main.versions.KADE}', 12);
-		songText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
-		songText.y = (FlxG.height - songText.height) - 3;
-		songText.antialiasing = true;
-		add(songText);
+		var watermark:FlxText = new FlxText(5, 0, 0, '${PlayState.moonMeta.title} - ${diff.toUpperCase()}', 12);
+		watermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
+		watermark.y = (FlxG.height - watermark.height) - 3;
+		watermark.antialiasing = true;
+		add(watermark);
 	}
 
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
-		songPos = Conductor.time;
+		if (Conductor.time >= 0.0)
+			songPos = Conductor.time;
 		// icon
 		var iconOffset:Int = 26;
 		var hpCenter:Float = healthBar.x + healthBar.width * (1 - healthBar.percent * 0.01);
@@ -131,6 +138,7 @@ class Kade extends BaseHUD {
 				iconP2.switchState("idle");
 			}
 		}
+		updateSongPosition();
 	}
 
 	override function updateScoreText(?miss:Bool = false):Void {
@@ -140,7 +148,7 @@ class Kade extends BaseHUD {
 		else
 			layout = '';
 		var score:Int = PlayState.session?.score ?? 0;
-		var scoreMoney:String = flixel.util.FlxStringUtil.formatMoney(score, false, true);
+		var scoreMoney:String = FlxStringUtil.formatMoney(score, false, true);
 		#if FEATURE_TRANSLATIONS
 		var cbs:Int = PlayState.session?.comboBreaks ?? 0;
 		var acc:Float = PlayState.session?.calculateAccuracy() ?? 0.0;
@@ -154,6 +162,16 @@ class Kade extends BaseHUD {
 		scoreTxt.objectCenter(healthBarBG, X);
 		if (judgesTxt != null)
 			judgesTxt.text = getJudgeCounts();
+	}
+
+	public function updateSongPosition() {
+		if (songName != null) {
+			var cur:String = FlxStringUtil.formatTime(songPos * 0.001, false);
+			var len:String = FlxStringUtil.formatTime(songLength * 0.001, false);
+			songName.text = '- ${PlayState.songTitle} ($cur / $len) -';
+			songName.objectCenter(songPosBG, X);
+			songName.alignment = CENTER;
+		}
 	}
 
 	public function getJudgeCounts() {

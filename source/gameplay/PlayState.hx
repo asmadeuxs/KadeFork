@@ -357,7 +357,6 @@ class PlayState extends MusicBeatState {
 		startingSong = false;
 		Conductor.current.playMusic();
 		Conductor.current.music.onComplete = endSong;
-		songLength = Conductor.current.music.length;
 	}
 
 	private function generateSong():Void {
@@ -366,6 +365,7 @@ class PlayState extends MusicBeatState {
 		Conductor.current.loadMusic(Paths.inst(PlayState.songName));
 		if (moonMeta.extraData.get(NEEDS_VOICES) == true)
 			Conductor.current.addTrack(Paths.voices(PlayState.songName));
+		songLength = Conductor.current.music.length;
 		scrollSpeed = moonMeta.scrollSpeeds.get(difficulty) ?? 2.5;
 
 		unspawnNotes.resize(0);

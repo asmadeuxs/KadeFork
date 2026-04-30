@@ -4,8 +4,14 @@
 #but if you're intentionally updating some text every frame
 #DO NOT use those as they can be a little bit expensive
 
-name,English (Canada)
-nativeName,English (Canada)
+name,English
+nativeName,English
+
+The Funkin' Crew Inc,The Funkin' Crew.
+present,present
+In Partnership,In Partnership
+with,with
+Newgrounds,Newgrounds
 
 score,Score: {1}
 comboBreaks,Combo Breaks: {1}

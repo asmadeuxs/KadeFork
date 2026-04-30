@@ -40,7 +40,7 @@ typedef InterpType = #if FEATURE_HSCRIPT hscript.Interp #else Any #end;
 				}
 			}
 		}
-		catch (e:Expr.Error)
+		catch (e)
 			Sys.println('Script Error (${this.fileName} at line ${info.lineNumber}) - $e');
 		#end
 		return caller;
