@@ -12,6 +12,10 @@ class CoolUtil {
 	public static var pixelScale:Float = 6;
 	public static var defaultDifficulties:Array<String> = ['easy', "normal", "hard"];
 
+	public static function formatEscapeStrings(text:String):String {
+		return text.replace("\\\\", "\\").replace("\\r", "\r").replace("\\n", "\n").replace("\\t", "\r").replace("\\'", "'");
+	}
+
 	public static function coolList(str:String):Array<String> {
 		var daList:Array<String> = str.trim().split('\n');
 		return [for (i in 0...daList.length) daList[i] = daList[i].trim()];

@@ -17,7 +17,6 @@ score,Pontos: {1}
 comboBreaks,Combo Breaks: {1}
 accuracy,Precisão: {1}
 keScoreText,Pontos: {1} | Combo Breaks: {2} | Precisão: {3}% | {4}
-keScoreTextNoAcc,Pontos: {1}
 
 judge_Kino,Kino
 judge_Sick,Sick

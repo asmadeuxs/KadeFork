@@ -219,7 +219,7 @@ class PlayState extends MusicBeatState {
 				add(underlay);
 		}
 
-		currentHUD = BaseHUD.loadHUD(/*Preferences.user.hudType*/);
+		currentHUD = BaseHUD.loadHUD(Preferences.user.hudStyle);
 		comboDisplay = new FlxSpriteGroup();
 		strumlines = new FlxTypedSpriteGroup();
 		notes = new NoteRenderer(unspawnNotes);
@@ -787,8 +787,12 @@ class PlayState extends MusicBeatState {
 		session.breakCombo();
 		var missJudge = session.judgeMan.getMiss();
 		if (missJudge != null) {
-			missJudge.hits++;
 			health += session.judgeMan.getHealthBonus(missJudge, health);
+			if (daNote != null) {
+				daNote.judgement = missJudge;
+				session.scoreNote(daNote);
+			} else
+				missJudge.hits++;
 			if (Preferences.user.showMissPopups) {
 				popUpRating(missJudge.image);
 				popUpCombo(session.combo, missJudge);

@@ -10,9 +10,7 @@ import gameplay.PlayState;
 import moonchart.formats.fnf.legacy.FNFLegacy.FNFLegacyMetaValues;
 import ui.HealthIcon;
 
-using util.CoolUtil;
-
-class Kade extends BaseHUD {
+class Classic extends BaseHUD {
 	public var healthBar:FlxBar;
 	public var healthBarBG:FlxSprite;
 	public var iconP1:HealthIcon;
@@ -69,7 +67,7 @@ class Kade extends BaseHUD {
 		iconP2.y = healthBar.y - (iconP2.height * 0.5);
 		add(iconP2);
 
-		scoreTxt = new FlxText(0, healthBarBG.y + 50, 0, "", 20);
+		scoreTxt = new FlxText(0, 0, 0, "", 20);
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
 		scoreTxt.antialiasing = true;
 		add(scoreTxt);
@@ -84,16 +82,6 @@ class Kade extends BaseHUD {
 			add(judgesTxt);
 		}
 		updateScoreText();
-
-		var diff:String = PlayState.difficulty;
-		#if FEATURE_TRANSLATIONS
-		diff = Translator.translateString('menus', 'difficulty_' + PlayState.difficulty);
-		#end
-		var songText:FlxText = new FlxText(5, 0, 0, '${PlayState.moonMeta.title} ${diff.toUpperCase()} - KE v${Main.versions.KADE}', 12);
-		songText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
-		songText.y = (FlxG.height - songText.height) - 3;
-		songText.antialiasing = true;
-		add(songText);
 	}
 
 	override function update(elapsed:Float):Void {
@@ -142,16 +130,15 @@ class Kade extends BaseHUD {
 		var score:Int = PlayState.session?.score ?? 0;
 		var scoreMoney:String = flixel.util.FlxStringUtil.formatMoney(score, false, true);
 		#if FEATURE_TRANSLATIONS
-		var cbs:Int = PlayState.session?.comboBreaks ?? 0;
-		var acc:Float = PlayState.session?.calculateAccuracy() ?? 0.0;
-		layout += Translator.translateFormat('main', 'keScoreText', scoreMoney, cbs, FlxMath.roundDecimal(acc, 2), generateRanking());
+		layout += Translator.translateFormat('main', 'score', scoreMoney);
 		#else
-		var cbs:Int = PlayState.session?.comboBreaks ?? 0;
-		var acc:Float = PlayState.session?.calculateAccuracy() ?? 0.0;
-		layout += 'Score: $scoreMoney | Combo Breaks: $cbs | Accuracy: ${FlxMath.roundDecimal(acc, 2)} | ${generateRanking()}';
+		layout += 'Score: $scoreMoney';
 		#end
 		scoreTxt.text = layout;
-		scoreTxt.objectCenter(healthBarBG, X);
+		// values copied from here https://github.com/FunkinCrew/Funkin/blob/bdedc0aad2b93b3a7787357313ba662ba8d3173f/source/funkin/play/PlayState.hx#L2016
+		scoreTxt.x = healthBarBG.x + healthBarBG.width - 190;
+		scoreTxt.y = healthBarBG.y + 30;
+		scoreTxt.alignment = RIGHT;
 		if (judgesTxt != null)
 			judgesTxt.text = getJudgeCounts();
 	}
@@ -180,38 +167,5 @@ class Kade extends BaseHUD {
 			iconP2.setGraphicSize(Std.int(iconP2.width + 30));
 			iconP2.updateHitbox();
 		}
-	}
-
-	function generateRanking():String {
-		var acc:Float = PlayState.session?.calculateAccuracy() ?? 0.0;
-		if (PlayState.current == null || acc <= 0.0)
-			return "N/A";
-		var ranking:String = PlayState.session?.judgeMan?.getClearFlag() ?? 'N/A';
-		if (ranking == "N/A")
-			return ranking;
-		else
-			ranking = '($ranking) ';
-
-		ranking += switch acc {
-			// WIFE TIME :)))) (based on Wife3)
-			case(_ >= 99.9935) => true: "AAAAA";
-			case(_ >= 99.980) => true: "AAAA:";
-			case(_ >= 99.970) => true: "AAAA.";
-			case(_ >= 99.955) => true: "AAAA";
-			case(_ >= 99.90) => true: "AAA:";
-			case(_ >= 99.80) => true: "AAA.";
-			case(_ >= 99.70) => true: "AAA";
-			case(_ >= 99) => true: "AA:";
-			case(_ >= 96.50) => true: "AA.";
-			case(_ >= 93) => true: "AA";
-			case(_ >= 90) => true: "A:";
-			case(_ >= 85) => true: "A.";
-			case(_ >= 80) => true: "A";
-			case(_ >= 70) => true: "B";
-			case(_ >= 60) => true: "C";
-			case(_ < 60) => true: "D";
-			case _: "N/A";
-		}
-		return ranking;
 	}
 }

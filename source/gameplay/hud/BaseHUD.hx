@@ -24,7 +24,14 @@ class BaseHUD extends FlxSpriteGroup {
 		if (hudName == null)
 			return new gameplay.hud.Kade();
 		var custom = ScriptLoader.findScript(ScriptLoader.getScriptFile(Paths.getPath('scripts/huds'), hudName), true);
-		return custom == null ? new gameplay.hud.Kade() : new gameplay.hud.BaseHUD(custom);
+		if (custom != null)
+			return new gameplay.hud.BaseHUD(custom);
+		else {
+			return switch hudName.toLowerCase() {
+				case "classic": new gameplay.hud.Classic();
+				case _: new gameplay.hud.Kade();
+			}
+		}
 	}
 
 	override function update(elapsed:Float):Void {

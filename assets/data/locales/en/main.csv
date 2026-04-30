@@ -10,9 +10,7 @@ nativeName,English (Canada)
 score,Score: {1}
 comboBreaks,Combo Breaks: {1}
 accuracy,Accuracy: {1}
-
 keScoreText,Score: {1} | Combo Breaks: {2} | Accuracy: {3}% | {4}
-keScoreTextNoAcc,Score: {1}
 
 judge_Kino,Kino
 judge_Sick,Sick

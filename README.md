@@ -19,8 +19,6 @@ todo (this is more for myself @asmadeuxs than anything.):
 	- add [hxvlc](https://github.com/MAJigsaw77/hxvlc) for video support
 - game:
 	- re-add replays
-	- add things to make hardcoding easier and convenient since that's the orientation i wanna go with
-		- softcoded mods will exist, but again, hardcoding is the focus
 	- rewrite all the menus
 		- probably change the visuals also if i can when i get to that point
 		- - it's my fork anyway the default menus can look different from other forks idc.

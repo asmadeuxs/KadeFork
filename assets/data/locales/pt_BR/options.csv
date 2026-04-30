@@ -3,6 +3,8 @@ optionval_OFF,DESLIGADO
 optionval_Up,Cima
 optionval_Down,Baixo
 optionval_Split,Dividido
+optionval_Detailed,Detalhado
+optionval_Classic,Clássico
 optionval_Strums,Notas
 optionval_Stage,Cenário
 
@@ -24,15 +26,15 @@ option_ui_right,Menu Direita
 option_ui_accept,Menu Aceitar
 option_ui_back,Menu Voltar
 
+option_language,Idioma
 option_lowQualityMode,Qualidade Baixa
-option_accuracyDisplay,Mais Estatísticas
+option_hudStyle,Estilo do HUD
 option_showMissPopups,Mostrar Combo Negativo
 option_showSongPosition,Barra de Progresso
 option_showJudgeCounts,Contador de Classificações
 option_showNps,Notas por Segundo
 option_noteSplashes,Note Splashes
 option_distractions,Distrações
-option_language,Idioma
 option_strumUnderlay,Escurecer Interface
 option_strumUnderlayType,Tipo de Escuridão
 
@@ -55,7 +57,7 @@ optiondesc_ui_accept,Tecla para confirmar ou ativar um elemento em um menu
 optiondesc_ui_back,Tecla para recusar ou sair de um menu
 
 optiondesc_lowQualityMode,Esconde certos elementos no fundo para ajudar com o carregamento (em algums casos, pode ajudar com desempenho)
-optiondesc_accuracyDisplay,Mostra Erros e Precisão no Texto de Pontuação
+optiondesc_hudStyle,Muda o Estilo do HUD,\n"Detalhado" sendo o Padrão
 optiondesc_showMissPopups,Mostra quantas vezes tu errou notas em sequência
 optiondesc_showSongPosition,Auto-explicativo, Afeta o HUD
 optiondesc_showJudgeCounts,Mostra um contador de classificações na esquerda do HUD

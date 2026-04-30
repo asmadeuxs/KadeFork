@@ -72,10 +72,10 @@ class Locale {
 			return;
 		trace(path);
 		for (localeDir in Paths.listFiles(path)) {
-		    trace(localeDir);
+			trace(localeDir);
 			var lang = reloadLocaleDirectory(localeDir);
 			if (lang != null)
-			    locales.set(localeDir, lang);
+				locales.set(localeDir, lang);
 		}
 	}
 
@@ -112,11 +112,11 @@ class Locale {
 					case(_.toLowerCase() == 'nativename' || _.toLowerCase() == 'native name') => true:
 						language.nativeName = value;
 					case(Paths.fileExists(_)) => true:
-					if (!language.pathOverrides.exists(ii))
-					    language.pathOverrides.set(ii, new Map());
-					language.pathOverrides[ii].set(keyTrim, value);
+						if (!language.pathOverrides.exists(ii))
+							language.pathOverrides.set(ii, new Map());
+						language.pathOverrides[ii].set(keyTrim, value);
 					case _:
-						language.strings[ii].set(keyTrim, value);
+						language.strings[ii].set(keyTrim, CoolUtil.formatEscapeStrings(value));
 				}
 			}
 		}

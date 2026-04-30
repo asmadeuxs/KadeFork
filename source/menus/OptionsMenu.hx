@@ -88,15 +88,26 @@ class OptionsMenu extends MusicBeatSubstate {
 		{
 			name: "Visuals",
 			options: [
+				#if FEATURE_TRANSLATIONS
+				{
+					name: "Language",
+					description: "Changes the game's text interfaces to be on a different language",
+					variable: "language",
+					type: "choice",
+					choices: Translator.getAvailableLanguageIDs()
+				},
+				#end
 				{
 					name: "Low Quality",
 					description: "Disables certain background effects to increase loading times (and in some cases, performance.)",
 					variable: "lowQualityMode"
 				},
 				{
-					name: "Show More Stats",
-					description: "Shows Misses and Accuracy in the Score Text",
-					variable: "accuracyDisplay"
+					name: "HUD Style",
+					description: "Changes the style of the HUD.\n\"Detailed\" being the default",
+					choices: ["Detailed", "Classic"], // BaseHUD.listHUDs()
+					variable: "hudStyle",
+					type: "choice"
 				},
 				{
 					name: "Show Miss Combo",
@@ -128,15 +139,6 @@ class OptionsMenu extends MusicBeatSubstate {
 					description: "Disables certain sounds and effects that may be distracting",
 					variable: "distractions"
 				},
-				#if FEATURE_TRANSLATIONS
-				{
-					name: "Language",
-					description: "Changes the game's text interfaces to be on a different language",
-					variable: "language",
-					type: "choice",
-					choices: Translator.getAvailableLanguageIDs()
-				},
-				#end
 				{
 					type: "number",
 					name: "Interface Dim",

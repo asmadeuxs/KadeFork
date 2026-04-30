@@ -95,7 +95,7 @@ class JudgementManager {
 				healthBonus: (_:Float) -> return -0.04,
 				color: 0xFFFF0000,
 				hittable: false,
-				accuracy: 0.0,
+				accuracy: -0.5,
 				score: -350,
 			}
 		];

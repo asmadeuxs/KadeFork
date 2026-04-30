@@ -5,6 +5,7 @@ import flixel.FlxG;
 import flixel.input.keyboard.FlxKey;
 
 // this is just for code formatting.
+// this is also kinda useful if you wanna know what values exist by default for these options
 private enum abstract ScrollType(Int) from Int to Int {
 	final UP = 0;
 	final DOWN = 1;
@@ -16,25 +17,35 @@ private enum abstract StrumUnderlayType(Int) from Int to Int {
 	final ON_STAGE = 1;
 }
 
-@:publicFields class Save { // General Gameplay
+private enum abstract HudType(String) from String to String {
+	final INFOMATIVE = "Detailed";
+	final CLASSIC = "Classic";
+}
+
+@:publicFields class Save {
+	// General Gameplay
+	var keybinds:ActionMap = Controls.defaultActions.copy();
 	var frameRate:Int = 120; // How many frames per second the game runs at
 	var scrollType:Int = ScrollType.UP; // Changes where the notes scroll to
 	var centerStrums:Bool = false; // Centers your strums and hides the opponent's
 	var ghostTapping:Bool = true; // Lets you mash without penalty
 	var noteOffset:Float = 0.0; // By how much should notes be offsetted?
-	// Scroll Speed.
 	var scrollSpeed:Float = 1.0; // Overrides the chart's scroll speed with your own (applies if it's not set to 1)
+	var etternaMode:Bool = true; // Changes the accuracy system to use Wife3
+
 	// Visuals & Accessibility
 	var strumUnderlay:Int = 0; // Enables a background behind the strums or stage (goes from 0 - 100)
 	var strumUnderlayType:Int = StrumUnderlayType.ON_STRUMS; // Where should the underlay be layered on
-	var accuracyDisplay:Bool = true; // Shows Misses and Accuracy in the Score Text
-	var showSongPosition:Bool = false; // Shows a progress bar for the song in the HUD
 	var noteSplashes:Bool = false; // Shows a funny note splash that gives you a boner
+
+	// HUD
+	var hudStyle:String = HudType.INFOMATIVE; // Changes the style of the HUD
+	var showSongPosition:Bool = false; // Shows a progress bar for the song in the HUD
 	var showNps:Bool = false; // Shows a NPS counter on the Score Text
-	var etternaMode:Bool = true; // Changes the accuracy system to use Wife3
 	var showJudgeCounts:Bool = true; // Displays a judgement counter during gameplay on the left side of the screen
 	var showMissPopups:Bool = true; // Displays miss popups when you miss notes
 
+	// VISUALS
 	// I feel like this will be very annoying to implement for Alphabet
 	// I do have roughly an idea on how I wanna do it realistically
 	// It's like for accent marks (á, à ç, ş, etc) I could like uhhh
@@ -63,8 +74,6 @@ private enum abstract StrumUnderlayType(Int) from Int to Int {
 	 * - Car Sounds in Week 4
 	 */
 	var distractions:Bool = true;
-
-	var keybinds:ActionMap = Controls.defaultActions.copy();
 
 	public function new():Void {}
 }
@@ -122,5 +131,17 @@ class Preferences {
 		if (FlxG.save.data.volume != null)
 			FlxG.sound.volume = FlxG.save.data.volume;
 		Preferences.setFPSCap(Preferences.user.frameRate);
+		migrateSave();
+	}
+
+	public static function migrateSave():Void {
+		// To migrate options from older version of the fork
+		// Not useful if you have a completely clean save
+		if (FlxG.save.data.accuracyDisplay != null) {
+			var inf:Bool = FlxG.save.data.accuracyDisplay;
+			Preferences.user.hudStyle = inf ? HudType.INFOMATIVE : HudType.CLASSIC;
+			FlxG.save.data.hudStyle = Preferences.user.hudStyle;
+			FlxG.save.data.accuracyDisplay = null;
+		}
 	}
 }
