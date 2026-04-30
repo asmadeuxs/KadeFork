@@ -19,7 +19,9 @@ class BootState extends flixel.FlxState {
 		new Controls(Controls.defaultActions.copy());
 		data.Preferences.load();
 		data.Highscore.load();
+		#if FEATURE_TRANSLATIONS
 		new data.Locale(Preferences.user.language);
+		#end
 
 		util.Mods.scan(true);
 		// yes we're calling them levels and not weeks

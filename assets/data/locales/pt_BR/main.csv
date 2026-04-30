@@ -1,0 +1,34 @@
+#key,translationString
+#some of these keys don't have {number} values
+#these are useful for formatting, yes
+#but if you're intentionally updating some text every frame
+#DO NOT use those as they can be a little bit expensive
+
+name,Portuguese (Brazil)
+nativeName,Português (Brasil)
+
+The Funkin' Crew Inc,A Funkin' Crew.
+present,apresenta
+In Partnership,Em parceria
+with,com
+Newgrounds,Newgrounds
+
+score,Pontos: {1}
+comboBreaks,Combo Breaks: {1}
+accuracy,Precisão: {1}
+keScoreText,Pontos: {1} | Combo Breaks: {2} | Precisão: {3}% | {4}
+keScoreTextNoAcc,Pontos: {1}
+
+judge_Kino,Kino
+judge_Sick,Sick
+judge_Good,Good
+judge_Bad,Bad
+judge_Shit,Shit
+judge_Miss,Erro
+
+judge_Kino_plural,Kinos
+judge_Sick_plural,Sicks
+judge_Good_plural,Goods
+judge_Bad_plural,Bads
+judge_Shit_plural,Shits
+judge_Miss_plural,Erros

@@ -249,13 +249,13 @@ class TitleState extends MusicBeatState {
 			case 1:
 				var fcCredits:String = "The Funkin' Crew Inc";
 				#if FEATURE_TRANSLATIONS
-				fcCredits = Translator.translateString(fcCredits);
+				fcCredits = Translator.translateString('main', fcCredits);
 				#end
 				createCoolText([fcCredits]);
 			case 3:
 				var fcPresents:String = "present";
 				#if FEATURE_TRANSLATIONS
-				fcPresents = Translator.translateString(fcPresents);
+				fcPresents = Translator.translateString('main', fcPresents);
 				#end
 				addMoreText(fcPresents);
 			case 4:
@@ -263,13 +263,13 @@ class TitleState extends MusicBeatState {
 			case 5:
 				createCoolText([
 					#if FEATURE_TRANSLATIONS
-					Translator.translateString('In Partnership'), Translator.translateString('with')
+					Translator.translateString('main', 'In Partnership'), Translator.translateString('main', 'with')
 					#else
 					'In Partnership', 'with'
 					#end
 				]);
 			case 7:
-				addMoreText(#if FEATURE_TRANSLATIONS Translator.translateString('Newgrounds') #else 'Newgrounds' #end
+				addMoreText(#if FEATURE_TRANSLATIONS Translator.translateString('main', 'Newgrounds') #else 'Newgrounds' #end
 				);
 				ngSpr.visible = true;
 			case 8:

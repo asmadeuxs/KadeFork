@@ -27,9 +27,9 @@ class PauseSubstate extends MusicBeatSubstate {
 		super();
 
 		#if FEATURE_TRANSLATIONS
-		var resume:String = Translator.translateString('pause_resumeSong');
-		var restart:String = Translator.translateString('pause_restartSong');
-		var exit:String = Translator.translateString('pause_exit');
+		var resume:String = Translator.translateString('menus', 'pause_resumeSong');
+		var restart:String = Translator.translateString('menus', 'pause_restartSong');
+		var exit:String = Translator.translateString('menus', 'pause_exit');
 		#else
 		var resume:String = 'Resume';
 		var restart:String = 'Restart';
@@ -70,7 +70,7 @@ class PauseSubstate extends MusicBeatSubstate {
 		add(levelInfo);
 
 		#if FEATURE_TRANSLATIONS
-		var diff:String = Translator.translateString('difficulty_' + PlayState.difficulty.toLowerCase());
+		var diff:String = Translator.translateString('menus', 'difficulty_' + PlayState.difficulty.toLowerCase());
 		#else
 		var diff:String = PlayState.difficulty;
 		#end

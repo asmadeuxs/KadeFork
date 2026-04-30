@@ -4,19 +4,52 @@ import util.CoolUtil;
 
 using StringTools;
 
+typedef StringMap = Map<String, String>;
+
 @:structInit @:publicFields class LocaleData {
 	var name:String;
 	var nativeName:String;
-	@:optional var strings:Map<String, String> = [];
-	@:optional var pathOverrides:Map<String, String> = [];
+	@:optional var strings:Map<String, StringMap> = [];
+	@:optional var pathOverrides:Map<String, StringMap> = [];
 
-	public function has(id:String):Bool
-		return strings.exists(id);
+	function hasCategory(cat:String):Bool
+		return strings.exists(cat);
 
-	public function get(id:String):String
-		return strings.get(id);
+	function hasString(cat:String, id:String):Bool
+		return strings.exists(cat) && strings[cat].exists(id);
 
-	public function toString():String
+	public function getCategory(cat:String, id:String):StringMap
+		return strings[cat];
+
+	function getString(cat:String, id:String):String
+		return strings.exists(cat) ? strings[cat][id] : null;
+
+	function getPath(category:String, id:String):String
+		return pathOverrides[category][id];
+
+	function find(id:String):String {
+		var formatted:String = id;
+		for (key in strings.keys()) {
+			if (strings[key] != null && strings[key][id] != null) {
+				formatted = strings[key][id];
+				break;
+			}
+		}
+		return formatted;
+	}
+
+	function findPath(path:String):String {
+		var formatted:String = path;
+		for (key in pathOverrides.keys()) {
+			if (pathOverrides[key] != null && pathOverrides[key][path] != null) {
+				formatted = pathOverrides[key][path];
+				break;
+			}
+		}
+		return formatted;
+	}
+
+	function toString():String
 		return '[Locale, $name]';
 }
 
@@ -37,15 +70,31 @@ class Locale {
 		var path:String = Paths.getPath('data/locales');
 		if (!Paths.fileExists(path))
 			return;
-		for (i in Paths.listFiles(path)) {
+		trace(path);
+		for (localeDir in Paths.listFiles(path)) {
+		    trace(localeDir);
+			var lang = reloadLocaleDirectory(localeDir);
+			if (lang != null)
+			    locales.set(localeDir, lang);
+		}
+	}
+
+	public function reloadLocaleDirectory(locale:String):LocaleData {
+		var localeFiles:String = Paths.getPath('data/locales/$locale');
+		if (!Paths.fileExists(localeFiles))
+			return null;
+		var ats = haxe.io.Path.addTrailingSlash;
+		var language:LocaleData = {name: null, nativeName: null};
+		for (i in Paths.listFiles(localeFiles)) {
 			if (!i.endsWith('.csv'))
 				continue;
-			var lines:Array<String> = Paths.getText(haxe.io.Path.addTrailingSlash(path) + i).split('\n');
+			var lines:Array<String> = Paths.getText(ats(localeFiles) + i).split('\n');
 			if (lines == null || lines.length == 0) {
-				trace('Translation file "$i" is empty.');
+				trace('Translation file "$i" (for language $locale) is empty.');
 				continue;
 			}
-			var language:LocaleData = {name: null, nativeName: null};
+			var ii:String = haxe.io.Path.withoutExtension(i);
+			language.strings.set(ii, new Map());
 			for (id => line in lines) {
 				var t:String = line.trim();
 				if (t.length == 0 || CoolUtil.isComment(t))
@@ -63,14 +112,15 @@ class Locale {
 					case(_.toLowerCase() == 'nativename' || _.toLowerCase() == 'native name') => true:
 						language.nativeName = value;
 					case(Paths.fileExists(_)) => true:
-						language.pathOverrides.set(keyTrim, value);
+					if (!language.pathOverrides.exists(ii))
+					    language.pathOverrides.set(ii, new Map());
+					language.pathOverrides[ii].set(keyTrim, value);
 					case _:
-						language.strings.set(keyTrim, value);
+						language.strings[ii].set(keyTrim, value);
 				}
 			}
-			locales.set(haxe.io.Path.withoutExtension(i), language);
 		}
-		trace(locales);
+		return language;
 	}
 
 	public function getAvailableLanguageIDs():Array<String> {
@@ -129,36 +179,39 @@ class Locale {
 	 * Translates a string and replaces all numbered brackets (i.e: {1}, {2}, ...) with the values attached.
 	 *
 	 * May be a bit slow if you're doing it every frame.
+	 * @param cat String Category the string is at (i.e: menus) - this is usually the csv file name
 	 * @param id String
 	 * @param replacements haxe.Rest<Dynamic>
 	 * @return String
 	 */
-	public function translateFormat(id:String, ...replacements:Dynamic):String
-		return format(translateString(id), ...replacements);
+	public function translateFormat(cat:String, id:String, ...replacements:Dynamic):String
+		return format(translateString(cat, id), ...replacements);
 
 	/**
 	 * Translates a string from an id
 	 *
+	 * @param cat String Category the string is at (i.e: main) - this is usually the csv file name
 	 * @param id String
 	 * @return String
 	 */
-	public function translateString(id:String):String {
+	public function translateString(cat:String, id:String):String {
 		var l:LocaleData = locales.get(this.language);
-		return l?.get(id) ?? '$id';
+		return l?.getString(cat, id) ?? '$cat:$id';
 	}
 
 	/**
 	 * Same as translateString but specifically looks for any IDs ending in _plural
 	 *
 	 * returns a non-plural version of the string if it can't be found.
+	 * @param cat String Category the string is at (i.e: menus) - this is usually the csv file name
 	 * @param id String
-	 * @return String 
+	 * @return String
 	 */
-	public function translatePlural(id:String):String {
-		var plu:String = translateString(id + '_plural');
-		if (plu == id) {
+	public function translatePlural(cat:String, id:String):String {
+		var plu:String = translateString(cat, id + '_plural');
+		if (plu == '$cat:${id}_plural') {
 			trace('${this.language} has no plural for string "$id"');
-			plu = translateString(id);
+			plu = translateString(cat, id);
 		}
 		return plu;
 	}

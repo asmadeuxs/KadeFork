@@ -367,7 +367,7 @@ class OptionsMenu extends MusicBeatSubstate {
 		if (curCatOptions != null) {
 			var option = curCatOptions[curSelected];
 			#if FEATURE_TRANSLATIONS
-			descriptionThingy.text = Translator.translateString('optiondesc_${option.variable}');
+			descriptionThingy.text = Translator.translateString('options', 'optiondesc_${option.variable}');
 			#else
 			descriptionThingy.text = option.description;
 			#end
@@ -390,7 +390,7 @@ class OptionsMenu extends MusicBeatSubstate {
 			catNameText.text = 'Viewing: ${optionStash[catSelected].name}\nPress Q/E to change category\nPress Left/Right to change option';
 
 		for (i => option in curCatOptions) {
-			var nameText = new FlxText(20, 50 + i * 40, catFrame.width, Translator.translateString('option_${option.variable}'), 24);
+			var nameText = new FlxText(20, 50 + i * 40, catFrame.width, Translator.translateString('options', 'option_${option.variable}'), 24);
 			var valText = new FlxText(0, nameText.y, catFrame.width - 20, option.valueString(), 24);
 			valText.font = optionsFont;
 			valText.alignment = RIGHT;

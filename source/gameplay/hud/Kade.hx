@@ -84,7 +84,7 @@ class Kade extends BaseHUD {
 
 		var diff:String = PlayState.difficulty;
 		#if FEATURE_TRANSLATIONS
-		diff = Translator.translateString('difficulty_' + PlayState.difficulty);
+		diff = Translator.translateString('menus', 'difficulty_' + PlayState.difficulty);
 		#end
 		var songText:FlxText = new FlxText(5, 0, 0, '${PlayState.moonMeta.title} ${diff.toUpperCase()} - KE v${Main.versions.KADE}', 12);
 		songText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
@@ -142,9 +142,9 @@ class Kade extends BaseHUD {
 		if (Preferences.user.accuracyDisplay) {
 			var cbs:Int = PlayState.session?.comboBreaks ?? 0;
 			var acc:Float = PlayState.session?.calculateAccuracy() ?? 0.0;
-			layout += Translator.translateFormat('keScoreText', scoreMoney, cbs, FlxMath.roundDecimal(acc, 2), generateRanking());
+			layout += Translator.translateFormat('main', 'keScoreText', scoreMoney, cbs, FlxMath.roundDecimal(acc, 2), generateRanking());
 		} else
-			layout += Translator.translateFormat('keScoreTextNoAcc', scoreMoney);
+			layout += Translator.translateFormat('main', 'keScoreTextNoAcc', scoreMoney);
 		#else
 		if (Preferences.user.accuracyDisplay) {
 			var cbs:Int = PlayState.session?.comboBreaks ?? 0;
@@ -164,7 +164,7 @@ class Kade extends BaseHUD {
 			for (idx => judge in PlayState.session.judgeMan.activeList) {
 				var judgeName:String = null;
 				#if FEATURE_TRANSLATIONS
-				judgeName = Translator.translatePlural('judge_' + judge.name);
+				judgeName = Translator.translatePlural('main', 'judge_' + judge.name);
 				#else
 				judgeName = judge.name;
 				#end

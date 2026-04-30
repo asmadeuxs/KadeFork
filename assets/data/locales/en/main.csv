@@ -1,0 +1,29 @@
+#key,translationString
+#some of these keys don't have {number} values
+#these are useful for formatting, yes
+#but if you're intentionally updating some text every frame
+#DO NOT use those as they can be a little bit expensive
+
+name,English (Canada)
+nativeName,English (Canada)
+
+score,Score: {1}
+comboBreaks,Combo Breaks: {1}
+accuracy,Accuracy: {1}
+
+keScoreText,Score: {1} | Combo Breaks: {2} | Accuracy: {3}% | {4}
+keScoreTextNoAcc,Score: {1}
+
+judge_Kino,Kino
+judge_Sick,Sick
+judge_Good,Good
+judge_Bad,Bad
+judge_Shit,Shit
+judge_Miss,Miss
+
+judge_Kino_plural,Kinos
+judge_Sick_plural,Sicks
+judge_Good_plural,Goods
+judge_Bad_plural,Bads
+judge_Shit_plural,Shits
+judge_Miss_plural,Misses

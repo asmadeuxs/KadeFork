@@ -47,8 +47,8 @@ using StringTools;
 			str = Translator.getNativeLangName(str);
 		else {
 			var transStr:String = 'optionval_$str';
-			var translated:String = Translator.translateString(transStr);
-			if (translated != transStr)
+			var translated:String = Translator.translateString('options', transStr);
+			if (!translated.contains(transStr))
 				str = translated;
 		}
 		#end

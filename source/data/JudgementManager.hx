@@ -42,8 +42,8 @@ class JudgementManager {
 	public function getDefaultJudgements():Array<Judgement> {
 		return [
 			{
-				name: "Sick",
-				image: "sick",
+				name: "Kino",
+				image: "kino",
 				splash: true,
 				color: 0xFF97FFFF,
 				healthBonus: (health:Float) -> return health < 2 ? 0.12 : 0.0,
@@ -52,8 +52,8 @@ class JudgementManager {
 				score: 500
 			},
 			{
-				name: "Great",
-				image: "great",
+				name: "Sick",
+				image: "sick",
 				splash: true,
 				healthBonus: (health:Float) -> return health < 2 ? 0.1 : 0.0,
 				color: 0xFFEAFF74,
