@@ -4,7 +4,7 @@ optionval_Up,Up
 optionval_Down,Down
 optionval_Split,Split
 optionval_Strums,Strums
-optionval_Stage,Stages
+optionval_Stage,Stage
 
 option_frameRate,Framerate
 option_scrollType,Scroll Type
