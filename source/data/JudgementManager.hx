@@ -116,8 +116,8 @@ class JudgementManager {
 			return "N/A";
 		var breaks:Int = gameplay.PlayState.session?.comboBreaks ?? 0;
 		return switch lowestFC {
-			case 0: "MFC"; // Marvelous (Sick) Full Combo
-			case 1: activeList[1].hits == 1 ? "WF" : "GFC+"; // White Flag / Great Full Combo
+			case 0: "KFC"; // Kino Full Combo
+			case 1: activeList[1].hits == 1 ? "WF" : "SFC"; // White Flag / Sick Full Combo
 			case 2: return activeList[2].hits == 1 ? "BF" : "GFC"; // Black Flag / Good Full Combo
 			case _: return breaks > 0 ? "NM" : "FC"; // No Misses / Full Combo
 		}
