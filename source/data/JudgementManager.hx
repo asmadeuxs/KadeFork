@@ -94,6 +94,7 @@ class JudgementManager {
 				image: "miss",
 				healthBonus: (_:Float) -> return -0.04,
 				color: 0xFFFF0000,
+				hitWindow: 200.0,
 				hittable: false,
 				accuracy: -0.5,
 				score: -350,
@@ -128,7 +129,7 @@ class JudgementManager {
 
 	public function judgeTime(noteDiff:Float):Null<Judgement> {
 		for (judgement in activeList)
-			if (judgement.hittable == true && noteDiff <= judgement.hitWindow)
+			if (judgement.hittable && noteDiff <= judgement.hitWindow)
 				return judgement;
 		return activeList[activeList.length - 1];
 	}

@@ -95,9 +95,12 @@ class Note extends gameplay.FunkinSprite {
 		this.noteType = data.type;
 
 		// reset gameplay values
+		this.judgement = null;
+		this.hitDifference = 0.0;
 		this.wasGoodHit = false;
 		this.tooLate = false;
 		this.missed = false;
+
 		noteScript?.callFunc("noteRegenerated", [this, strumTime, noteData, sustainLength]);
 		return this;
 	}

@@ -186,6 +186,8 @@ class DummyPlayState extends MusicBeatState {
 	}
 
 	public function queueInputNote(note:Note):Void {
+		if (!note.mustPress)
+			return;
 		var lane:Int = note.noteData;
 		var placeInQ = inputQueue[lane];
 		var i:Int = 0;
@@ -195,6 +197,8 @@ class DummyPlayState extends MusicBeatState {
 	}
 
 	function removeNoteFromInputQueue(note:Note):Void {
+		if (!note.mustPress)
+			return;
 		var lane:Int = note.noteData;
 		var placeInQ = inputQueue[lane];
 		var i = placeInQ.indexOf(note);

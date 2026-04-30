@@ -567,6 +567,8 @@ class PlayState extends MusicBeatState {
 	// so I completely changed how note input works just to make it faster
 	// god I need a hug. -asmadeuxs
 	public function queueInputNote(note:Note):Void {
+		if (!note.mustPress)
+			return;
 		var lane:Int = note.noteData;
 		var placeInQ = inputQueue[lane];
 		var i:Int = 0;
@@ -576,6 +578,8 @@ class PlayState extends MusicBeatState {
 	}
 
 	function removeNoteFromInputQueue(note:Note):Void {
+		if (!note.mustPress)
+			return;
 		var lane:Int = note.noteData;
 		var placeInQ = inputQueue[lane];
 		var i = placeInQ.indexOf(note);
