@@ -40,6 +40,10 @@ class DummyPlayState extends MusicBeatState {
 	var generatedMusic:Bool = false;
 	var perfectMode:Bool = false;
 
+	var holdInputs:Array<Bool> = [false, false, false, false];
+	var inputQueue:Array<Array<Note>> = [];
+	var inputMgr:InputManager;
+
 	override function create() {
 		super.create();
 
@@ -50,8 +54,22 @@ class DummyPlayState extends MusicBeatState {
 		chart = Song.loadFromFile(formattedSong, songName);
 		generateSong();
 
+		inputMgr = new InputManager(keyPressed, keyReleased);
+		inputQueue.resize(PlayState.noteActions.length);
+		for (i in 0...inputQueue.length)
+			inputQueue[i] = [];
+		for (noteData in 0...PlayState.noteActions.length) {
+			var action = PlayState.noteActions[noteData];
+			var keys:Array<FlxKey> = Controls.current.actions[action];
+			for (key in keys)
+				inputMgr.remapKeyCode(key, noteData);
+		}
+		inputMgr.init(); // NEED to do this
+
 		strumlines = new FlxTypedSpriteGroup();
 		notes = new NoteRenderer(unspawnNotes);
+		notes.noteSpawned.add(queueInputNote);
+		notes.noteKilled.add(removeNoteFromInputQueue);
 		add(strumlines);
 		add(notes);
 
@@ -115,10 +133,10 @@ class DummyPlayState extends MusicBeatState {
 		Conductor.current.active = false;
 		Conductor.current.stopMusic();
 		Conductor.current.clearTracks();
+		inputMgr.destroy();
 	}
 
 	var starting:Bool = true;
-	var holdInputs:Array<Bool> = [false, false, false, false];
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
@@ -132,15 +150,6 @@ class DummyPlayState extends MusicBeatState {
 	}
 
 	function noteUpdate(time:Float):Void {
-		var noteActions = PlayState.noteActions;
-		for (i in 0...noteActions.length) {
-			var action = noteActions[i];
-			if (Controls.current.justPressed(action))
-				keyPressed(i);
-			holdInputs[i] = Controls.current.pressed(noteActions[i]);
-			if (Controls.current.justReleased(action))
-				keyReleased(i);
-		}
 		for (daNote in notes.getActiveNotes()) {
 			var noteKill:Bool = false;
 			var autoHit:Bool = !daNote.mustPress || (daNote.mustPress && perfectMode);
@@ -176,26 +185,45 @@ class DummyPlayState extends MusicBeatState {
 		}
 	}
 
-	public function keyPressed(key:Int = -1):Void {
-		if (perfectMode || key == -1)
+	public function queueInputNote(note:Note):Void {
+		var lane:Int = note.noteData;
+		var placeInQ = inputQueue[lane];
+		var i:Int = 0;
+		while (i < placeInQ.length && placeInQ[i].strumTime < note.strumTime)
+			i++;
+		placeInQ.insert(i, note);
+	}
+
+	function removeNoteFromInputQueue(note:Note):Void {
+		var lane:Int = note.noteData;
+		var placeInQ = inputQueue[lane];
+		var i = placeInQ.indexOf(note);
+		if (i != -1)
+			placeInQ.splice(i, 1);
+	}
+
+	public function keyPressed(key:Int):Void {
+		var on:Bool = inputMgr != null && !perfectMode;
+		if (!on || key == -1 || !generatedMusic)
 			return;
 
-		var strum = playerStrums.members[key];
-		var gottaHits:Array<Note> = notes.filter(function(nt:Note):Bool return nt != null && nt.canBeHit && nt.noteData == key);
-		gottaHits.sort(function(a:Note, b:Note):Int return Std.int(a.strumTime - b.strumTime));
+		var lane:Int = key;
+		var queue:Array<Note> = inputQueue[lane];
+		var next:Note = (queue.length != 0) ? queue[0] : null;
 		holdInputs[key] = true;
 
-		if (gottaHits.length != 0) {
-			var note = gottaHits[0];
-			note.wasGoodHit = true;
-			if (!note.isSustain)
-				notes.removeNote(note);
+		if (next != null && next.canBeHit) {
+			queue.shift();
+			next.wasGoodHit = true;
+			next.hitDifference = Math.abs(next.strumTime - Conductor.time);
+			if (!next.isSustain)
+				notes.removeNote(next);
 			else {
-				note.visible = false;
-				if (note.holdBody != null)
-					note.holdBody.visible = true;
-				if (note.holdEnd != null)
-					note.holdEnd.visible = true;
+				next.visible = false;
+				if (next.holdBody != null)
+					next.holdBody.visible = true;
+				if (next.holdEnd != null)
+					next.holdEnd.visible = true;
 			}
 			playerStrums.playAnim(key, "confirm");
 			for (vocal in Conductor.current.tracks)
@@ -204,8 +232,9 @@ class DummyPlayState extends MusicBeatState {
 			playerStrums.playAnim(key, "pressed");
 	}
 
-	public function keyReleased(key:Int = -1):Void {
-		if (perfectMode || key < 0)
+	public function keyReleased(key:Int):Void {
+		var on:Bool = inputMgr != null && !perfectMode;
+		if (!on || key == -1 || !generatedMusic)
 			return;
 		holdInputs[key] = false;
 		playerStrums.playAnim(key, "static");

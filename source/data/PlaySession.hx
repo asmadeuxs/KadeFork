@@ -30,11 +30,13 @@ class PlaySession {
 	}
 
 	public function scoreNote(daNote:Note):Void {
-		var noteDiff:Float = Math.abs(Conductor.time - daNote.strumTime);
-		if (daNote.judgement == null)
-			daNote.judgement = judgeMan.judgeTime(noteDiff);
+		if (daNote.judgement == null) {
+			var diff:Float = Math.abs(daNote.strumTime - Conductor.time);
+			daNote.judgement = judgeMan.judgeTime(diff);
+			daNote.hitDifference = diff;
+		}
 		// if (Preferences.user.etternaMode)
-		//	totalNotesHit += util.EtternaFunctions.wife3(judgementData.maxHitWindow, noteDiff);
+		//	totalNotesHit += util.EtternaFunctions.wife3(judgementData.maxHitWindow, daNote.hitDifference);
 		// else
 		totalNotesHit += daNote.judgement.accuracy;
 		score += Math.round(daNote.judgement.score);

@@ -8,12 +8,16 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 import flixel.math.FlxMath;
 import flixel.util.typeLimit.OneOfTwo;
+import flixel.util.FlxSignal;
 import gameplay.note.Note;
 import util.ObjectPool;
 
 using util.CoolUtil;
 
 class NoteRenderer extends FlxBasic {
+	public var noteSpawned(get, never):FlxTypedSignal<Note->Void>;
+	public var noteKilled(get, never):FlxTypedSignal<Note->Void>; // fnf note found dead in the bronx
+
 	var notePool:ObjectPool<Note>;
 	var activeNotes:Array<Note> = [];
 	var unspawnNotes:Array<NoteData>;
@@ -22,6 +26,8 @@ class NoteRenderer extends FlxBasic {
 
 	public function new(unspawnNotes:Array<NoteData>, poolSize:Int = 64) {
 		super();
+		_noteSpawned = new FlxTypedSignal();
+		_noteKilled = new FlxTypedSignal();
 		this.unspawnNotes = unspawnNotes;
 		notePool = new ObjectPool<Note>(poolSize, (_) -> new Note());
 		notePool.initiatePool();
@@ -61,6 +67,8 @@ class NoteRenderer extends FlxBasic {
 				}
 				note.revive();
 				activeNotes.push(note);
+				if (noteSpawned != null)
+					noteSpawned.dispatch(note);
 			} else {
 				note.kill();
 				notePool.release(note);
@@ -110,6 +118,8 @@ class NoteRenderer extends FlxBasic {
 			note.holdEnd.kill();
 		notePool.release(note);
 		activeNotes.splice(index, 1);
+		if (noteKilled != null)
+			noteKilled.dispatch(note);
 	}
 
 	override function draw():Void {
@@ -178,4 +188,13 @@ class NoteRenderer extends FlxBasic {
 			note.camera = Value;
 		return super.set_camera(Value);
 	}
+
+	@:noCompletion var _noteSpawned:FlxTypedSignal<Note->Void>;
+	@:noCompletion var _noteKilled:FlxTypedSignal<Note->Void>;
+
+	@:noCompletion function get_noteSpawned():FlxTypedSignal<Note->Void>
+		return _noteSpawned;
+
+	@:noCompletion function get_noteKilled():FlxTypedSignal<Note->Void>
+		return _noteKilled;
 }

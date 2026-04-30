@@ -70,6 +70,7 @@ class Note extends gameplay.FunkinSprite {
 	public var hitMultiplier:Array<Float> = [1.0, 1.0];
 
 	public var judgement:Judgement;
+	public var hitDifference:Float = 0.0;
 
 	var colorArray:Array<String> = ["purple", "blue", "green", "red"];
 
@@ -82,7 +83,7 @@ class Note extends gameplay.FunkinSprite {
 
 		this.isMine = false;
 		this.isFake = false;
-		this.isSustain = false; // data.length > 0.0;
+		this.isSustain = data.length > 0.0;
 		this.sustainProgress = data.length;
 		this.sustainLength = data.length;
 		this.strumTime = data.time;

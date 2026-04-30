@@ -15,6 +15,7 @@ import flixel.FlxState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
+import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.sound.FlxSound;
@@ -127,14 +128,15 @@ class PlayState extends MusicBeatState {
 	var detailsText:String = "";
 	#end
 
-	/**
-	 * Re-enables some old input behaviour where inputs would freeze if boyfriend gets stunned
-	 *
-	 * Stunning Sources are:
-	 * - Dying (permanent until retry)
-	 * - Missing a Note (brief)
-	**/
-	var stunningPausesInput:Bool = false;
+	// find a way to customise this later          VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+	public static var noteActions:Array<String> = ["note_left", "note_down", "note_up", "note_right"];
+
+	public var holdInputs:Array<Bool> = [false, false, false, false];
+	public var inputEnabled:Bool = false;
+
+	var inputQueue:Array<Array<Note>> = [];
+	var twoPlayerMode:Bool = false;
+	var inputMgr:InputManager;
 
 	override public function create() {
 		super.create();
@@ -148,6 +150,17 @@ class PlayState extends MusicBeatState {
 		else
 			session = new PlaySession();
 
+		inputMgr = new InputManager(keyPressed, keyReleased);
+		inputQueue.resize(noteActions.length);
+		for (i in 0...inputQueue.length)
+			inputQueue[i] = [];
+		for (noteData in 0...noteActions.length) {
+			var action = noteActions[noteData];
+			var keys:Array<FlxKey> = Controls.current.actions[action];
+			for (key in keys)
+				inputMgr.remapKeyCode(key, noteData);
+		}
+		inputMgr.init(); // NEED to do this
 		#if hxdiscord_rpc
 		iconRPC = moonMeta.extraData.get(PLAYER_2) ?? "bf";
 
@@ -210,6 +223,8 @@ class PlayState extends MusicBeatState {
 		comboDisplay = new FlxSpriteGroup();
 		strumlines = new FlxTypedSpriteGroup();
 		notes = new NoteRenderer(unspawnNotes);
+		notes.noteSpawned.add(queueInputNote);
+		notes.noteKilled.add(removeNoteFromInputQueue);
 
 		perfectText = new FlxText(0, 0, 0, "[BOTPLAY]");
 		perfectText.setFormat(Paths.font("vcr.ttf"), 24, 0xFFFFFFFF, LEFT, OUTLINE, 0xFF000000);
@@ -275,6 +290,7 @@ class PlayState extends MusicBeatState {
 		Conductor.current.active = false;
 		Conductor.current.stopMusic();
 		Conductor.current.clearTracks();
+		inputMgr.destroy();
 		session.judgeMan = null;
 		current = null;
 	}
@@ -370,7 +386,7 @@ class PlayState extends MusicBeatState {
 				if (Math.abs(oldNote.time - daStrumTime) < 0.00001 && oldNote.lane == lane && oldNote.owner == owner)
 					continue;
 			// @formatter:off
-			var swagNote:NoteData = {time: daStrumTime, lane: lane, type: note.type, length: note.length, owner: owner};
+			var swagNote:NoteData = {time: daStrumTime, lane: lane, type: note.type, length: 0, owner: owner};
 			unspawnNotes.push(swagNote);
 			// @formatter:on
 			if (!noteTypes.contains(swagNote.type))
@@ -438,12 +454,6 @@ class PlayState extends MusicBeatState {
 		paused = true;
 	}
 
-	// find a way to customise this later          VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-	public static var noteActions:Array<String> = ["note_left", "note_down", "note_up", "note_right"];
-
-	public var holdInputs:Array<Bool> = [false, false, false, false];
-	public var inputEnabled:Bool = false;
-
 	override public function update(elapsed:Float) { // debug keys
 		#if debug
 		if (FlxG.keys.justPressed.ONE) {
@@ -506,16 +516,6 @@ class PlayState extends MusicBeatState {
 		}
 
 		if (generatedMusic) {
-			if (inputEnabled) {
-				for (i in 0...noteActions.length) {
-					var action = noteActions[i];
-					if (Controls.current.justPressed(action))
-						keyShit(i);
-					holdInputs[i] = Controls.current.pressed(noteActions[i]);
-					if (Controls.current.justReleased(action))
-						keyUnshit(i);
-				}
-			}
 			notes.updateNotes(Conductor.time, strumlines.members, scrollSpeed);
 			noteUpdate(Conductor.time);
 		}
@@ -523,18 +523,6 @@ class PlayState extends MusicBeatState {
 
 	public function noteUpdate(time:Float):Void {
 		for (daNote in notes.getActiveNotes()) {
-			if (!daNote.mustPress && daNote.wasGoodHit) {
-				if (songName != 'Tutorial')
-					camZooming = true;
-				var altAnim:String = "";
-				if (curSection != null && curSection.altAnim)
-					altAnim = '-alt';
-				dad.sing(daNote.noteData, altAnim, true);
-				dad.danceCooldown = (Conductor.semiquaver) + daNote.sustainLength;
-				for (vocal in Conductor.current.tracks)
-					vocal.volume = 1;
-				notes.removeNote(daNote);
-			}
 			var noteKill:Bool = false;
 			if (!daNote.mustPress || (daNote.mustPress && perfectMode)) {
 				if (daNote.strumTime <= Conductor.time && !daNote.isFake) {
@@ -557,9 +545,74 @@ class PlayState extends MusicBeatState {
 					noteKill = true;
 				}
 			}
+			if (!daNote.mustPress && daNote.wasGoodHit) {
+				if (songName != 'Tutorial')
+					camZooming = true;
+				var altAnim:String = "";
+				if (curSection != null && curSection.altAnim)
+					altAnim = '-alt';
+				dad.sing(daNote.noteData, altAnim, true);
+				dad.danceCooldown = (Conductor.semiquaver) + daNote.sustainLength;
+				for (vocal in Conductor.current.tracks)
+					vocal.volume = 1;
+				notes.removeNote(daNote);
+			}
 			if (noteKill)
 				notes.removeNote(daNote);
 		}
+	}
+
+	// ok listen I was so paranoid because inputs were taking 10ms (max, can be less) to hit
+	// and that sounds like I'm worrying too much I know but this is a rhythm game and I'm SURPRISED filtering is kinda slow
+	// so I completely changed how note input works just to make it faster
+	// god I need a hug. -asmadeuxs
+	public function queueInputNote(note:Note):Void {
+		var lane:Int = note.noteData;
+		var placeInQ = inputQueue[lane];
+		var i:Int = 0;
+		while (i < placeInQ.length && placeInQ[i].strumTime < note.strumTime)
+			i++;
+		placeInQ.insert(i, note);
+	}
+
+	function removeNoteFromInputQueue(note:Note):Void {
+		var lane:Int = note.noteData;
+		var placeInQ = inputQueue[lane];
+		var i = placeInQ.indexOf(note);
+		if (i != -1)
+			placeInQ.splice(i, 1);
+	}
+
+	public function keyPressed(key:Int):Void {
+		var on:Bool = inputMgr != null && inputEnabled && !perfectMode;
+		if (!on || key == -1 || paused || inCutscene || !generatedMusic || endingSong)
+			return;
+
+		// okay now that I'm done with this code and it works I'm genuinely SO confused
+		// why the fuck was it taking 10ms before to hit a note but that DIDN'T happen in DummyPlayState
+		// the fuck is in this cursed class man, I didn't rewrite it entirely because that'd be time consuming
+		// but WHY was this taking 10ms max to respond, why, I don't get it. -asmadeuxs
+
+		var lane:Int = key;
+		var queue:Array<Note> = inputQueue[lane];
+		var next:Note = (queue.length != 0) ? queue[0] : null;
+
+		if (next != null && next.canBeHit) {
+			queue.shift();
+			goodNoteHit(next);
+			playerStrums.playAnim(key, "confirm");
+		} else {
+			playerStrums.playAnim(key, "pressed");
+			if (!Preferences.user.ghostTapping)
+				noteMiss(key);
+		}
+	}
+
+	public function keyReleased(key:Int):Void {
+		var on:Bool = inputMgr != null && inputEnabled && !perfectMode;
+		if (!on || key == -1 || paused || inCutscene || !generatedMusic || endingSong)
+			return;
+		playerStrums.playAnim(key, "static");
 	}
 
 	function endSong():Void {
@@ -719,35 +772,6 @@ class PlayState extends MusicBeatState {
 		});
 	}
 
-	public function keyShit(key:Int = -1):Void {
-		var stunned:Bool = boyfriend.stunned && stunningPausesInput;
-		if (key == -1 || perfectMode || paused || inCutscene || !generatedMusic || endingSong || stunned)
-			return;
-
-		var strum = playerStrums.members[key];
-		var gottaHits:Array<Note> = notes.filter(function(nt:Note):Bool return nt != null && nt.canBeHit && !nt.isSustain && nt.noteData == key);
-		gottaHits.sort(function(a:Note, b:Note):Int return Std.int(a.strumTime - b.strumTime));
-
-		if (gottaHits.length != 0) {
-			if (gottaHits[0].isMine)
-				noteMiss(key, gottaHits[0]);
-			else
-				goodNoteHit(gottaHits[0]);
-			playerStrums.playAnim(key, "confirm");
-		} else {
-			playerStrums.playAnim(key, "pressed");
-			if (!Preferences.user.ghostTapping)
-				noteMiss(key);
-		}
-	}
-
-	public function keyUnshit(key:Int = -1):Void {
-		var stunned:Bool = boyfriend.stunned && stunningPausesInput;
-		if (perfectMode || key == -1 || paused || inCutscene || !generatedMusic || endingSong || stunned)
-			return;
-		playerStrums.playAnim(key, "static");
-	}
-
 	function noteMiss(direction:Int = 1, ?daNote:Note):Void {
 		if (boyfriend.stunned)
 			return;
@@ -784,6 +808,10 @@ class PlayState extends MusicBeatState {
 			var caller = note.noteScript.callFunc('onNoteHit', [note]).value;
 			if (caller == ScriptLoader.STOP_FUNC)
 				return;
+		}
+		if (note.isMine) {
+			noteMiss(note.noteData, note);
+			return;
 		}
 		boyfriend.sing(note.noteData, true);
 		boyfriend.danceCooldown = (Conductor.semiquaver) + note.sustainLength;
