@@ -18,7 +18,7 @@ private enum abstract StrumUnderlayType(Int) from Int to Int {
 }
 
 private enum abstract HudType(String) from String to String {
-	final INFOMATIVE = "Detailed";
+	final INFORMATIVE = "Detailed";
 	final CLASSIC = "Classic";
 }
 
@@ -39,7 +39,7 @@ private enum abstract HudType(String) from String to String {
 	var noteSplashes:Bool = false; // Shows a funny note splash that gives you a boner
 
 	// HUD
-	var hudStyle:String = HudType.INFOMATIVE; // Changes the style of the HUD
+	var hudStyle:String = HudType.INFORMATIVE; // Changes the style of the HUD
 	var showSongPosition:Bool = false; // Shows a progress bar for the song in the HUD
 	var showNps:Bool = false; // Shows a NPS counter on the Score Text
 	var showJudgeCounts:Bool = true; // Displays a judgement counter during gameplay on the left side of the screen
@@ -139,7 +139,7 @@ class Preferences {
 		// Not useful if you have a completely clean save
 		if (FlxG.save.data.accuracyDisplay != null) {
 			var inf:Bool = FlxG.save.data.accuracyDisplay;
-			Preferences.user.hudStyle = inf ? HudType.INFOMATIVE : HudType.CLASSIC;
+			Preferences.user.hudStyle = inf ? HudType.INFORMATIVE : HudType.CLASSIC;
 			FlxG.save.data.hudStyle = Preferences.user.hudStyle;
 			FlxG.save.data.accuracyDisplay = null;
 		}
