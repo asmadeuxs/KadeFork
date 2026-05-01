@@ -2,7 +2,7 @@ Kade Engine 1.4.2 fork because I was bored.
 
 ---
 
-Strict No LLM / No AI Policy
+# Strict No LLM / No AI Policy
 Use of generative AI/LLMs is strictly forbidden for all contributions.
 
 This includes bug reports and comments on the issue tracker.
