@@ -1,5 +1,14 @@
 Kade Engine 1.4.2 fork because I was bored.
 
+---
+
+Strict No LLM / No AI Policy
+Use of generative AI/LLMs is strictly forbidden for all contributions.
+
+This includes bug reports and comments on the issue tracker.
+
+---
+
 you might wanna use `--recurse-submodules` when cloning this repository since it has some local ones that are needed for the game to compile.
 
 ```
