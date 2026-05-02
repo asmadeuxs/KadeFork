@@ -3,8 +3,9 @@ optionval_OFF,DESLIGADO
 optionval_Up,Cima
 optionval_Down,Baixo
 optionval_Split,Dividido
-optionval_Detailed,Detalhado
-optionval_Classic,Clássico
+hudoption_Scripted,Em Script
+hudoption_Detailed,Detalhado
+hudoption_Classic,Clássico
 optionval_Strums,Notas
 optionval_Stage,Cenário
 

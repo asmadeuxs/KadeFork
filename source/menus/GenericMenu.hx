@@ -1,35 +1,109 @@
 package menus;
 
 import flixel.FlxG;
+import util.Mods;
 
 typedef SimpleMenuButton = {
 	name:String,
 	func:() -> Void
 }
 
+enum MenuVerticalStyle {
+	VERTICAL;
+	HORIZONTAL;
+
+	/**
+	 * "BOTH" as in Both- Horizontal and Vertical
+	**/
+	BOTH;
+}
+
 class GenericMenu extends MusicBeatState {
-	public var curSelected:Int = 0;
+	public var canInput:Bool = true;
 
-	public var minSelections:Int = 0;
-	public var maxSelections:Int = 1;
+	public var curVertical:Int = 0;
+	public var minVerticals:Int = 0;
+	public var maxVerticals:Int = 1;
 
-	public var onSelectionChanged:Void->Void;
-	public var onAcceptPressed:Void->Void;
-	public var onBackPressed:Void->Void;
+	public var curHorizontal:Int = 0;
+	public var minHorizontals:Int = 0;
+	public var maxHorizontals:Int = 1;
+
+	/**
+	 * Changes the item by this much when pressing up/down
+	**/
+	public var verticalFactor:Int = 1;
+
+	/**
+	 * Changes the item by this much when pressing left/right
+	**/
+	public var horizontalFactor:Int = 1;
+
+	public var menuScrollType:MenuVerticalStyle = MenuVerticalStyle.VERTICAL;
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
-		if (controls.BACK_P && onBackPressed != null)
-			onBackPressed();
-		if (controls.ACCEPT_P && onAcceptPressed != null)
-			onAcceptPressed();
+		if (canInput)
+			handleInput();
 	}
 
-	public function changeSelection(next:Int = 0, ?playScrollSound:Bool = true) {
-		curSelected = flixel.math.FlxMath.wrap(curSelected + next, minSelections, maxSelections);
-		if (next != 0 && playScrollSound)
-			FlxG.sound.play(Paths.sound("scrollMenu"));
-		if (onSelectionChanged != null)
-			onSelectionChanged();
+	public function handleInput():Void {
+		if (controls.BACK_P)
+			onBackPressed();
+		if (controls.ACCEPT_P)
+			onAcceptPressed(curVertical, curHorizontal);
+
+		if (menuScrollType == VERTICAL || menuScrollType == BOTH) {
+			var up:Bool = controls.UP_P;
+			if (up || controls.DOWN_P)
+				changeVertical(up ? -verticalFactor : verticalFactor);
+		}
+		if (menuScrollType == HORIZONTAL || menuScrollType == BOTH) {
+			var left:Bool = controls.LEFT_P;
+			if (left || controls.RIGHT_P)
+				changeHorizontal(left ? -horizontalFactor : horizontalFactor);
+		}
 	}
+
+	public function changeVertical(next:Int = 0, ?playScrollSound:Bool = true) {
+		var prev:Int = curVertical;
+		curVertical = flixel.math.FlxMath.wrap(curVertical + next, minVerticals, maxVerticals);
+		onVerticalChanged(curVertical);
+		if (prev != curVertical && playScrollSound)
+			FlxG.sound.play(menuSound("scrollMenu"));
+	}
+
+	public function changeHorizontal(next:Int = 0, ?playScrollSound:Bool = true) {
+		var prev:Int = curHorizontal;
+		curHorizontal = flixel.math.FlxMath.wrap(curHorizontal + next, minHorizontals, maxHorizontals);
+		onHorizontalChanged(curHorizontal);
+		if (prev != curHorizontal && playScrollSound)
+			FlxG.sound.play(menuSound("scrollMenu"));
+	}
+
+	public function onBackPressed():Void {}
+
+	public function onVerticalChanged(selected:Int):Void {}
+
+	public function onHorizontalChanged(selected:Int):Void {}
+
+	public function onAcceptPressed(v:Int, h:Int):Void {}
+
+	// wanted mods to be able to override the built-in sounds
+	// that is assuming they don't have scripts of their own to override their menus
+	// its finicky, it works, so whatever. -asmadeuxs
+	inline function menuImage(key:String):flixel.graphics.FlxGraphic
+		return Paths.image(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
+
+	inline function menuSound(key:String):openfl.media.Sound
+		return Paths.sound(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
+
+	inline function menuMusic(key:String):openfl.media.Sound
+		return Paths.music(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
+
+	inline function menuSparrowAtlas(key:String):flixel.graphics.frames.FlxAtlasFrames
+		return Paths.getSparrowAtlas(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
+
+	inline function menuFont(key:String):String
+		return Paths.font(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
 }

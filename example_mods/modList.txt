@@ -1,2 +1,0 @@
-base_game|true
-note_quantization|true

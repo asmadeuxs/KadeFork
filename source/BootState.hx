@@ -28,10 +28,15 @@ class BootState extends flixel.FlxState {
 		// they call it levels in base game so we will call it levels here -asmadeuxs
 		var registry = new registry.LevelRegistry();
 		var cats = util.Mods.getEnabled();
-		if (cats[0] != "core")
-			cats.insert(0, "core");
 		for (id in cats)
 			registry.loadLevels(id);
+		util.Mods.loadMods();
+		lime.app.Application.current.onExit.add(function(e:Int) {
+			data.Preferences.save();
+			util.Mods.saveMods();
+		});
+		// this is not great but it, its fine for now.
+		FlxG.signals.preStateSwitch.add(() -> Paths.clearCache());
 
 		/* // we're just gonna rewrite story mode altogether,
 			// the current one is genuinely hell to work with and was basically unmaintained -asmadeuxs

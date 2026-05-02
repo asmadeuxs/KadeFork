@@ -20,9 +20,27 @@ class BaseHUD extends FlxSpriteGroup {
 		}
 	}
 
+	public static function listHUDs():Array<String> {
+		var hudList:Array<String> = ["Detailed", "Classic"];
+		function findThenPush(modId:String = 'core') {
+			var dir:String = Paths.getPath('scripts/huds', modId);
+			if (Paths.fileExists(dir)) {
+				for (i in Paths.listFiles(dir)) {
+					if (!Paths.scriptExtensions.contains(haxe.io.Path.extension(i)))
+						continue;
+					var hudName:String = haxe.io.Path.withoutExtension(i);
+					if (!hudList.contains(hudName))
+						hudList.push(hudName);
+				}
+			}
+		}
+		var modIDs:Array<String> = util.Mods.getEnabled();
+		for (modId in modIDs)
+			findThenPush(modId);
+		return hudList;
+	}
+
 	public static function loadHUD(?hudName:String = null):BaseHUD {
-		if (hudName == null)
-			return new gameplay.hud.Kade();
 		var custom = ScriptLoader.findScript(ScriptLoader.getScriptFile(Paths.getPath('scripts/huds'), hudName), true);
 		if (custom != null)
 			return new gameplay.hud.BaseHUD(custom);

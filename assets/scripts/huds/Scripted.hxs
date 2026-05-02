@@ -4,6 +4,7 @@ import flixel.FlxSprite;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.text.FlxTextBorderStyle;
+import flixel.math.FlxMath;
 import flixel.util.FlxStringUtil;
 import flixel.ui.FlxBar;
 import flixel.ui.FlxBarFillDirection;
@@ -16,27 +17,20 @@ var healthBar:FlxBar;
 var iconP1:HealthIcon;
 var iconP2:HealthIcon;
 
-__name = "ClassicHUD";
+__name = "Test";
 
 function generateHUD() {
-  healthBarBG = new FlxSprite(0, FlxG.height * 0.9).loadGraphic(Paths.image('gameplay/ui/healthBar'));
+  healthBarBG = new FlxSprite(0, FlxG.height * 0.875).loadGraphic(Paths.image('gameplay/ui/healthBar'));
   healthBarBG.x = (FlxG.width - healthBarBG.width) * 0.5;
 	if (Preferences.user.scrollType == 1)
 		healthBarBG.y = 50;
 	//healthBarBG.screenCenter("X");
 	add(healthBarBG);
 
-  trace(PlayState, PlayState.current);
   healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, FlxBarFillDirection.RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8),
     PlayState.current, 'health', 0, 2);
   healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
   add(healthBar);
-
-  scoreTxt = new FlxText(healthBarBG.x + healthBarBG.width - 190, healthBarBG.y + 30, 0, "Score:0");
-  scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, "RIGHT", FlxTextBorderStyle.OUTLINE, 0xFF000000);
-  if (!Preferences.user.accuracyDisplay)
-    scoreTxt.x = healthBarBG.x + healthBarBG.width * 0.5;
-  add(scoreTxt);
 
   iconP1 = new HealthIcon(HealthIcon.getPlayerIcon(), true);
   iconP1.y = healthBar.y - (iconP1.height * 0.5);
@@ -45,6 +39,14 @@ function generateHUD() {
   iconP2 = new HealthIcon(HealthIcon.getOpponentIcon(), false);
   iconP2.y = healthBar.y - (iconP2.height * 0.5);
 	add(iconP2);
+
+  scoreTxt = new FlxText(healthBarBG.x + healthBarBG.width - 190, healthBarBG.y + 30, 0, "Score:0");
+  scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, "RIGHT", FlxTextBorderStyle.OUTLINE, 0xFF000000);
+  if (!Preferences.user.accuracyDisplay)
+    scoreTxt.x = healthBarBG.x + healthBarBG.width * 0.5;
+  add(scoreTxt);
+  
+  updateScoreText();
 }
 
 function update(elapsed:Float) {
@@ -77,12 +79,11 @@ function update(elapsed:Float) {
   }
 }
 
-function updateScoreText(?miss:Bool = false):Void {
+function updateScoreText():Void {
   if (scoreTxt != null) {
-    if (PlayState.current != null && PlayState.current.perfectMode)
-      scoreTxt.text = 'Bot Play Enabled';
-    else
-	    scoreTxt.text = 'Score: ' + FlxStringUtil.formatMoney(PlayState.songScore, false, true);
+    var cbs:Int = PlayState.session != null ? PlayState.session.comboBreaks : 0;
+    var acc:Float = PlayState.session != null ? PlayState.session.calculateAccuracy() : 0.0;
+    scoreTxt.text = 'Accuracy: ' + FlxMath.roundDecimal(acc, 2) + '% | ' + 'Combo Breaks: ' + cbs;
   }
 }
 

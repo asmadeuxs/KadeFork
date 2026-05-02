@@ -1,5 +1,7 @@
 package gameplay;
 
+import data.hscript.Script;
+import data.hscript.ScriptLoader;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.util.FlxColor;
@@ -8,19 +10,34 @@ import flixel.util.typeLimit.OneOfTwo;
 import gameplay.FunkinSprite;
 import haxe.Json5;
 
+using util.AnimationHelper;
 using util.CoolUtil;
 
 class StageBG extends FlxBasic {
 	public var cameraZoom:Float = 1.0;
+	public var characterOffsets:Map<String, Array<Float>> = new Map();
 
 	var objects:Array<FlxBasic> = [];
 	var stageFile(default, set):String;
 	var _loadedFiles:Map<String, StageFile> = [];
 
+	var stageScript:Script;
+
 	public function new(stageFile:String):Void {
 		super();
 		this.stageFile = stageFile;
 	}
+
+	override function update(elapsed:Float):Void {
+		scriptFuncCall('update', [elapsed, this]);
+		super.update(elapsed);
+	}
+
+	public function beatHit(beat:Int):Void
+		scriptFuncCall('onBeatHit', [beat, this]);
+
+	public function stepHit(step:Int):Void
+		scriptFuncCall('onStepHit', [step, this]);
 
 	public function clear() {
 		for (o in objects)
@@ -40,16 +57,27 @@ class StageBG extends FlxBasic {
 		super.destroy();
 	}
 
+	private function loadStageScript(stageName:String):Script {
+		var scriptPath:String = Paths.getPath('data/stages/$stageName');
+		stageScript = ScriptLoader.findScript(ScriptLoader.getScriptFile(scriptPath, stageName), true);
+		scriptFuncCall('onLoad', [this]);
+		return stageScript;
+	}
+
+	public function scriptFuncCall(funcName:String, ?args:Array<Dynamic>):HScriptFunction {
+		if (stageScript == null)
+			return null;
+		return stageScript.callFunc(funcName, args);
+	}
+
 	private function findStageFile(file:String):String {
-		var paths = [
-			Paths.getPath('data/stages/${file}'),
-			Paths.getPath('data/stages/${file}-config'),
-		];
-		var path:String = paths[0] + '.json';
+		var paths = ['data/stages/${file}', 'data/stages/${file}-config'];
+		var path:String = Paths.getPath(paths[0] + '.json');
 		for (i in paths) {
 			for (ext in Paths.jsonExtensions) {
-				if (Paths.fileExists(i + ext)) {
-					path = i;
+				var target:String = Paths.getPath(i);
+				if (Paths.fileExists(target)) {
+					path = target;
 					break;
 				}
 			}
@@ -57,7 +85,7 @@ class StageBG extends FlxBasic {
 		return path;
 	}
 
-	function loadDummy() {
+	function loadDummy():Void {
 		var dummy = new FunkinSprite(0, 0).makeScaledGraphic(FlxG.width, FlxG.height, 0xFF808080);
 		dummy.scrollFactor.set();
 		dummy.ID = 0;
@@ -72,8 +100,11 @@ class StageBG extends FlxBasic {
 				if (newStage == null) {
 					loadDummy();
 					return stageFile = 'dummy';
-				} else
+				} else {
+					loadStageScript(stage);
 					loadStageObjects(newStage);
+					scriptFuncCall('onStageLoaded', [this, stage]);
+				}
 				return stageFile = stage;
 		}
 	}
@@ -97,10 +128,30 @@ class StageBG extends FlxBasic {
 		if (stageData == null)
 			return;
 		cameraZoom = stageData.cameraZoom ?? 1.0;
+		if (stageData.characterOffsets != null) {
+			for (key in Reflect.fields(stageData.characterOffsets)) {
+				characterOffsets.set(key, [0, 0]);
+				var offset:Dynamic = Reflect.field(stageData.characterOffsets, key);
+				if (offset != null) {
+					if (offset is Array)
+						characterOffsets.set(key, [offset[0] ?? 0, offset[1] ?? 0]);
+					else if (offset is Dynamic)
+						characterOffsets.set(key, [offset.x ?? 0, offset.y ?? 0]);
+				}
+			}
+		}
 		if (stageData.objects != null && stageData.objects.length != 0) {
 			for (id => data in stageData.objects) {
 				var sprite = new FunkinSprite(data.position[0] ?? 0.0, data.position[1] ?? 0.0);
-				sprite.loadGraphic(Paths.image(data.file));
+				if (data.animations == null)
+					sprite.loadGraphic(Paths.image(data.file));
+				else {
+					// TODO: support other atlas types
+					sprite.frames = Paths.getSparrowAtlas(data.file);
+					sprite.addFromJson(data.animations, data.defaultFramerate ?? 24);
+					if (data.defaultAnimation != null && sprite.animation.getByName(data.defaultAnimation) != null)
+						sprite.playAnim(data.defaultAnimation, true);
+				}
 
 				if (data.scrollFactor != null) {
 					if (data.scrollFactor is Array) {
@@ -131,7 +182,7 @@ class StageBG extends FlxBasic {
 					} else if (data.color is String)
 						sprite.color = FlxColor.fromString(data.color);
 				}
-				trace('array index $id - sprite index ${sprite.ID}');
+				// trace('array index $id - sprite index ${sprite.ID}');
 				objects.push(sprite);
 			}
 		}
@@ -173,14 +224,15 @@ class StageBG extends FlxBasic {
 
 	public function moveByID(id:Int, newPosition:Int):FlxBasic {
 		var obj:FlxBasic = null;
+		for (i in objects)
+			if (i.ID == id) {
+				i.ID = newPosition;
+				obj = i;
+				break;
+			}
+		objects.sort((a, b) -> return FlxSort.byValues(FlxSort.ASCENDING, a.ID, b.ID));
 		return obj;
 	}
-}
-
-private typedef JsonAnimation = {
-	prefix:String,
-	frameRate:Int,
-	looped:Bool
 }
 
 private typedef JsonSprite = {
@@ -188,8 +240,10 @@ private typedef JsonSprite = {
 	file:String,
 	?atlasType:String,
 	position:Array<Float>,
+	?defaultFramerate:Int,
+	?defaultAnimation:String,
 	?visible:OneOfTwo<String, Bool>,
-	?animations:Array<JsonAnimation>,
+	?animations:Map<String, OneOfTwo<String, JsonAnimation>>,
 	?scale:OneOfTwo<Array<Float>, Float>,
 	?scrollFactor:OneOfTwo<Array<Float>, Float>,
 	?color:OneOfTwo<Array<Int>, String>,
@@ -201,5 +255,6 @@ typedef StageFile = {
 	?name:String,
 	?cameraZoom:Float,
 	?defaultAntialiasing:Bool,
+	?characterOffsets:Dynamic,
 	objects:Array<JsonSprite>
 }

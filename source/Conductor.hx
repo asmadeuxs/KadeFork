@@ -113,8 +113,6 @@ class Conductor extends flixel.FlxBasic {
 			music.pause();
 		else
 			music.play(false, music.time);
-		if (!pause)
-			checkNeedResync();
 	}
 
 	public function pauseMusic():Void

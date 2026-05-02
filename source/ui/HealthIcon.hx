@@ -15,6 +15,7 @@ class HealthIcon extends FunkinSprite {
 	public var sprTracker:FlxObject;
 
 	var iconPath:String = null;
+	var character:String = 'face';
 	var iconScript:Script;
 	var animCount:Int = 1;
 
@@ -31,6 +32,7 @@ class HealthIcon extends FunkinSprite {
 		flipX = isPlayer;
 	}
 
+	// might remove this in favor of a script -asmadeuxs
 	public function loadIconScript(character:String):Void {
 		var iconPath:String = Paths.getPath('images/gameplay/characters/$character/icon-$character');
 		var path = ScriptLoader.getScriptFile(iconPath, character);
@@ -49,12 +51,14 @@ class HealthIcon extends FunkinSprite {
 				var paths = [
 					'gameplay/characters/$character/icon-$character',
 					'gameplay/characters/$noSuffix/icon-$character',
-					'gameplay/characters/$noSuffix/icon-$noSuffix'
+					'gameplay/characters/$noSuffix/icon-$noSuffix',
+					'gameplay/characters/icon-$character',
+					'gameplay/characters/icon-$noSuffix',
 				];
 				var fail:Bool = true;
 				var mainPath:String = paths[0];
 				for (checkPath in paths) {
-					if (Paths.fileExists(Paths.getPath("images/" + checkPath + ".png"))) {
+					if (Paths.fileExists(Paths.getPath('images/$checkPath.png'))) {
 						mainPath = checkPath;
 						fail = false;
 						break;
@@ -65,13 +69,14 @@ class HealthIcon extends FunkinSprite {
 					return this;
 				}
 				iconPath = mainPath;
-				if (Paths.fileExists(Paths.getPath("images/" + mainPath.replace(".png", ".xml")))) {
-					frames = Paths.getSparrowAtlas(mainPath);
+				var xml:String = mainPath.replace(".png", ".xml");
+				if (Paths.fileExists(Paths.getPath('images/$xml', null))) {
+					frames = Paths.getSparrowAtlas(iconPath);
 					animation.addByPrefix("idle", "idle", 24, false);
 					animation.addByPrefix("winning", "winning", 24, false);
 					animation.addByPrefix("losing", "losing", 24, false);
 				} else {
-					var tex = Paths.image(Path.withoutExtension(mainPath));
+					var tex = Paths.image(Path.withoutExtension(iconPath));
 					// simple icon
 					// if there's 1 frame on the image then its only that one frmae
 					// 2 is idle/losing
@@ -84,22 +89,31 @@ class HealthIcon extends FunkinSprite {
 					if (frames.frames.length > 2)
 						animation.add("winning", [2]);
 				}
+				this.character = character;
 				antialiasing = !character.endsWith('-pixel');
 				animCount = animation.exists("winning") ? 3 : (animation.exists("losing") ? 2 : 1);
 				switchState("idle", true);
+				if (iconScript != null)
+					iconScript.callFunc("onIconloaded", [character, this]);
 		}
 		scrollFactor.set();
 		return this;
 	}
 
-	///
 	public function switchState(to:String, ?force:Bool = false) {
+		if (iconScript != null) {
+			var v = iconScript.callFunc("switchState", [character, to, force]);
+			if (v != null && v.value == ScriptLoader.STOP_FUNC)
+				return;
+		}
 		if (to == "winning" && animCount >= 3)
 			playAnim("winning", force);
 		else if (to == "losing" && animCount >= 2)
 			playAnim("losing", force);
 		else
 			playAnim("idle", force);
+		if (iconScript != null)
+			iconScript.callFunc("onStateSwitched", [character, to, force]);
 	}
 
 	override function update(elapsed:Float) {

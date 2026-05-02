@@ -16,6 +16,9 @@ using StringTools;
 	public var name:String = null;
 	public var description:String = null;
 	public var variable:String = null;
+
+	@:optional public var valueTranslationString:String = null;
+
 	@:optional public var type:String = "bool";
 
 	// For numbers
@@ -46,8 +49,10 @@ using StringTools;
 		if (variable == 'language')
 			str = Translator.getNativeLangName(str);
 		else {
-			var transStr:String = 'optionval_$str';
-			var translated:String = Translator.translateString('options', transStr);
+			var transStr:String = 'optionval_';
+			if (valueTranslationString != null)
+				transStr = valueTranslationString;
+			var translated:String = Translator.translateString('options', transStr + str);
 			if (!translated.contains(transStr))
 				str = translated;
 		}

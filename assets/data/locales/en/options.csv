@@ -3,8 +3,9 @@ optionval_OFF,OFF
 optionval_Up,Up
 optionval_Down,Down
 optionval_Split,Split
-optionval_Detailed,Detailed
-optionval_Classic,Classic
+hudoption_Scripted,Scripted
+hudoption_Detailed,Detailed
+hudoption_Classic,Classic
 optionval_Strums,Strums
 optionval_Stage,Stage
 

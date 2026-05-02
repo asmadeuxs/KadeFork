@@ -79,6 +79,7 @@ class PlayState extends MusicBeatState {
 	public static var nps:Int = 0;
 	public static var maxNps:Int = 0;
 
+	public var stage:StageBG;
 	public var dad:Character;
 	public var gf:Character;
 	public var boyfriend:Character;
@@ -184,15 +185,14 @@ class PlayState extends MusicBeatState {
 		generateSong();
 
 		curStage = moonMeta.extraData.exists(STAGE) ? moonMeta.extraData.get(STAGE) : "stage";
-		var stage = new gameplay.StageBG(curStage);
+		stage = new StageBG(curStage);
 		defaultCamZoom = stage.cameraZoom;
 		add(stage);
 
 		gf = new Character(400, 130, moonMeta.extraData.exists(PLAYER_3) ? moonMeta.extraData.get(PLAYER_3) : "bf");
 		dad = new Character(100, 100, moonMeta.extraData.exists(PLAYER_2) ? moonMeta.extraData.get(PLAYER_2) : "bf");
 		boyfriend = new Character(770, 450, moonMeta.extraData.exists(PLAYER_1) ? moonMeta.extraData.get(PLAYER_1) : "bf", true);
-		gf.scrollFactor.set(0.95, 0.95);
-
+		// gf.scrollFactor.set(0.95, 0.95);
 		var mid = dad.getMidpoint();
 		var off = dad.cameraOffset;
 		var camPos:FlxPoint = new FlxPoint(mid.x + off.x, mid.y + off.y);
@@ -201,6 +201,23 @@ class PlayState extends MusicBeatState {
 			gf.visible = false;
 			if (isStoryMode)
 				tweenCamIn();
+		}
+
+		// this looks ugly.
+		if (stage.characterOffsets.exists('player')) {
+			var o:Array<Float> = stage.characterOffsets.get('player');
+			boyfriend.x += o[0];
+			boyfriend.y += o[1];
+		}
+		if (stage.characterOffsets.exists('opponent')) {
+			var o:Array<Float> = stage.characterOffsets.get('opponent');
+			dad.x += o[0];
+			dad.y += o[1];
+		}
+		if (stage.characterOffsets.exists('metronome')) {
+			var o:Array<Float> = stage.characterOffsets.get('metronome');
+			gf.x += o[0];
+			gf.y += o[1];
 		}
 
 		add(gf);
@@ -304,7 +321,7 @@ class PlayState extends MusicBeatState {
 		inputEnabled = true;
 
 		Conductor.current.active = true;
-		Conductor.setTime(-Conductor.crotchet * 6.7);
+		Conductor.setTime(-Conductor.crotchet * 8);
 
 		var swagCounter:Int = 0;
 		startTimer = new FlxTimer().start(Conductor.crotchet * 0.001, function(tmr:FlxTimer) {
@@ -842,12 +859,21 @@ class PlayState extends MusicBeatState {
 			currentHUD.updateScoreText();
 	}
 
+	override function stepHit(curStep:Int) {
+		if (stage != null)
+			stage.stepHit(curStep);
+		if (currentHUD != null)
+			currentHUD.stepHit(curStep);
+	}
+
 	override function beatHit(curBeat:Int) {
 		if (camZooming && camGame.zoom < 1.35 && curBeat % 4 == 0) {
 			camGame.zoom += 0.015;
 			camHUD.zoom += 0.03;
 		}
 
+		if (stage != null)
+			stage.beatHit(curBeat);
 		if (currentHUD != null)
 			currentHUD.beatHit(curBeat);
 		characterDance(curBeat);

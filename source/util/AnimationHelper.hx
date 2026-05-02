@@ -6,14 +6,14 @@ import flixel.math.FlxPoint;
 import flixel.util.typeLimit.OneOfTwo;
 import gameplay.FunkinSprite;
 
-// private typedef OffsetField = {x:Float, y:Float};
+typedef JsonOffsetField = {x:Float, y:Float};
 
-typedef AnimationDef = {
-	?prefix:String,
+typedef JsonAnimation = {
+	prefix:String,
 	?indices:OneOfTwo<String, Array<Int>>,
+	?offset:OneOfTwo<JsonOffsetField, Array<Int>>,
 	?frameRate:Int,
 	?looped:Bool,
-	?offset:Dynamic
 }
 
 class AnimationHelper {
@@ -34,10 +34,12 @@ class AnimationHelper {
 			var looped:Bool = false;
 			var offset:FlxPoint = null;
 
-			if (Std.isOfType(def, String)) {
+			if (Std.isOfType(def, String))
 				prefix = cast(def, String);
-			} else if (Std.isOfType(def, Dynamic)) {
-				var obj:AnimationDef = def;
+			else {
+				var obj:JsonAnimation = cast def;
+				if (obj == null || obj.prefix == null)
+					continue;
 				prefix = obj.prefix;
 				if (obj.indices != null)
 					indices = parseIndices(obj.indices);
@@ -45,8 +47,7 @@ class AnimationHelper {
 				looped = obj.looped == true;
 				if (obj.offset != null)
 					offset = parseOffset(obj.offset);
-			} else
-				continue;
+			}
 
 			if (prefix == null)
 				continue;
@@ -56,9 +57,10 @@ class AnimationHelper {
 			else
 				sprite.animation.addByPrefix(animName, prefix, frameRate, looped);
 
-			if (offset != null && sprite is FunkinSprite)
-				cast(sprite, FunkinSprite).addOffset(animName, offset.x ?? 0, offset.y ?? 0);
-
+			if (offset != null && Std.isOfType(sprite, FunkinSprite)) {
+				var fs:FunkinSprite = cast sprite;
+				fs.addOffset(animName, offset.x, offset.y);
+			}
 			if (onAddAnim != null)
 				onAddAnim(animName);
 		}
@@ -90,12 +92,12 @@ class AnimationHelper {
 			return [];
 	}
 
-	private static function parseOffset(offsetDef:Dynamic):FlxPoint {
-		if (offsetDef is Array)
+	private static function parseOffset(offsetDef:OneOfTwo<JsonOffsetField, Array<Int>>):FlxPoint {
+		if (Std.isOfType(offsetDef, Array))
 			return FlxPoint.get(offsetDef[0] ?? 0, offsetDef[1] ?? 0);
-		else if (offsetDef is Dynamic)
-			return FlxPoint.get(offsetDef.x ?? 0, offsetDef.y ?? 0);
-		else
-			return FlxPoint.get(0, 0);
+		else {
+			var offsetField:JsonOffsetField = cast offsetDef;
+			return FlxPoint.get(offsetField.x ?? 0, offsetField.y ?? 0);
+		}
 	}
 }

@@ -16,7 +16,7 @@ class AlphabetMenu extends FlxTypedSpriteGroup<Alphabet> {
 		}
 	}
 
-	public function generateMenu(?customItems:Array<String>):AlphabetMenu {
+	public function generateMenu(?customItems:Array<String>, ?onItemAdded:(Int, Alphabet) -> Void):AlphabetMenu {
 		var items:Array<String> = (customItems != null && customItems.length != 0) ? customItems : this.items;
 		if (items == null || items.length == 0)
 			return this;
@@ -24,6 +24,8 @@ class AlphabetMenu extends FlxTypedSpriteGroup<Alphabet> {
 			var entry:Alphabet = new Alphabet(0, (70 * i) + 30, items[i], true, false);
 			entry.targetY = i;
 			add(entry);
+			if (onItemAdded != null)
+				onItemAdded(i, entry);
 		}
 		return this;
 	}

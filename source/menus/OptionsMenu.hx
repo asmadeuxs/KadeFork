@@ -105,7 +105,8 @@ class OptionsMenu extends MusicBeatSubstate {
 				{
 					name: "HUD Style",
 					description: "Changes the style of the HUD.\n\"Detailed\" being the default",
-					choices: ["Detailed", "Classic"], // BaseHUD.listHUDs()
+					choices: gameplay.hud.BaseHUD.listHUDs(),
+					valueTranslationString: "hudoption_",
 					variable: "hudStyle",
 					type: "choice"
 				},
@@ -315,8 +316,8 @@ class OptionsMenu extends MusicBeatSubstate {
 			new flixel.util.FlxTimer().start(0.5, (_) -> {
 				if (parent is MainMenuState) {
 					var menu:MainMenuState = cast parent;
-					menu.selectedSomethin = false;
 					menu.tweenItemsBackIn();
+					menu.canInput = true;
 				}
 			});
 		}

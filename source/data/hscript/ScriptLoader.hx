@@ -71,6 +71,10 @@ class ScriptLoader {
 		interp.variables.set("Preferences", data.Preferences);
 		interp.variables.set("CoolUtil", util.CoolUtil);
 		interp.variables.set("Paths", util.Paths);
+		// other
+		interp.variables.set("_GAMEVERSION", Main.versions.BASE_GAME);
+		interp.variables.set("_KADEVERSION", Main.versions.KADE);
+		interp.variables.set("_FORKVERSION", Main.versions.FORK);
 		#end
 		return interp;
 	}

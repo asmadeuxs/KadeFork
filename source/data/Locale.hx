@@ -70,9 +70,7 @@ class Locale {
 		var path:String = Paths.getPath('data/locales');
 		if (!Paths.fileExists(path))
 			return;
-		trace(path);
 		for (localeDir in Paths.listFiles(path)) {
-			trace(localeDir);
 			var lang = reloadLocaleDirectory(localeDir);
 			if (lang != null)
 				locales.set(localeDir, lang);

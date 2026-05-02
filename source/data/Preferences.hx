@@ -3,6 +3,7 @@ package data;
 import Controls.ActionMap;
 import flixel.FlxG;
 import flixel.input.keyboard.FlxKey;
+import util.Mods;
 
 // this is just for code formatting.
 // this is also kinda useful if you wanna know what values exist by default for these options
@@ -17,6 +18,8 @@ private enum abstract StrumUnderlayType(Int) from Int to Int {
 	final ON_STAGE = 1;
 }
 
+// if you add more hardcoded HUD styles
+// don't forget to go to gameplay.hud.BaseHUD and modify the `listHUDs` function
 private enum abstract HudType(String) from String to String {
 	final INFORMATIVE = "Detailed";
 	final CLASSIC = "Classic";

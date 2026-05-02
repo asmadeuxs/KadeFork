@@ -10,9 +10,9 @@ class AssetRegistry<Asset> extends BaseRegistry<Asset> {
 
 	public function clear(validate:(key:String, value:Asset) -> Bool):Void {
 		for (key in entries.keys()) {
-			var value = entries.get(key);
-			if (validate(key, value)) {
-				clearFunc(key, value);
+			var assetEntry:Asset = entries.get(key);
+			if (validate(key, assetEntry)) {
+				clearFunc(key, assetEntry);
 				entries.remove(key);
 			}
 		}
