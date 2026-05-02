@@ -70,7 +70,7 @@ class GenericMenu extends MusicBeatState {
 		curVertical = flixel.math.FlxMath.wrap(curVertical + next, minVerticals, maxVerticals);
 		onVerticalChanged(curVertical);
 		if (prev != curVertical && playScrollSound)
-			FlxG.sound.play(menuSound("scrollMenu"));
+			FlxG.sound.play(Mods.menuSound("scrollMenu"));
 	}
 
 	public function changeHorizontal(next:Int = 0, ?playScrollSound:Bool = true) {
@@ -78,7 +78,7 @@ class GenericMenu extends MusicBeatState {
 		curHorizontal = flixel.math.FlxMath.wrap(curHorizontal + next, minHorizontals, maxHorizontals);
 		onHorizontalChanged(curHorizontal);
 		if (prev != curHorizontal && playScrollSound)
-			FlxG.sound.play(menuSound("scrollMenu"));
+			FlxG.sound.play(Mods.menuSound("scrollMenu"));
 	}
 
 	public function onBackPressed():Void {}
@@ -88,22 +88,4 @@ class GenericMenu extends MusicBeatState {
 	public function onHorizontalChanged(selected:Int):Void {}
 
 	public function onAcceptPressed(v:Int, h:Int):Void {}
-
-	// wanted mods to be able to override the built-in sounds
-	// that is assuming they don't have scripts of their own to override their menus
-	// its finicky, it works, so whatever. -asmadeuxs
-	inline function menuImage(key:String):flixel.graphics.FlxGraphic
-		return Paths.image(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
-
-	inline function menuSound(key:String):openfl.media.Sound
-		return Paths.sound(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
-
-	inline function menuMusic(key:String):openfl.media.Sound
-		return Paths.music(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
-
-	inline function menuSparrowAtlas(key:String):flixel.graphics.frames.FlxAtlasFrames
-		return Paths.getSparrowAtlas(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
-
-	inline function menuFont(key:String):String
-		return Paths.font(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
 }

@@ -161,4 +161,22 @@ class Mods {
 			ids.push(modId);
 		return ids;
 	}
+
+	// wanted mods to be able to override the built-in sounds
+	// that is assuming they don't have scripts of their own to override their menus
+	// its finicky, it works, so whatever. -asmadeuxs
+	inline public static function menuImage(key:String):flixel.graphics.FlxGraphic
+		return Paths.image(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
+
+	inline public static function menuSound(key:String):openfl.media.Sound
+		return Paths.sound(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
+
+	inline public static function menuMusic(key:String):openfl.media.Sound
+		return Paths.music(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
+
+	inline public static function menuSparrowAtlas(key:String):flixel.graphics.frames.FlxAtlasFrames
+		return Paths.getSparrowAtlas(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
+
+	inline public static function menuFont(key:String):String
+		return Paths.font(key, (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core");
 }

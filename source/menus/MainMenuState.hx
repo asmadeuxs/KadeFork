@@ -45,7 +45,7 @@ class MainMenuState extends GenericMenu {
 		maxVerticals = optionShit.length - 1;
 
 		if (FlxG.sound.music == null || !FlxG.sound.music.playing)
-			FlxG.sound.playMusic(menuMusic("freakyMenu"), 0.7);
+			FlxG.sound.playMusic(Mods.menuMusic("freakyMenu"), 0.7);
 
 		add(camFollow = new FlxObject(0, 0, 1, 1));
 		FlxG.camera.follow(camFollow, null, 0.10);
@@ -54,7 +54,7 @@ class MainMenuState extends GenericMenu {
 		createMenuItems();
 
 		var versionShit:FlxText = new FlxText(5, 0, 0, 'FNF v${Main.versions.BASE_GAME} - KE v${Main.versions.KADE} - Fork v${Main.versions.FORK}', 12);
-		versionShit.setFormat(menuFont("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		versionShit.setFormat(Mods.menuFont("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		versionShit.y = (FlxG.height - versionShit.height) - 5;
 		versionShit.scrollFactor.set();
 		add(versionShit);
@@ -63,7 +63,7 @@ class MainMenuState extends GenericMenu {
 	}
 
 	public function createBG():Void {
-		var bg:FlxSprite = new FlxSprite().loadGraphic(menuImage('ui/backgrounds/menuBG'));
+		var bg:FlxSprite = new FlxSprite().loadGraphic(Mods.menuImage('ui/backgrounds/menuBG'));
 		bg.scrollFactor.set(0, 0.15);
 		bg.scale.set(1.1, 1.1);
 		bg.screenCenter();
@@ -71,7 +71,7 @@ class MainMenuState extends GenericMenu {
 		bg.antialiasing = true;
 		add(bg);
 
-		magenta = new FlxSprite(bg.x, bg.y).loadGraphic(menuImage('ui/backgrounds/menuBGMagenta'));
+		magenta = new FlxSprite(bg.x, bg.y).loadGraphic(Mods.menuImage('ui/backgrounds/menuBGMagenta'));
 		magenta.scrollFactor.set(0, 0.15);
 		magenta.scale.set(1.1, 1.1);
 		magenta.updateHitbox();
@@ -84,7 +84,7 @@ class MainMenuState extends GenericMenu {
 		menuItems = new FlxTypedGroup<FlxSprite>();
 		for (i in 0...optionShit.length) {
 			var menuItem:FlxSprite = new FlxSprite(0, 130 + (i * 180));
-			menuItem.frames = menuSparrowAtlas('ui/FNF_main_menu_assets');
+			menuItem.frames = Mods.menuSparrowAtlas('ui/FNF_main_menu_assets');
 			menuItem.animation.addByPrefix('idle', optionShit[i].name + " basic", 24);
 			menuItem.animation.addByPrefix('selected', optionShit[i].name + " white", 24);
 			menuItem.animation.play('idle');
@@ -111,6 +111,8 @@ class MainMenuState extends GenericMenu {
 			trace('Menu priority set to: ${Mods.menuPriorityMod}');
 			if (FlxG.save.data.menuPriorityMod != Mods.menuPriorityMod)
 				FlxG.save.data.menuPriorityMod = Mods.menuPriorityMod;
+			if (FlxG.sound.music != null)
+				FlxG.sound.music.stop();
 			FlxG.resetState();
 		}
 		if (FlxG.keys.justPressed.SEVEN) {
@@ -126,7 +128,7 @@ class MainMenuState extends GenericMenu {
 
 	override function onAcceptPressed(v:Int, h:Int):Void {
 		canInput = false;
-		FlxG.sound.play(menuSound('confirmMenu'));
+		FlxG.sound.play(Mods.menuSound('confirmMenu'));
 		FlxFlicker.flicker(magenta, 1.1, 0.15, false);
 
 		menuItems.forEach(function(spr:FlxSprite) {

@@ -40,7 +40,7 @@ class FreeplayState extends GenericMenu {
 		#end
 		this.menuScrollType = BOTH;
 		if (FlxG.sound.music == null)
-			FlxG.sound.playMusic(menuMusic("freakyMenu"), 0.7);
+			FlxG.sound.playMusic(Mods.menuMusic("freakyMenu"), 0.7);
 		Conductor.current.active = false;
 		Conductor.setTime(0.0);
 
@@ -78,7 +78,7 @@ class FreeplayState extends GenericMenu {
 		foldersPushed.resize(0);
 		foldersPushed = null;
 
-		add(new FlxSprite().loadGraphic(menuImage('ui/backgrounds/menuBGBlue')));
+		add(new FlxSprite().loadGraphic(Mods.menuImage('ui/backgrounds/menuBGBlue')));
 		var itemCreated = function(i:Int, target:Alphabet) {
 			if (songs[i].mod != Mods.currentMod)
 				Mods.currentMod = songs[i].mod;
@@ -92,7 +92,7 @@ class FreeplayState extends GenericMenu {
 		maxVerticals = songs.length - 1;
 
 		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, "", 32);
-		scoreText.setFormat(menuFont("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
+		scoreText.setFormat(Mods.menuFont("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
 
 		var scoreBG:FlxSprite = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 66, 0xFF000000);
 		scoreBG.alpha = 0.6;
