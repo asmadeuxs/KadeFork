@@ -1,6 +1,7 @@
 package data;
 
 import util.CoolUtil;
+import flixel.util.typeLimit.OneOfTwo;
 
 using StringTools;
 
@@ -67,18 +68,72 @@ class Locale {
 	}
 
 	public function reloadLocales():Void {
-		var path:String = Paths.getPath('data/locales');
-		if (!Paths.fileExists(path))
-			return;
-		for (localeDir in Paths.listFiles(path)) {
-			var lang = reloadLocaleDirectory(localeDir);
-			if (lang != null)
-				locales.set(localeDir, lang);
+		var foldersLooked:Array<String> = [];
+		var ats = haxe.io.Path.addTrailingSlash;
+		var cats = util.Mods.getEnabled();
+		locales.clear();
+		for (modId in cats) {
+			var basePath:String = Paths.getPath('data/locales', modId);
+			if (!Paths.fileExists(basePath))
+				continue;
+			for (localeDir in Paths.listFiles(basePath)) {
+				var absPath:String = ats(basePath) + localeDir;
+				if (foldersLooked.contains(absPath))
+					continue;
+				foldersLooked.push(absPath);
+				var lang:LocaleData = reloadLocaleFromDirectory(absPath);
+				if (lang == null)
+					continue;
+				if (locales.exists(localeDir)) {
+					var existing:LocaleData = locales[localeDir];
+					if (existing.name == null && lang.name != null)
+						existing.name = lang.name;
+					if (existing.nativeName == null && lang.nativeName != null)
+						existing.nativeName = lang.nativeName;
+					// merging strings and stuff
+					for (cat => map in lang.strings) {
+						if (!existing.strings.exists(cat))
+							existing.strings.set(cat, new Map());
+						for (key => value in map)
+							existing.strings[cat].set(key, value);
+					}
+					for (cat => map in lang.pathOverrides) {
+						if (!existing.pathOverrides.exists(cat))
+							existing.pathOverrides.set(cat, new Map());
+						for (key => value in map)
+							existing.pathOverrides[cat].set(key, value);
+					}
+				} else
+					locales.set(localeDir, lang);
+			}
 		}
+
+		foldersLooked.resize(0);
+		foldersLooked = null;
 	}
 
-	public function reloadLocaleDirectory(locale:String):LocaleData {
-		var localeFiles:String = Paths.getPath('data/locales/$locale');
+	/**
+	 * Lists every locale folder in both assets and mods.
+	**/
+	public function getLocaleFolders():Array<String> {
+		var ats = haxe.io.Path.addTrailingSlash;
+		var cats = util.Mods.getEnabled();
+		var files:Array<String> = [];
+		for (modId in cats) {
+			var path:String = Paths.getPath('data/locales', modId);
+			if (!Paths.fileExists(path))
+				continue;
+			for (localeDir in Paths.listFiles(path)) {
+				var fullPath:String = ats(path) + localeDir;
+				if (!files.contains(fullPath))
+					files.push(fullPath);
+			}
+		}
+		return files;
+	}
+
+	public function reloadLocaleFromDirectory(path:String):LocaleData {
+		var localeFiles:String = path;
 		if (!Paths.fileExists(localeFiles))
 			return null;
 		var ats = haxe.io.Path.addTrailingSlash;
@@ -86,13 +141,14 @@ class Locale {
 		for (i in Paths.listFiles(localeFiles)) {
 			if (!i.endsWith('.csv'))
 				continue;
-			var lines:Array<String> = Paths.getText(ats(localeFiles) + i).split('\n');
+			var path:String = ats(localeFiles) + i;
+			var lines:Array<String> = Paths.getText(path).split('\n');
 			if (lines == null || lines.length == 0) {
-				trace('Translation file "$i" (for language $locale) is empty.');
 				continue;
 			}
 			var ii:String = haxe.io.Path.withoutExtension(i);
-			language.strings.set(ii, new Map());
+			if (language.strings[ii] == null)
+				language.strings.set(ii, new Map());
 			for (id => line in lines) {
 				var t:String = line.trim();
 				if (t.length == 0 || CoolUtil.isComment(t))
@@ -110,7 +166,7 @@ class Locale {
 					case(_.toLowerCase() == 'nativename' || _.toLowerCase() == 'native name') => true:
 						language.nativeName = value;
 					case(Paths.fileExists(_)) => true:
-						if (!language.pathOverrides.exists(ii))
+						if (language.pathOverrides[ii] == null)
 							language.pathOverrides.set(ii, new Map());
 						language.pathOverrides[ii].set(keyTrim, value);
 					case _:
@@ -174,6 +230,18 @@ class Locale {
 	}
 
 	/**
+	 * Translates a string from an id
+	 *
+	 * @param cat String Category the string is at (i.e: main) - this is usually the csv file name
+	 * @param id String
+	 * @return String
+	 */
+	public function translateString(cat:String, id:String):String {
+		var l:LocaleData = locales.get(this.language);
+		return l?.getString(cat, id) ?? '$cat:$id';
+	}
+
+	/**
 	 * Translates a string and replaces all numbered brackets (i.e: {1}, {2}, ...) with the values attached.
 	 *
 	 * May be a bit slow if you're doing it every frame.
@@ -186,15 +254,37 @@ class Locale {
 		return format(translateString(cat, id), ...replacements);
 
 	/**
-	 * Translates a string from an id
-	 *
-	 * @param cat String Category the string is at (i.e: main) - this is usually the csv file name
-	 * @param id String
-	 * @return String
-	 */
-	public function translateString(cat:String, id:String):String {
+	 * @see `Locale.translateString`
+	 * @param def String Default string in case translation fails.
+	**/
+	public function translateStringDefault(cat:String, id:String, ?def:String):String {
 		var l:LocaleData = locales.get(this.language);
-		return l?.getString(cat, id) ?? '$cat:$id';
+		if (def == null)
+			def = '$cat:$id';
+		return l?.getString(cat, id) ?? def;
+	}
+
+	/**
+	 * @see `Locale.translateFormat`
+	 * @param def String Default string in case translation fails.
+	**/
+	public function translateFormatDefault(cat:String, id:String, ?def:String, ...replacements:Dynamic):String {
+		return format(translateStringDefault(cat, id), ...replacements);
+	}
+
+	/**
+	 * Workaround function for hscript since it doesn't support ...rest arguments
+	 * @see `Locale.translateFormat`
+	 * @param def String Default string in case translation fails.
+	**/
+	public function translateFormatArray(cat:String, id:String, ?def:String, replacements:Dynamic):String {
+		var result:String = translateStringDefault(cat, id, def);
+		if (Std.isOfType(replacements, Array))
+			for (i in 0...replacements.length)
+				result = result.split('{${i + 1}}').join(Std.string(replacements[i]));
+		else
+			result = result.replace("{1}", Std.string(replacements));
+		return result;
 	}
 
 	/**

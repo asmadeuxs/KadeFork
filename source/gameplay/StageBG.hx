@@ -13,6 +13,7 @@ import haxe.Json5;
 using util.AnimationHelper;
 using util.CoolUtil;
 
+@:allow(ui.DeveloperMenu)
 class StageBG extends FlxBasic {
 	public var cameraZoom:Float = 1.0;
 	public var characterOffsets:Map<String, Array<Float>> = new Map();
@@ -57,6 +58,25 @@ class StageBG extends FlxBasic {
 		super.destroy();
 	}
 
+	/**
+	 * Lists every stage file in both assets and mods.
+	**/
+	public static function getStageFiles():Array<String> {
+		var stages:Array<String> = [];
+		var cats = util.Mods.getEnabled();
+		for (modId in cats) {
+			var stagesPath:String = Paths.getPath('data/stages', modId);
+			if (!Paths.fileExists(stagesPath))
+				continue;
+			for (i in Paths.listFiles(stagesPath)) {
+				if (!Paths.jsonExtensions.contains(haxe.io.Path.extension(i)))
+					continue;
+				stages.push('$modId:$i');
+			}
+		}
+		return stages;
+	}
+
 	private function loadStageScript(stageName:String):Script {
 		var scriptPath:String = Paths.getPath('data/stages/$stageName');
 		stageScript = ScriptLoader.findScript(ScriptLoader.getScriptFile(scriptPath, stageName), true);
@@ -71,11 +91,18 @@ class StageBG extends FlxBasic {
 	}
 
 	private function findStageFile(file:String):String {
-		var paths = ['data/stages/${file}', 'data/stages/${file}-config'];
+		var modId:String = null;
+		var stage:String = file;
+		if (file.indexOf(":") != -1) {
+			var info = file.split(":");
+			modId = info[0];
+			stage = info[1];
+		}
+		var paths = ['data/stages/$stage', 'data/stages/$stage-config'];
 		var path:String = Paths.getPath(paths[0] + '.json');
 		for (i in paths) {
 			for (ext in Paths.jsonExtensions) {
-				var target:String = Paths.getPath(i);
+				var target:String = Paths.getPath(i, modId);
 				if (Paths.fileExists(target)) {
 					path = target;
 					break;

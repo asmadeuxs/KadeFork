@@ -171,12 +171,11 @@ class ScriptLoader {
 					codeString: scriptStr,
 					interp: customInterp == null ? makeInterpreter() : customInterp,
 				};
-				script.setVar("trace", function(v:Dynamic) Sys.println('[${script.fileName}:${script.getPosInfos().lineNumber}] $v'));
+				script.initVars();
 				return script;
 			}
-			catch (e:haxe.Exception) {
+			catch (e:haxe.Exception)
 				trace('Unexpected script error, ${e.message} (details: ${e.details()})');
-			}
 		#else
 		trace('Scripts are not enabled in this build! (HScript error)');
 		#end

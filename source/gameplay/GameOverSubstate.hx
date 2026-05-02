@@ -15,12 +15,12 @@ class GameOverSubstate extends MusicBeatSubstate {
 	var stageSuffix:String = "";
 
 	public function new(x:Float, y:Float) {
+		Conductor.current.active = false;
 		stageSuffix = PlayState.current.boyfriend.gameOverSuffix;
 
 		super();
 
 		Conductor.bpm = 100;
-		Conductor.current.active = false;
 		Conductor.setTime(0.0);
 
 		add(bf = new Character(x, y, PlayState.current.boyfriend.deathCharacter, true));
@@ -53,10 +53,10 @@ class GameOverSubstate extends MusicBeatSubstate {
 		if (bf.animation.curAnim.name == 'firstDeath' && bf.animation.curAnim.curFrame == 12)
 			FlxG.camera.follow(camFollow, LOCKON, 0.01);
 
-		if (bf.animation.curAnim.name == 'firstDeath' && bf.animation.curAnim.finished)
+		if (bf.animation.curAnim.name == 'firstDeath' && bf.animation.curAnim.finished) {
 			FlxG.sound.playMusic(Paths.music('gameOver' + stageSuffix));
-		if (FlxG.sound.music.playing)
 			Conductor.current.active = true;
+		}
 	}
 
 	override function beatHit(beat:Int) {

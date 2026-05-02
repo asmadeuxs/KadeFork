@@ -46,6 +46,17 @@ typedef InterpType = #if FEATURE_HSCRIPT hscript.Interp #else Any #end;
 		return caller;
 	}
 
+	public function initVars():Void {
+		if (interp != null && interp.variables != null) {
+			interp.variables.set("trace", function(...args:Array<Dynamic>) {
+				var pos:haxe.PosInfos = getPosInfos();
+				var line:Int = pos.lineNumber + 1;
+				var message:String = [for (a in args) Std.string(a)].join(" ");
+				Sys.println('[$fileName:$line] $message');
+			});
+		}
+	}
+
 	function getPosInfos():haxe.PosInfos
 		return #if FEATURE_HSCRIPT this.interp.posInfos() #else null #end;
 

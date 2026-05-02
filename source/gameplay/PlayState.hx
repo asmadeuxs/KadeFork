@@ -177,6 +177,19 @@ class PlayState extends MusicBeatState {
 		camHUD.bgColor.alpha = 0;
 		FlxG.cameras.add(camHUD, false);
 
+		camFollow = new FlxObject(0, 0, 1, 1);
+		if (prevCamFollow != null) {
+			camFollow = prevCamFollow;
+			prevCamFollow = null;
+		}
+		add(camFollow);
+
+		camGame.follow(camFollow, LOCKON, 0.04);
+		// camGame.setScrollBounds(0, FlxG.width, 0, FlxG.height);
+
+		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
+		FlxG.fixedTimestep = false;
+
 		persistentUpdate = true;
 		persistentDraw = true;
 
@@ -192,39 +205,14 @@ class PlayState extends MusicBeatState {
 		gf = new Character(400, 130, moonMeta.extraData.exists(PLAYER_3) ? moonMeta.extraData.get(PLAYER_3) : "bf");
 		dad = new Character(100, 100, moonMeta.extraData.exists(PLAYER_2) ? moonMeta.extraData.get(PLAYER_2) : "bf");
 		boyfriend = new Character(770, 450, moonMeta.extraData.exists(PLAYER_1) ? moonMeta.extraData.get(PLAYER_1) : "bf", true);
-		// gf.scrollFactor.set(0.95, 0.95);
-		var mid = dad.getMidpoint();
-		var off = dad.cameraOffset;
-		var camPos:FlxPoint = new FlxPoint(mid.x + off.x, mid.y + off.y);
-		if (dad.characterId == gf.characterId) {
-			dad.setPosition(gf.x, gf.y);
-			gf.visible = false;
-			if (isStoryMode)
-				tweenCamIn();
-		}
 
-		// this looks ugly.
-		if (stage.characterOffsets.exists('player')) {
-			var o:Array<Float> = stage.characterOffsets.get('player');
-			boyfriend.x += o[0];
-			boyfriend.y += o[1];
-		}
-		if (stage.characterOffsets.exists('opponent')) {
-			var o:Array<Float> = stage.characterOffsets.get('opponent');
-			dad.x += o[0];
-			dad.y += o[1];
-		}
-		if (stage.characterOffsets.exists('metronome')) {
-			var o:Array<Float> = stage.characterOffsets.get('metronome');
-			gf.x += o[0];
-			gf.y += o[1];
-		}
-
+		positionCharacters();
 		add(gf);
 		add(dad);
 		add(boyfriend);
 
-		Conductor.setTime(-5000);
+		camGame.zoom = defaultCamZoom;
+		camGame.focusOn(camFollow.getPosition());
 
 		var underlay:FlxSprite = null;
 		if (Preferences.user.strumUnderlay > 0) { // always creating it if its supposed to be visible for the sake adding it for both cases.
@@ -279,28 +267,15 @@ class PlayState extends MusicBeatState {
 		add(comboDisplay);
 		add(perfectText);
 
-		camFollow = new FlxObject(0, 0, 1, 1);
-		camFollow.setPosition(camPos.x, camPos.y);
-		if (prevCamFollow != null) {
-			camFollow = prevCamFollow;
-			prevCamFollow = null;
-		}
-		add(camFollow);
+		startSongCutscene();
+	}
 
-		camGame.follow(camFollow, LOCKON, 0.04);
-		// camGame.setScrollBounds(0, FlxG.width, 0, FlxG.height);
-		camGame.zoom = defaultCamZoom;
-		camGame.focusOn(camFollow.getPosition());
-
-		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
-		FlxG.fixedTimestep = false;
-
-		startingSong = true;
-
+	public function startSongCutscene() {
 		switch (songName.toLowerCase()) {
 			default:
 				startCountdown();
 		}
+		startingSong = true;
 	}
 
 	override public function destroy() {
@@ -310,6 +285,39 @@ class PlayState extends MusicBeatState {
 		inputMgr.destroy();
 		session.judgeMan = null;
 		current = null;
+	}
+
+	// For stage reloading
+	public function positionCharacters() {
+		// this looks ugly.
+		if (boyfriend != null && stage.characterOffsets.exists('player')) {
+			var o:Array<Float> = stage.characterOffsets.get('player');
+			boyfriend.x = 770 + o[0];
+			boyfriend.y = 450 + o[1];
+		}
+		if (dad != null && stage.characterOffsets.exists('opponent')) {
+			var o:Array<Float> = stage.characterOffsets.get('opponent');
+			dad.x = 100 + o[0];
+			dad.y = 100 + o[1];
+		}
+		if (gf != null && stage.characterOffsets.exists('metronome')) {
+			var o:Array<Float> = stage.characterOffsets.get('metronome');
+			gf.x = 400 + o[0];
+			gf.y = 130 + o[1];
+		}
+		// gf.scrollFactor.set(0.95, 0.95);
+		if (dad != null) {
+			if (gf != null && dad.characterId == gf.characterId) {
+				dad.setPosition(gf.x, gf.y);
+				gf.visible = false;
+				if (isStoryMode)
+					tweenCamIn();
+			}
+			var mid = dad.getMidpoint();
+			var off = dad.cameraOffset;
+			var camPos:FlxPoint = new FlxPoint(mid.x + off.x, mid.y + off.y);
+			camFollow.setPosition(camPos.x, camPos.y);
+		}
 	}
 
 	var startTimer:FlxTimer;
@@ -484,6 +492,10 @@ class PlayState extends MusicBeatState {
 			session.invalid = true;
 			perfectMode = !perfectMode;
 			perfectText.visible = perfectMode;
+		}
+		if (FlxG.keys.justPressed.FIVE) {
+			pause();
+			openSubState(new ui.DeveloperMenu());
 		}
 		// end of debug keys
 

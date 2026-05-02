@@ -4,9 +4,15 @@ import flixel.FlxG;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxMath;
 
+enum abstract LerpingStyle(String) from String to String {
+	var DEFAULT = "default";
+	var CENTERED = "centered";
+}
+
 class AlphabetMenu extends FlxTypedSpriteGroup<Alphabet> {
 	public var spacingBetweenItems:Int = 130;
 	public var items:Array<String> = null;
+	public var lerpStyle:String = LerpingStyle.DEFAULT;
 
 	public function new(x:Float, y:Float, ?list:Array<String>):Void {
 		super(x, y);
@@ -42,8 +48,14 @@ class AlphabetMenu extends FlxTypedSpriteGroup<Alphabet> {
 					i.visible = true;
 				}
 				var scaledY = FlxMath.remapToRange(i.targetY, 0, 1, 0, 1.3);
-				i.y = FlxMath.lerp(i.y, (scaledY * spacingBetweenItems) + (FlxG.height * 0.48), 0.16);
-				i.x = FlxMath.lerp(i.x, (i.targetY * 20) + 90, 0.16);
+				switch lerpStyle {
+					case LerpingStyle.CENTERED:
+						i.y = FlxMath.lerp(i.y, (scaledY * spacingBetweenItems) + (FlxG.height * 0.48), 0.16);
+						i.x = (FlxG.width - i.width) * 0.5;
+					case _:
+						i.y = FlxMath.lerp(i.y, (scaledY * spacingBetweenItems) + (FlxG.height * 0.48), 0.16);
+						i.x = FlxMath.lerp(i.x, (i.targetY * 20) + 90, 0.16);
+				}
 			}
 		}
 	}

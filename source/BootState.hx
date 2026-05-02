@@ -2,9 +2,9 @@ package;
 
 import flixel.FlxG;
 
-// This is just a class to initialise variables
-// Preferably only mess with it if you need to do some save-file related stuff
 class BootState extends flixel.FlxState {
+	// This is just a class to initialise variables
+	// Preferably only mess with it if you need to do some save-file related stuff
 	override function create() {
 		/*\#if sys
 			if (!sys.FileSystem.exists(Sys.getCwd() + "/assets/replays"))
@@ -19,22 +19,22 @@ class BootState extends flixel.FlxState {
 		new Controls(Controls.defaultActions.copy());
 		data.Preferences.load();
 		data.Highscore.load();
-		#if FEATURE_TRANSLATIONS
-		new data.Locale(Preferences.user.language);
-		#end
-
 		util.Mods.scan(true);
 		// yes we're calling them levels and not weeks
 		// they call it levels in base game so we will call it levels here -asmadeuxs
-		var registry = new registry.LevelRegistry();
+		var levelRegistry = new registry.LevelRegistry();
 		var cats = util.Mods.getEnabled();
 		for (id in cats)
-			registry.loadLevels(id);
+			levelRegistry.loadLevels(id);
+		levelRegistry = null;
 		util.Mods.loadMods();
 		lime.app.Application.current.onExit.add(function(e:Int) {
 			data.Preferences.save();
 			util.Mods.saveMods();
 		});
+		#if FEATURE_TRANSLATIONS
+		new data.Locale(Preferences.user.language);
+		#end
 		// this is not great but it, its fine for now.
 		FlxG.signals.preStateSwitch.add(() -> Paths.clearCache());
 
