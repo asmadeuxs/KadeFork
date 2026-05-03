@@ -42,7 +42,7 @@ class PauseSubstate extends MusicBeatSubstate {
 				name: exit,
 				func: () -> {
 					if (!FlxG.sound.music.playing) {
-						FlxG.sound.playMusic(Paths.inst(PlayState.songName), 0);
+						FlxG.sound.playMusic(Paths.inst(PlayState.songName, PlayState.difficulty, util.Mods.currentMod), 0);
 						FlxG.sound.music.time = FlxG.random.int(0, Std.int(FlxG.sound.music.length * 0.5));
 						FlxG.sound.music.fadeIn(4, 0, 0.7);
 					}
@@ -126,7 +126,10 @@ class PauseSubstate extends MusicBeatSubstate {
 	}
 
 	function changeSelection(change:Int = 0):Void {
+		var prev:Int = curSelected;
 		curSelected = flixel.math.FlxMath.wrap(curSelected + change, 0, menuItems.length - 1);
+		if (prev != curSelected)
+			FlxG.sound.play(util.Mods.menuSound("scrollMenu"));
 
 		var bullShit:Int = 0;
 		for (item in grpMenuShit.members) {

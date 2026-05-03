@@ -50,8 +50,7 @@ class DummyPlayState extends MusicBeatState {
 		Conductor.current.active = false;
 		Conductor.setTime(0.0);
 
-		var formattedSong:String = Highscore.formatSong(songName, difficulty);
-		chart = Song.loadFromFile(formattedSong, songName);
+		chart = Song.loadFromFile(util.Mods.currentMod, songName, difficulty);
 		generateSong();
 
 		inputMgr = new InputManager(keyPressed, keyReleased);
@@ -86,8 +85,8 @@ class DummyPlayState extends MusicBeatState {
 
 	private function generateSong():Void {
 		Conductor.mapTimingPoints(chart);
-		Conductor.current.loadMusic(Paths.inst(songName));
-		Conductor.current.addTrack(Paths.voices(songName));
+		Conductor.current.loadMusic(Paths.inst(songName, difficulty, 'core'));
+		Conductor.current.addTrack(Paths.voices(songName, difficulty, 'core'));
 
 		Conductor.bpm = chartMeta.bpmChanges[0].bpm;
 		scrollSpeed = chartMeta.scrollSpeeds.get(difficulty) ?? 2.5;

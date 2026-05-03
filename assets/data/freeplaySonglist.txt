@@ -1,6 +1,2 @@
 # Song Name:Song Folder:Icon:Difficulties,Separated,By,A,Comma
 Test:test:bf-pixel:normal
-Tutorial:tutorial:gf
-Bopeebo:bopeebo:dad
-Fresh:fresh:dad
-Dadbattle:dadbattle:dad

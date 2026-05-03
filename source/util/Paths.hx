@@ -85,43 +85,38 @@ class Paths {
 			soundRegistry.clear((key, asset) -> return false);
 	}
 
-	static function resolveAssetPath(file:String, ?mod:String):String {
+	static public function resolveAssetPath(file:String, ?mod:String):String {
+		if (Paths.fileExists(file))
+			return file;
+		var corePath:String = '$root/$file';
 		#if FEATURE_MODS
 		if (mod != null && mod.endsWith(":"))
 			mod = mod.substr(0, -1);
 		if (mod != null && mod != "core") {
-			var modPath = Mods.getAssetFromMod(mod, file);
+			var modPath:String = Mods.getAssetFromMod(mod, file);
 			if (modPath != null && Paths.fileExists(modPath))
 				return modPath;
-			var corePath = '$root/$file';
-			if (Paths.fileExists(corePath))
-				return corePath;
-			return null;
+			return corePath;
 		}
-		if (mod == "core") {
-			var corePath = '$root/$file';
-			return Paths.fileExists(corePath) ? corePath : null;
-		}
+		if (mod == "core" && Paths.fileExists(corePath))
+			return corePath;
+
 		if (Mods.currentMod != null && Mods.currentMod != "core") {
-			var curPath = Mods.getAssetFromMod(Mods.currentMod, file);
+			var curPath:String = Mods.getAssetFromMod(Mods.currentMod, file);
 			if (curPath != null && Paths.fileExists(curPath))
 				return curPath;
 		}
 		if (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") {
-			var prioPath = Mods.getAssetFromMod(Mods.menuPriorityMod, file);
+			var prioPath:String = Mods.getAssetFromMod(Mods.menuPriorityMod, file);
 			if (prioPath != null && Paths.fileExists(prioPath))
 				return prioPath;
 		}
-		var modPath = Mods.searchAssetOnMods(file);
+		var modPath:String = Mods.searchAssetOnMods(file);
 		if (modPath != null && Paths.fileExists(modPath))
 			return modPath;
-		var corePath = '$root/$file';
-		if (Paths.fileExists(corePath))
-			return corePath;
-		return null;
+		return corePath;
 		#else
-		var corePath = '$root/$file';
-		return Paths.fileExists(corePath) ? corePath : null;
+		return corePath;
 		#end
 	}
 
@@ -286,11 +281,37 @@ class Paths {
 	inline static public function music(key:String, ?mod:String):Sound
 		return getPath('music/$key.ogg', MUSIC, mod);
 
-	inline static public function voices(song:String, ?mod:String):Sound
-		return getPath('songs/${song.toLowerCase()}/Voices.ogg', MUSIC, mod);
+	inline static public function resolveSongPath(file:String, song:String, variation:String, mod:String):String {
+		var paths:Array<String> = [
+			'songs/$song/$file-$variation',
+			'songs/$song/$variation/$file-$variation',
+			'songs/$song/$file',
+		];
+		var path:String = null;
+		for (possiblePath in paths) {
+			var candidate:String = Paths.resolveAssetPath(possiblePath + '.ogg', mod);
+			if (Paths.fileExists(candidate)) {
+				path = possiblePath + '.ogg';
+				break;
+			}
+		}
+		return path;
+	}
 
-	inline static public function inst(song:String, ?mod:String):Sound
-		return getPath('songs/${song.toLowerCase()}/Inst.ogg', MUSIC, mod);
+	inline static public function inst(song:String, difficulty:String, ?mod:String):Sound {
+		var path:String = resolveSongPath('Inst', song, difficulty, mod);
+		return getPath(path, MUSIC, mod);
+	}
+
+	inline static public function voices(song:String, difficulty:String, ?mod:String):Sound {
+		var path:String = resolveSongPath('Voices', song, difficulty, mod);
+		return getPath(path, MUSIC, mod);
+	}
+
+	inline static public function songaudio(file:String, song:String, difficulty:String, ?mod:String):Sound {
+		var path:String = resolveSongPath(file, song, difficulty, mod);
+		return getPath(path, MUSIC, mod);
+	}
 
 	inline static public function image(key:String, ?mod:String):FlxGraphic
 		return getPath('images/$key.png', IMAGE, mod);

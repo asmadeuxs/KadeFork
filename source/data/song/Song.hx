@@ -13,12 +13,29 @@ class Song {
 		//
 	}
 
-	public static function loadFromFile(jsonInput:String, ?folder:String):DynamicFormat {
-		if (folder == null)
-			folder = jsonInput.substring(0, jsonInput.lastIndexOf("-"));
-		var pathWithSuf:String = Paths.getPath('songs/$folder/$jsonInput.json');
-		var pathNoSuf:String = Paths.getPath('songs/$folder/${jsonInput.substring(0, jsonInput.lastIndexOf("-"))}.json');
-		var path:String = Paths.fileExists(pathWithSuf) ? pathWithSuf : pathNoSuf;
-		return new FNFPsych().fromFile(path, null, "hard");
+	public static function getSongPath(mod:String, song:String, difficulty:String = 'normal'):String {
+		var paths:Array<String> = [
+			'songs/$song/$song-$difficulty',
+			'songs/$song/$song-$difficulty-chart',
+			'songs/$song/$song-chart',
+			'songs/$song/$difficulty',
+			'songs/$song/$song',
+		];
+		var path:String = null;
+		for (possiblePath in paths) {
+			var candidate:String = Paths.resolveAssetPath(possiblePath + '.json', mod);
+			if (Paths.fileExists(candidate)) {
+				path = candidate;
+				break;
+			}
+		}
+		return path;
+	}
+
+	public static function loadFromFile(mod:String, song:String, ?difficulty:String):DynamicFormat {
+		var path:String = getSongPath(mod, song, difficulty);
+		if (path == null)
+			throw 'Song file not found for $song ($difficulty) in mod $mod';
+		return new FNFPsych().fromFile(path, null, null);
 	}
 }

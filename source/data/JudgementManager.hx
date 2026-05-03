@@ -73,6 +73,7 @@ class JudgementManager {
 			{
 				name: "Bad",
 				image: "bad",
+				comboBreak: true,
 				healthBonus: (_:Float) -> return -0.06,
 				color: 0xFFDC7487,
 				hitWindow: 135.0,

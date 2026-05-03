@@ -194,7 +194,7 @@ class PlayState extends MusicBeatState {
 		persistentDraw = true;
 
 		if (moonSong == null)
-			moonSong = Song.loadFromFile('tutorial');
+			moonSong = Song.loadFromFile('core', 'test');
 		generateSong();
 
 		curStage = moonMeta.extraData.exists(STAGE) ? moonMeta.extraData.get(STAGE) : "stage";
@@ -387,9 +387,9 @@ class PlayState extends MusicBeatState {
 	private function generateSong():Void {
 		Conductor.bpm = moonMeta.bpmChanges[0].bpm;
 		Conductor.mapTimingPoints(moonSong);
-		Conductor.current.loadMusic(Paths.inst(PlayState.songName));
-		if (moonMeta.extraData.get(NEEDS_VOICES) == true)
-			Conductor.current.addTrack(Paths.voices(PlayState.songName));
+		Conductor.current.loadMusic(Paths.inst(PlayState.songName, PlayState.difficulty, util.Mods.currentMod));
+		if (moonMeta.extraData.get(NEEDS_VOICES) == true) // TODO: separate Player and Opponent vocals
+			Conductor.current.addTrack(Paths.voices(PlayState.songName, PlayState.difficulty, util.Mods.currentMod));
 		songLength = Conductor.current.music.length;
 		scrollSpeed = moonMeta.scrollSpeeds.get(difficulty) ?? 2.5;
 
@@ -652,7 +652,7 @@ class PlayState extends MusicBeatState {
 		canPause = false;
 		Conductor.current.stopMusic();
 		if (!session.invalid)
-			Highscore.saveScore(songName, Math.round(session.score), difficulty);
+			Highscore.saveScore(songName, difficulty, session.score);
 
 		/*
 			if (isStoryMode) {
@@ -675,7 +675,7 @@ class PlayState extends MusicBeatState {
 					trace(PlayState.storyPlaylist[0].toLowerCase() + difficulty);
 					FlxTransitionableState.skipNextTransIn = true;
 					FlxTransitionableState.skipNextTransOut = true;
-					PlayState.moonSong = Song.loadFromFile(PlayState.storyPlaylist[0].toLowerCase() + difficulty, PlayState.storyPlaylist[0]);
+					PlayState.moonSong = Song.loadFromFile(util.Mods.currentMod, PlayState.storyPlaylist[0].toLowerCase(), difficulty);
 					prevCamFollow = camFollow;
 
 					Conductor.current.active = false;
@@ -685,7 +685,7 @@ class PlayState extends MusicBeatState {
 		} else*/ {
 			trace('WENT BACK TO FREEPLAY??');
 			if (!FlxG.sound.music.playing) {
-				FlxG.sound.playMusic(Paths.inst(PlayState.songName), 0);
+				FlxG.sound.playMusic(Paths.inst(PlayState.songName, PlayState.difficulty, util.Mods.currentMod), 0);
 				FlxG.sound.music.time = FlxG.random.int(0, Std.int(FlxG.sound.music.length * 0.5));
 				FlxG.sound.music.fadeIn(4, 0, 0.7);
 			}

@@ -54,6 +54,8 @@ class FreeplayState extends GenericMenu {
 				var level:LevelData = registry.get('$modId:$id');
 				if (level != null && level.songs != null) {
 					for (info in level.songs) {
+						if (foldersPushed.contains(info.folder))
+							continue;
 						var diffs:Array<String> = info.difficulties ?? level.difficulties;
 						songs.push(new SongMetadata(info.name, info.folder, info.icon ?? "face", modId, diffs));
 						foldersPushed.push(info.folder);
@@ -125,9 +127,9 @@ class FreeplayState extends GenericMenu {
 		PlayState.isStoryMode = false;
 		var curSong = songs[song];
 		Mods.currentMod = curSong.mod;
+		trace(curSong.mod);
 		PlayState.difficulty = lastDifficultyArray[difficulty].toLowerCase();
-		var poop:String = Highscore.formatSong(curSong.songFolder, PlayState.difficulty);
-		PlayState.moonSong = Song.loadFromFile(poop, curSong.songFolder);
+		PlayState.moonSong = Song.loadFromFile(curSong.mod, curSong.songFolder, PlayState.difficulty);
 		PlayState.songName = curSong.songFolder;
 		FlxG.switchState(new gameplay.PlayState());
 	}
