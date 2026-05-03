@@ -172,9 +172,10 @@ class TitleState extends MusicBeatState {
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER;
 		if (transitioning && pressedEnter) {
 			if (!transitionTmr.finished) {
-				if (spamming >= 3)
+				if (spamming >= 3) {
 					transitionTmr.cancel();
-				else
+					FlxG.switchState(new menus.MainMenuState());
+				} else
 					spamming++;
 			}
 		}
