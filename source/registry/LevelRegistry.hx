@@ -1,7 +1,9 @@
 package registry;
 
 import util.CoolUtil;
+import util.Mods;
 
+using haxe.io.Path;
 using StringTools;
 
 typedef LevelLabel = {
@@ -26,7 +28,7 @@ typedef LevelData = {
 class LevelRegistry extends BaseRegistry<LevelData> {
 	public static var current:LevelRegistry = null;
 
-	var ordered:Array<String> = null;
+	var ordered:Map<String, Array<LevelData>> = new Map();
 
 	public function new():Void {
 		super("LevelRegistry");
@@ -34,48 +36,92 @@ class LevelRegistry extends BaseRegistry<LevelData> {
 	}
 
 	override function destroy() {
-		ordered.resize(0);
+		ordered.clear();
 		ordered = null;
 		super.destroy();
 	}
 
-	@:noPrivateAccess
-	private function isJson(f:String) {
-		var ext = haxe.io.Path.extension(f);
-		return Paths.jsonExtensions.contains(ext);
-	}
-
 	public function loadLevels(?mod:String = null) {
-		if (ordered == null || ordered.length > 0) {
-			if (ordered == null)
-				ordered = [];
-			else
-				ordered.resize(0);
-		}
-		var origin:String = Paths.getAssetOrigin(mod);
-		var levelDir:String = Paths.getPath('data/levels', null, mod);
-		if (!Paths.fileExists(levelDir)) {
-			trace('Level directory "$levelDir" does not exist.');
-			return;
-		}
-		if (mod == "core")
-			trace('Loading built-in levels (from assets folder)');
+		if (!ordered.exists(mod))
+			ordered.set(mod, []);
 		else
-			trace('Loading levels from mod "$mod"');
-		for (file in Paths.listFiles(levelDir)) {
-			if (!isJson(file) || !Paths.fileExists(Paths.getPath('data/levels/$file')))
-				continue;
-			var regKey:String = '$origin${file.substr(0, file.lastIndexOf("."))}';
-			var level:LevelData = cast Paths.getPath('data/levels/$file', JSON5);
-			if (level != null)
-				register(regKey, level);
+			ordered[mod].resize(0);
+		var origin = Paths.getAssetOrigin(mod);
+		var levelDir = Paths.resolveAssetPath('data/levels', mod);
+
+		try {
+			if (!Paths.fileExists(levelDir)) {
+				// trace('Levels not found for $mod');
+				return;
+			}
+			if (mod == "core")
+				trace('Loading built-in levels (from assets folder)');
 			else
-				trace('Level "$file" is not valid. (check spelling errors?)');
+				trace('Loading levels from mod "$mod"');
+			var orderFile = Paths.resolveAssetPath('data/levelList.txt', mod);
+			var levelNames:Array<String> = [];
+			var useOrderFile = Paths.fileExists(orderFile);
+			if (useOrderFile) {
+				var content = Paths.getText(orderFile);
+				levelNames = CoolUtil.coolList(content);
+			}
+			var availableLevels:Map<String, String> = new Map();
+			for (file in Paths.listFiles(levelDir)) {
+				var ext = file.extension();
+				if (!Paths.jsonExtensions.contains(ext))
+					continue;
+				var name = file.withoutExtension();
+				var filePath = haxe.io.Path.addTrailingSlash(levelDir) + file;
+				if (Paths.fileExists(filePath))
+					availableLevels.set(name, filePath);
+			}
+			var namesToProcess = useOrderFile ? levelNames : [for (name in availableLevels.keys()) name];
+			for (name in namesToProcess) {
+				var filePath = availableLevels.get(name);
+				if (filePath == null) {
+					if (useOrderFile)
+						trace('Level "$name" listed in levelList.txt but not found in $levelDir');
+					continue;
+				}
+				var regKey = '$origin$name';
+				var level:LevelData = cast haxe.Json5.parse(Paths.getText(filePath));
+				if (level != null) {
+					register(regKey, level, true);
+					ordered[mod].push(level);
+				} else {
+					trace('Level "$filePath" is not valid JSON5 (check spelling?)');
+				}
+			}
 		}
-		if (Paths.fileExists(Paths.getPath('data/levelList.txt', null, mod)))
-			ordered = CoolUtil.coolList(Paths.getText(Paths.getPath('data/levelList.txt', null, mod)));
+		catch (e:haxe.Exception) {
+			Sys.println(e.message);
+			Sys.println(e.details());
+		}
 	}
 
-	public function getOrderedLevels():Array<String>
-		return ordered;
+	public function getModsLoaded():Array<String>
+		return [for (key in ordered.keys()) key];
+
+	/**
+	 * Returns all LevelData for a given mod 
+	 *
+	 * will either be in the order specified in levelList.txt OR the filesystem order (if the file doesn't exist)
+	 */
+	public function getLevelData(mod:String):Array<LevelData>
+		return ordered.get(mod);
+
+	/**
+	 * Returns every LevelSong from every level in the given mod.
+	 */
+	public function getModLevelSongs(mod:String):Array<LevelSong> {
+		var songs:Array<LevelSong> = [];
+		var levels = ordered.get(mod);
+		// this is dizzying
+		if (levels != null)
+			for (level in levels)
+				if (level.songs != null)
+					for (song in level.songs)
+						songs.push(song);
+		return songs;
+	}
 }

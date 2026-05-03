@@ -24,8 +24,8 @@ class BaseRegistry<Registrable> {
 	public function lock():Bool
 		return locked = true;
 
-	public function register(id:String, object:Registrable):Registrable {
-		if (this.has(id)) {
+	public function register(id:String, object:Registrable, ?force:Bool = false):Registrable {
+		if (this.has(id) && !force) {
 			throw 'Tried registering "$id" but it already exists, use a different ID.';
 			return null;
 		}

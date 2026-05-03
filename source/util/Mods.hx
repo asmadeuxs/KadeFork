@@ -75,7 +75,8 @@ class Mods {
 				continue;
 			}
 			allMods.set(modId, {name: modData[0], version: modData[1] ?? apiVer, description: modData[2] ?? defaultDesc});
-			activeMods.push(modId);
+			if (!activeMods.contains(modId))
+				activeMods.push(modId);
 			trace('Loaded mod folder $modId');
 		}
 		// TODO: re-enable this, I'll just enable every mod at once for now

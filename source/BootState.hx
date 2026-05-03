@@ -19,15 +19,14 @@ class BootState extends flixel.FlxState {
 		new Controls(Controls.defaultActions.copy());
 		data.Preferences.load();
 		data.Highscore.load();
+		util.Mods.loadMods();
 		util.Mods.scan(true);
 		// yes we're calling them levels and not weeks
 		// they call it levels in base game so we will call it levels here -asmadeuxs
 		var levelRegistry = new registry.LevelRegistry();
-		var cats = util.Mods.getEnabled();
-		for (id in cats)
+		for (id in util.Mods.getEnabled())
 			levelRegistry.loadLevels(id);
 		levelRegistry = null;
-		util.Mods.loadMods();
 		lime.app.Application.current.onExit.add(function(e:Int) {
 			data.Preferences.save();
 			util.Mods.saveMods();
@@ -35,6 +34,7 @@ class BootState extends flixel.FlxState {
 		#if FEATURE_TRANSLATIONS
 		new data.Locale(Preferences.user.language);
 		#end
+		util.Mods.saveMods();
 		// this is not great but it, its fine for now.
 		FlxG.signals.preStateSwitch.add(() -> Paths.clearCache());
 

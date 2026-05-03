@@ -86,32 +86,29 @@ class Paths {
 	}
 
 	static public function resolveAssetPath(file:String, ?mod:String):String {
-		if (Paths.fileExists(file))
-			return file;
 		var corePath:String = '$root/$file';
 		#if FEATURE_MODS
 		if (mod != null && mod.endsWith(":"))
 			mod = mod.substr(0, -1);
-		if (mod != null && mod != "core") {
-			var modPath:String = Mods.getAssetFromMod(mod, file);
+		if (mod == "core")
+			return corePath;
+		if (mod != null) {
+			var modPath = Mods.getAssetFromMod(mod, file);
 			if (modPath != null && Paths.fileExists(modPath))
 				return modPath;
 			return corePath;
 		}
-		if (mod == "core" && Paths.fileExists(corePath))
-			return corePath;
-
 		if (Mods.currentMod != null && Mods.currentMod != "core") {
-			var curPath:String = Mods.getAssetFromMod(Mods.currentMod, file);
+			var curPath = Mods.getAssetFromMod(Mods.currentMod, file);
 			if (curPath != null && Paths.fileExists(curPath))
 				return curPath;
 		}
 		if (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") {
-			var prioPath:String = Mods.getAssetFromMod(Mods.menuPriorityMod, file);
+			var prioPath = Mods.getAssetFromMod(Mods.menuPriorityMod, file);
 			if (prioPath != null && Paths.fileExists(prioPath))
 				return prioPath;
 		}
-		var modPath:String = Mods.searchAssetOnMods(file);
+		var modPath = Mods.searchAssetOnMods(file);
 		if (modPath != null && Paths.fileExists(modPath))
 			return modPath;
 		return corePath;

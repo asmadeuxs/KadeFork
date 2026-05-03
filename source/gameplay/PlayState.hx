@@ -493,7 +493,7 @@ class PlayState extends MusicBeatState {
 			perfectMode = !perfectMode;
 			perfectText.visible = perfectMode;
 		}
-		if (FlxG.keys.justPressed.FIVE) {
+		if (FlxG.keys.justPressed.FIVE && startedCountdown && canPause) {
 			pause();
 			openSubState(new ui.DeveloperMenu());
 		}

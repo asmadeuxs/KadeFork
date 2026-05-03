@@ -44,21 +44,17 @@ class FreeplayState extends GenericMenu {
 		Conductor.current.active = false;
 		Conductor.setTime(0.0);
 
-		// to not add the same song twice
-		var foldersPushed:Array<String> = [];
 		var modIDs:Array<String> = util.Mods.getEnabled();
-
 		for (modId in modIDs) {
-			var registry = LevelRegistry.current;
-			for (id in registry.getOrderedLevels()) {
-				var level:LevelData = registry.get('$modId:$id');
-				if (level != null && level.songs != null) {
-					for (info in level.songs) {
-						if (foldersPushed.contains(info.folder))
-							continue;
-						var diffs:Array<String> = info.difficulties ?? level.difficulties;
-						songs.push(new SongMetadata(info.name, info.folder, info.icon ?? "face", modId, diffs));
-						foldersPushed.push(info.folder);
+			// level songs (weeks whatever)
+			var levels:Array<LevelData> = LevelRegistry.current.getLevelData(modId);
+			if (levels != null && levels.length != 0) {
+				for (level in levels) {
+					if (level == null || level.songs.length == 0)
+						continue;
+					for (song in level.songs) {
+						var diffs:Array<String> = song.difficulties ?? level.difficulties;
+						songs.push(new SongMetadata(song.name, song.folder, song.icon ?? "face", modId, diffs));
 					}
 				}
 			}
@@ -66,19 +62,12 @@ class FreeplayState extends GenericMenu {
 			var initSonglist = CoolUtil.coolTextFile(Paths.getPath('data/freeplaySonglist.txt', modId));
 			for (i in 0...initSonglist.length) {
 				var data:Array<String> = initSonglist[i].split(':');
-				if (foldersPushed.contains(data[1]))
-					continue;
 				var diffs:Array<String> = null;
 				if (data.length > 2 && data[3].length > 0)
 					diffs = data[3].split(",");
-				songs.push(new SongMetadata(data[0], data[1], data[2], diffs));
-				foldersPushed.push(data[1]);
+				songs.push(new SongMetadata(data[0], data[1], data[2], modId, diffs));
 			}
 		}
-
-		// cool we don't need the array anymore
-		foldersPushed.resize(0);
-		foldersPushed = null;
 
 		add(new FlxSprite().loadGraphic(Mods.menuImage('ui/backgrounds/menuBGBlue')));
 		var itemCreated = function(i:Int, target:Alphabet) {
