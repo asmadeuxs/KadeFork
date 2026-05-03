@@ -44,6 +44,7 @@ class FreeplayState extends GenericMenu {
 		Conductor.current.active = false;
 		Conductor.setTime(0.0);
 
+		var foldersPushed:Array<String> = [];
 		var modIDs:Array<String> = util.Mods.getEnabled();
 		for (modId in modIDs) {
 			// level songs (weeks whatever)
@@ -53,21 +54,32 @@ class FreeplayState extends GenericMenu {
 					if (level == null || level.songs.length == 0)
 						continue;
 					for (song in level.songs) {
+						if (foldersPushed.contains(song.folder))
+							continue;
 						var diffs:Array<String> = song.difficulties ?? level.difficulties;
 						songs.push(new SongMetadata(song.name, song.folder, song.icon ?? "face", modId, diffs));
+						if (!foldersPushed.contains(song.folder))
+							foldersPushed.push(song.folder);
 					}
 				}
 			}
 			// custom songs (just for compatibility sake)
 			var initSonglist = CoolUtil.coolTextFile(Paths.getPath('data/freeplaySonglist.txt', modId));
 			for (i in 0...initSonglist.length) {
+				if (foldersPushed.contains(data[1]))
+					continue;
 				var data:Array<String> = initSonglist[i].split(':');
 				var diffs:Array<String> = null;
 				if (data.length > 2 && data[3].length > 0)
 					diffs = data[3].split(",");
 				songs.push(new SongMetadata(data[0], data[1], data[2], modId, diffs));
+				if (!foldersPushed.contains(data[1]))
+					foldersPushed.push(data[1]);
 			}
 		}
+
+		foldersPushed.resize(0);
+		foldersPushed = null;
 
 		add(new FlxSprite().loadGraphic(Mods.menuImage('ui/backgrounds/menuBGBlue')));
 		var itemCreated = function(i:Int, target:Alphabet) {
