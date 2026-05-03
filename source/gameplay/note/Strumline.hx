@@ -67,23 +67,43 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 	public function isStrumDownscroll(noteData:Int):Bool
 		return downscroll[noteData] == -1;
 
+	var strumSpacing:Float = 160;
+
 	public function generateStrums():Void {
-		var spacing:Float = 160;
 		downscroll.resize(this.keyCount);
 		for (i in 0...this.keyCount) {
-			downscroll[i] = switch Preferences.user.scrollType {
-				case 2: (i % 4 >= 2) ? -1 : 1; // Split
-				case 1: -1; // Downscroll
-				case _: 1; // Default upscroll
-			};
-			var strumY:Float = (downscroll[i] == -1) ? FlxG.height - 185 : 30;
 			var strum:FunkinSprite = noteskin.generateStrum(i);
-			strum.x = (spacing * strum.scale.x) * i;
-			strum.y = strumY;
-			// strum.updateHitbox();
 			strums.push(strum);
+			// strum.updateHitbox();
+			changeScrollDirection(i, Preferences.user.scrollType);
 			add(strum);
 		}
+	}
+
+	public function repositionStrum(noteData:Int):Void {
+		var i:Int = noteData % strums.length;
+		var strum:FunkinSprite = strums[i];
+		if (strum != null) {
+			strum.x = (strumSpacing * strum.scale.x) * i;
+			strum.y = (downscroll[i] == -1) ? FlxG.height - 185 : 30;
+		}
+	}
+
+	/**
+	 * Changes the scroll direction for one of the receptors
+	 *
+	 * @param noteData Int
+	 * @param scrollType Int [1 = down | 2 = split | anything else = up]
+	**/
+	public function changeScrollDirection(noteData:Int, scrollType:Int):Void {
+		if (downscroll.length < strums.length)
+			downscroll.resize(strums.length);
+		downscroll[noteData] = switch scrollType {
+			case 2: (noteData % 4 >= 2) ? -1 : 1; // Split
+			case 1: -1; // Downscroll
+			case _: 1; // Default upscroll
+		};
+		repositionStrum(noteData);
 	}
 
 	public function playAnim(direction:Int = 0, animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0):Void {

@@ -23,6 +23,7 @@ class Kade extends BaseHUD {
 	public var scoreTxt:FlxText;
 	public var judgesTxt:FlxText;
 
+	var songPosBar:FlxBar;
 	var songPosBG:FlxSprite;
 	var songName:FlxText;
 
@@ -34,61 +35,48 @@ class Kade extends BaseHUD {
 		songLength = PlayState.songLength;
 		if (Preferences.user.showSongPosition) // I dont wanna talk about this code :( -KadeDev // I do -asmadeuxs
 		{
-			var songPosBar = new FlxBar(0, 10, LEFT_TO_RIGHT, 500, 25, this, 'songPos', 0, songLength);
+			songPosBar = new FlxBar(0, 0, LEFT_TO_RIGHT, 500, 25, this, 'songPos', 0, songLength);
+			songPosBG = new FlxSprite(0, 0).makeGraphic(Std.int(songPosBar.width), Std.int(songPosBar.height), FlxColor.TRANSPARENT);
+			songName = new FlxText(0, 0, Std.int(songPosBG.width), "", 16);
 			songPosBar.createFilledBar(FlxColor.BLACK, FlxColor.fromRGB(0, 255, 128));
-			if (Preferences.user.scrollType == 1)
-				songPosBar.y = FlxG.height * 0.9 + 45;
-			songPosBar.screenCenter(X);
-
-			songPosBG = new FlxSprite(songPosBar.x, songPosBar.y).makeGraphic(Std.int(songPosBar.width), Std.int(songPosBar.height), FlxColor.TRANSPARENT);
-			songName = new FlxText(0, songPosBG.y + 3, Std.int(songPosBG.width), "", 16);
 			songName.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			FlxSpriteUtil.drawRect(songPosBG, 0, 0, songPosBar.width, songPosBar.height, FlxColor.TRANSPARENT, {thickness: 4, color: FlxColor.BLACK});
 			updateSongPosition();
+		}
 
+		healthBarBG = new FlxSprite(0, 0).loadGraphic(Paths.image('gameplay/ui/healthBar'));
+		healthBar = new FlxBar(0, 0, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), PlayState.current, 'health', 0, 2);
+		iconP1 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_1) ?? "bf", true);
+		iconP2 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_2) ?? "bf", false);
+		scoreTxt = new FlxText(0, healthBarBG.y + 50, 0, "", 20);
+		if (Preferences.user.showJudgeCounts) {
+			judgesTxt = new FlxText(0, 0, FlxG.width, "");
+			judgesTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT);
+			judgesTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.0);
+			judgesTxt.antialiasing = true;
+		}
+
+		healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
+		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
+		healthBarBG.antialiasing = true;
+		healthBar.antialiasing = true;
+		scoreTxt.antialiasing = true;
+
+		add(healthBarBG);
+		add(healthBar);
+		add(iconP1);
+		add(iconP2);
+		add(scoreTxt);
+
+		if (Preferences.user.showJudgeCounts)
+			add(judgesTxt);
+
+		if (Preferences.user.showSongPosition) {
 			add(songPosBar);
 			add(songPosBG);
 			add(songName);
 		}
 
-		// FlxG.height * 0.9 originally but I like it this way -asmadeuxs
-		// should be 630 if FlxG.height is 720
-		var healthY:Float = FlxG.height * 0.875;
-		if (Preferences.user.scrollType == 1)
-			healthY = 70; // 50 originally
-		healthBarBG = new FlxSprite(0, healthY).loadGraphic(Paths.image('gameplay/ui/healthBar'));
-		healthBarBG.antialiasing = true;
-		healthBarBG.screenCenter(X);
-		add(healthBarBG);
-
-		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8),
-			PlayState.current, 'health', 0, 2);
-		healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
-		healthBar.antialiasing = true;
-		add(healthBar);
-
-		iconP1 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_1) ?? "bf", true);
-		iconP1.y = healthBar.y - (iconP1.height * 0.5);
-		add(iconP1);
-
-		iconP2 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_2) ?? "bf", false);
-		iconP2.y = healthBar.y - (iconP2.height * 0.5);
-		add(iconP2);
-
-		scoreTxt = new FlxText(0, healthBarBG.y + 50, 0, "", 20);
-		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
-		scoreTxt.antialiasing = true;
-		add(scoreTxt);
-
-		if (Preferences.user.showJudgeCounts) {
-			judgesTxt = new FlxText(5, 0, FlxG.width, "");
-			judgesTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT);
-			judgesTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.0);
-			judgesTxt.antialiasing = true;
-			judgesTxt.screenCenter(Y);
-			judgesTxt.y -= 30;
-			add(judgesTxt);
-		}
 		updateScoreText();
 
 		var diff:String = PlayState.difficulty;
@@ -100,6 +88,42 @@ class Kade extends BaseHUD {
 		watermark.y = (FlxG.height - watermark.height) - 3;
 		watermark.antialiasing = true;
 		add(watermark);
+	}
+
+	override function onSettingsChanged() {
+		positionElements();
+	}
+
+	public function positionElements() {
+		if (Preferences.user.showSongPosition) {
+			songPosBar.y = 10;
+			if (Preferences.user.scrollType == 1)
+				songPosBar.y = FlxG.height * 0.9 + 45;
+			songPosBar.screenCenter(X);
+			songPosBG.setPosition(songPosBar.x, songPosBar.y);
+			songName.y = songPosBG.y + 3;
+		}
+
+		// FlxG.height * 0.9 originally but I like it this way -asmadeuxs
+		// should be 630 if FlxG.height is 720
+		var healthY:Float = FlxG.height * 0.875;
+		if (Preferences.user.scrollType == 1)
+			healthY = 70; // 50 originally
+		healthBarBG.screenCenter(X);
+		healthBarBG.y = healthY;
+		add(healthBarBG);
+
+		healthBar.setPosition(healthBarBG.x + 4, healthBarBG.y + 4);
+		iconP1.y = healthBar.y - (iconP1.height * 0.5);
+		iconP2.y = healthBar.y - (iconP2.height * 0.5);
+		scoreTxt.y = healthBarBG.y + 50;
+		scoreTxt.screenCenter(X);
+
+		if (Preferences.user.showJudgeCounts) {
+			judgesTxt.screenCenter(Y);
+			judgesTxt.y -= 30;
+			judgesTxt.y = 5;
+		}
 	}
 
 	override function update(elapsed:Float):Void {

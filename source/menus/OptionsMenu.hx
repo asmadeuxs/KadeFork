@@ -177,13 +177,16 @@ class OptionsMenu extends MusicBeatSubstate {
 
 	var binding:Bool = false;
 
-	public function new(parent:MusicBeatState) {
+	public function new(?parent:MusicBeatState = null) {
+		if (parent == null)
+			parent = cast FlxG.state;
 		this.parent = parent;
 		super();
 	}
 
 	override function create():Void {
 		super.create();
+		camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 		// it wouldn't let me do it up there
 		for (cat in 0...optionStash.length)
 			for (i in optionStash[cat].options)
@@ -318,6 +321,16 @@ class OptionsMenu extends MusicBeatSubstate {
 					var menu:MainMenuState = cast parent;
 					menu.tweenItemsBackIn();
 					menu.canInput = true;
+					menu = null;
+				} else if (parent is gameplay.PlayState) {
+					var play:gameplay.PlayState = cast parent;
+					play.onSettingsChanged();
+					play = null;
+				}
+				// i don't like this conditional
+				if (FlxG.state != null && FlxG.state.subState != null) {
+					FlxG.state.subState.persistentDraw = true;
+					FlxG.state.subState.persistentUpdate = false;
 				}
 			});
 		}
@@ -325,7 +338,11 @@ class OptionsMenu extends MusicBeatSubstate {
 	}
 
 	override function destroy():Void {
+		if (camScroll != null)
+			camScroll.destroy();
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, setKeybind);
+		FlxG.cameras.remove(camScroll);
+		Preferences.loadKeybinds();
 		super.destroy();
 	}
 

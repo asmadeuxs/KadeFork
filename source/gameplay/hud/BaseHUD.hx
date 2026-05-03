@@ -58,6 +58,11 @@ class BaseHUD extends FlxSpriteGroup {
 			hudScript.callFunc("update", [elapsed, this]);
 	}
 
+	public function onSettingsChanged() {
+		if (hudScript != null)
+			hudScript.callFunc("onSettingsChanged", [this]);
+	}
+
 	public function updateScoreText(?miss:Bool) {
 		if (hudScript != null)
 			hudScript.callFunc("updateScoreText", [miss, this]);

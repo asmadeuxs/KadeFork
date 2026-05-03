@@ -29,15 +29,25 @@ class PauseSubstate extends MusicBeatSubstate {
 		#if FEATURE_TRANSLATIONS
 		var resume:String = Translator.translateString('menus', 'pause_resumeSong');
 		var restart:String = Translator.translateString('menus', 'pause_restartSong');
+		var options:String = Translator.translateString('menus', 'pause_changeOptions');
 		var exit:String = Translator.translateString('menus', 'pause_exit');
 		#else
 		var resume:String = 'Resume';
 		var restart:String = 'Restart';
+		var options:String = 'Change Options';
 		var exit:String = 'Exit';
 		#end
 		menuItems = [
 			{name: resume, func: () -> close()},
 			{name: restart, func: () -> FlxG.resetState()},
+			{
+				name: options,
+				func: () -> {
+					persistentDraw = true;
+					persistentUpdate = false;
+					openSubState(new menus.OptionsMenu());
+				}
+			},
 			{
 				name: exit,
 				func: () -> {
@@ -54,7 +64,6 @@ class PauseSubstate extends MusicBeatSubstate {
 		pauseMusic = new FlxSound().loadEmbedded(util.Mods.menuMusic('breakfast'), true, true);
 		pauseMusic.volume = 0;
 		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length * 0.5)));
-
 		FlxG.sound.list.add(pauseMusic);
 
 		var bg:FlxSprite = new FlxSprite().makeScaledGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
@@ -101,22 +110,11 @@ class PauseSubstate extends MusicBeatSubstate {
 	override function update(elapsed:Float) {
 		if (pauseMusic.volume < 0.5)
 			pauseMusic.volume += 0.01 * elapsed;
-
 		super.update(elapsed);
-
-		var upP = controls.UP_P;
-		var downP = controls.DOWN_P;
-		var leftP = controls.LEFT_P;
-		var rightP = controls.RIGHT_P;
-		var accepted = controls.ACCEPT;
-
-		if (upP) {
-			changeSelection(-1);
-		} else if (downP) {
-			changeSelection(1);
-		}
-
-		if (accepted && menuItems[curSelected] != null && menuItems[curSelected].func != null)
+		var upP:Bool = controls.UP_P;
+		if (upP || controls.DOWN_P)
+			changeSelection(upP ? -1 : 1);
+		if (controls.ACCEPT && menuItems[curSelected] != null && menuItems[curSelected].func != null)
 			menuItems[curSelected].func();
 	}
 

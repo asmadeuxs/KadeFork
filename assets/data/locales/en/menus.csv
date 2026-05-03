@@ -8,4 +8,5 @@ freeplay_PB,PERSONAL BEST:
 
 pause_resumeSong,Resume
 pause_restartSong,Restart
+pause_changeOptions,Options
 pause_exit,Exit

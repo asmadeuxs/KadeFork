@@ -38,6 +38,7 @@ class TitleState extends MusicBeatState {
 	var wackyImage:FlxSprite;
 
 	var itsTheIntroBitch:Bool = false;
+	var spamming:Int = 0;
 
 	override public function create():Void {
 		curWacky = FlxG.random.getObject(getIntroTextShit());
@@ -165,9 +166,18 @@ class TitleState extends MusicBeatState {
 	}
 
 	var transitioning:Bool = false;
+	var transitionTmr:FlxTimer = new FlxTimer();
 
 	override function update(elapsed:Float) {
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER;
+		if (transitioning && pressedEnter) {
+			if (!transitionTmr.finished) {
+				if (spamming >= 3)
+					transitionTmr.cancel();
+				else
+					spamming++;
+			}
+		}
 
 		#if mobile
 		for (touch in FlxG.touches.list) {
@@ -191,11 +201,10 @@ class TitleState extends MusicBeatState {
 
 		if (pressedEnter && !transitioning && skippedIntro) {
 			titleText.animation.play('press');
-
 			transitioning = true;
 			FlxG.camera.flash(FlxColor.WHITE, 1);
 			FlxG.sound.play(Mods.menuSound('confirmMenu'), 0.7);
-			new FlxTimer().start(2, function(tmr:FlxTimer) FlxG.switchState(new menus.MainMenuState()));
+			transitionTmr.start(2, function(tmr:FlxTimer) FlxG.switchState(new menus.MainMenuState()));
 		}
 
 		if (pressedEnter && !skippedIntro) {

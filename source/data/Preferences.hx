@@ -119,22 +119,23 @@ class Preferences {
 				value = Reflect.field(Preferences.deft, pref);
 			Reflect.setField(Preferences.user, pref, value);
 		}
-
-		for (action in Preferences.user.keybinds.keys()) {
-			if (!Controls.current.actions.exists(action))
-				Controls.current.actions.set(action, Preferences.user.keybinds.get(action).copy());
-			else {
-				var userKeys = Preferences.user.keybinds.get(action);
-				for (i in 0...userKeys.length)
-					Controls.current.actions.get(action)[i] = userKeys[i];
-			}
-		}
+		loadKeybinds();
 		if (FlxG.save.data.mute != null)
 			FlxG.sound.muted = FlxG.save.data.mute;
 		if (FlxG.save.data.volume != null)
 			FlxG.sound.volume = FlxG.save.data.volume;
 		Preferences.setFPSCap(Preferences.user.frameRate);
 		migrateSave();
+	}
+
+	public static function loadKeybinds():Void {
+		for (action in Preferences.user.keybinds.keys()) {
+			var userKeys = Preferences.user.keybinds.get(action);
+			if (!Controls.current.actions.exists(action))
+				Controls.current.actions.set(action, []);
+			for (i in 0...userKeys.length)
+				Controls.current.actions.get(action)[i] = userKeys[i];
+		}
 	}
 
 	public static function migrateSave():Void {

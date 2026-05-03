@@ -112,8 +112,9 @@ class PlayState extends MusicBeatState {
 	var generatedMusic:Bool = false;
 	var startingSong:Bool = false;
 
-	var camHUD:FlxCamera;
 	var camGame:FlxCamera;
+	var camHUD:FlxCamera;
+	var camOver:FlxCamera;
 
 	var notesHitArray:Array<Date> = [];
 	var tilNpsUpdate:Float = 1;
@@ -135,6 +136,8 @@ class PlayState extends MusicBeatState {
 	public var holdInputs:Array<Bool> = [false, false, false, false];
 	public var inputEnabled:Bool = false;
 
+	var uiDimBackground:FlxSprite;
+
 	var inputQueue:Array<Array<Note>> = [];
 	var twoPlayerMode:Bool = false;
 	var inputMgr:InputManager;
@@ -155,12 +158,7 @@ class PlayState extends MusicBeatState {
 		inputQueue.resize(noteActions.length);
 		for (i in 0...inputQueue.length)
 			inputQueue[i] = [];
-		for (noteData in 0...noteActions.length) {
-			var action = noteActions[noteData];
-			var keys:Array<FlxKey> = Controls.current.actions[action];
-			for (key in keys)
-				inputMgr.remapKeyCode(key, noteData);
-		}
+		setupKeybinds();
 		inputMgr.init(); // NEED to do this
 		#if hxdiscord_rpc
 		iconRPC = moonMeta.extraData.get(PLAYER_2) ?? "bf";
@@ -174,8 +172,12 @@ class PlayState extends MusicBeatState {
 
 		camGame = FlxG.camera;
 		camHUD = new FlxCamera();
+		camOver = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
+		camOver.bgColor.alpha = 0;
+
 		FlxG.cameras.add(camHUD, false);
+		FlxG.cameras.add(camOver, false);
 
 		camFollow = new FlxObject(0, 0, 1, 1);
 		if (prevCamFollow != null) {
@@ -214,20 +216,12 @@ class PlayState extends MusicBeatState {
 		camGame.zoom = defaultCamZoom;
 		camGame.focusOn(camFollow.getPosition());
 
-		var underlay:FlxSprite = null;
-		if (Preferences.user.strumUnderlay > 0) { // always creating it if its supposed to be visible for the sake adding it for both cases.
-			var width:Int = Preferences.user.strumUnderlayType == 1 ? FlxG.width : 1;
-			underlay = new FlxSprite().makeScaledGraphic(width, FlxG.height, 0xFF000000);
-			underlay.camera = camHUD; // always on camHUD so it renders properly
-			underlay.alpha = Preferences.user.strumUnderlay * 0.01;
-			if (Preferences.user.strumUnderlayType == 1)
-				add(underlay);
-		}
-
+		uiDimBackground = new FlxSprite().makeScaledGraphic(1, FlxG.height, 0xFF000000);
 		currentHUD = BaseHUD.loadHUD(Preferences.user.hudStyle);
 		comboDisplay = new FlxSpriteGroup();
 		strumlines = new FlxTypedSpriteGroup();
 		notes = new NoteRenderer(unspawnNotes);
+
 		notes.noteSpawned.add(queueInputNote);
 		notes.noteKilled.add(removeNoteFromInputQueue);
 
@@ -244,22 +238,10 @@ class PlayState extends MusicBeatState {
 
 		opponentStrums = new Strumline();
 		playerStrums = new Strumline();
+		positionStrumlines();
 
-		opponentStrums.x = (FlxG.width - opponentStrums.width) * 0.05;
-		if (Preferences.user.centerStrums) {
-			playerStrums.x = (FlxG.width - playerStrums.width) * 0.5;
-			opponentStrums.visible = false;
-		} else
-			playerStrums.x = (FlxG.width - playerStrums.width) * 0.8;
 		strumlines.add(opponentStrums);
 		strumlines.add(playerStrums);
-
-		// and underlay to strums if option allows it
-		if (underlay != null && Preferences.user.strumUnderlayType == 0) {
-			underlay.scale.x = playerStrums.width; // fill strumline region
-			underlay.objectCenter(playerStrums, X); // move to last strum
-			add(underlay);
-		}
 
 		add(currentHUD);
 		add(strumlines);
@@ -267,6 +249,7 @@ class PlayState extends MusicBeatState {
 		add(comboDisplay);
 		add(perfectText);
 
+		setupUnderlay();
 		startSongCutscene();
 	}
 
@@ -285,6 +268,46 @@ class PlayState extends MusicBeatState {
 		inputMgr.destroy();
 		session.judgeMan = null;
 		current = null;
+	}
+
+	public function onSettingsChanged() {
+		var currentSave = Preferences.user;
+		changeScrollDirection(currentSave.scrollType);
+		setupUnderlay();
+		setupKeybinds();
+		if (currentHUD != null)
+			currentHUD.onSettingsChanged();
+	}
+
+	public function setupKeybinds() {
+		for (noteData in 0...noteActions.length) {
+			var action = noteActions[noteData];
+			var keys:Array<FlxKey> = Controls.current.actions[action];
+			for (key in keys)
+				inputMgr.remapKeyCode(key, noteData);
+		}
+	}
+
+	public function setupUnderlay() {
+		if (uiDimBackground == null)
+			return;
+		remove(uiDimBackground);
+		uiDimBackground.visible = Preferences.user.strumUnderlay > 0;
+		uiDimBackground.alpha = Preferences.user.strumUnderlay * 0.01;
+		uiDimBackground.camera = camHUD;
+		if (uiDimBackground.visible) {
+			if (Preferences.user.strumUnderlayType == 0) {
+				uiDimBackground.scale.x = playerStrums.width; // fill strumline region
+				uiDimBackground.objectCenter(playerStrums, X); // move to last strum}
+				insert(members.indexOf(currentHUD), uiDimBackground);
+			} else if (Preferences.user.strumUnderlayType == 1) {
+				uiDimBackground.scale.x = FlxG.width;
+				insert(members.indexOf(stage), uiDimBackground);
+				uiDimBackground.screenCenter(X);
+			}
+			// just making sure
+			uiDimBackground.y = 0;
+		}
 	}
 
 	// For stage reloading
@@ -318,6 +341,27 @@ class PlayState extends MusicBeatState {
 			var camPos:FlxPoint = new FlxPoint(mid.x + off.x, mid.y + off.y);
 			camFollow.setPosition(camPos.x, camPos.y);
 		}
+	}
+
+	public function positionStrumlines() {
+		opponentStrums.x = (FlxG.width - opponentStrums.width) * 0.05;
+		if (Preferences.user.centerStrums)
+			playerStrums.x = (FlxG.width - playerStrums.width) * 0.5;
+		else
+			playerStrums.x = (FlxG.width - playerStrums.width) * 0.8;
+		opponentStrums.visible = !Preferences.user.centerStrums;
+	}
+
+	// For when the scroll option changes
+	public function changeScrollDirection(?scrollType:Null<Int>) {
+		if (scrollType == null)
+			scrollType = Preferences.user.scrollType;
+		for (sl in strumlines.members) {
+			sl.x = 0;
+			for (i in 0...sl.strums.length)
+				sl.changeScrollDirection(i, scrollType);
+		}
+		positionStrumlines();
 	}
 
 	var startTimer:FlxTimer;
