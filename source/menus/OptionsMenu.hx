@@ -67,10 +67,17 @@ class OptionsMenu extends MusicBeatSubstate {
 					type: "number",
 					name: "Scroll Speed",
 					variable: "scrollSpeed",
-					description: "Overrides the chart's scroll speed with your own\napplies if it's not set to 1",
+					description: "Overrides the chart's scroll speed with your own (provided you change Scroll Speed Type below)",
 					numberStep: 0.1,
 					numberBoundLeft: 0.1,
 					numberBoundRight: 10.0
+				},
+				{
+					type: "choice",
+					name: "Scroll Speed Type",
+					variable: "scrollSpeedType",
+					description: "What should the scroll speed setting do?",
+					choices: ["Chart", "Additive", "Constant", "BPM-Based"]
 				}
 			]
 		},

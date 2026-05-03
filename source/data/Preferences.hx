@@ -5,44 +5,25 @@ import flixel.FlxG;
 import flixel.input.keyboard.FlxKey;
 import util.Mods;
 
-// this is just for code formatting.
-// this is also kinda useful if you wanna know what values exist by default for these options
-private enum abstract ScrollType(Int) from Int to Int {
-	final UP = 0;
-	final DOWN = 1;
-	final SPLIT = 2;
-}
-
-private enum abstract StrumUnderlayType(Int) from Int to Int {
-	final ON_STRUMS = 0;
-	final ON_STAGE = 1;
-}
-
-// if you add more hardcoded HUD styles
-// don't forget to go to gameplay.hud.BaseHUD and modify the `listHUDs` function
-private enum abstract HudType(String) from String to String {
-	final INFORMATIVE = "Detailed";
-	final CLASSIC = "Classic";
-}
-
 @:publicFields class Save {
 	// General Gameplay
 	var keybinds:ActionMap = Controls.defaultActions.copy();
 	var frameRate:Int = 120; // How many frames per second the game runs at
-	var scrollType:Int = ScrollType.UP; // Changes where the notes scroll to
+	var scrollType:Int = 0; // Changes where the notes scroll to
 	var centerStrums:Bool = false; // Centers your strums and hides the opponent's
 	var ghostTapping:Bool = true; // Lets you mash without penalty
 	var noteOffset:Float = 0.0; // By how much should notes be offsetted?
-	var scrollSpeed:Float = 1.0; // Overrides the chart's scroll speed with your own (applies if it's not set to 1)
+	var scrollSpeed:Float = 1.0; // Overrides the chart's scroll speed with your own (provided you change Scroll Speed Type below)
+	var scrollSpeedType:Int = 0; // What should the scroll speed setting do?
 	var etternaMode:Bool = true; // Changes the accuracy system to use Wife3
 
 	// Visuals & Accessibility
 	var strumUnderlay:Int = 0; // Enables a background behind the strums or stage (goes from 0 - 100)
-	var strumUnderlayType:Int = StrumUnderlayType.ON_STRUMS; // Where should the underlay be layered on
+	var strumUnderlayType:Int = 0; // Where should the underlay be layered on
 	var noteSplashes:Bool = false; // Shows a funny note splash that gives you a boner
 
 	// HUD
-	var hudStyle:String = HudType.INFORMATIVE; // Changes the style of the HUD
+	var hudStyle:String = "Detailed"; // Changes the style of the HUD
 	var showSongPosition:Bool = false; // Shows a progress bar for the song in the HUD
 	var showNps:Bool = false; // Shows a NPS counter on the Score Text
 	var showJudgeCounts:Bool = true; // Displays a judgement counter during gameplay on the left side of the screen
@@ -143,7 +124,7 @@ class Preferences {
 		// Not useful if you have a completely clean save
 		if (FlxG.save.data.accuracyDisplay != null) {
 			var inf:Bool = FlxG.save.data.accuracyDisplay;
-			Preferences.user.hudStyle = inf ? HudType.INFORMATIVE : HudType.CLASSIC;
+			Preferences.user.hudStyle = inf ? "Detailed" : "Classic";
 			FlxG.save.data.hudStyle = Preferences.user.hudStyle;
 			FlxG.save.data.accuracyDisplay = null;
 		}

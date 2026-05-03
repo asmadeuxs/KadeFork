@@ -65,8 +65,8 @@ class Character extends gameplay.FunkinSprite {
 			var v = scriptFuncCall('update', [this, elapsed]);
 			if (v != null && v.value == ScriptLoader.STOP_FUNC)
 				return;
-			if (isSinging()) {
-				danceCooldown -= elapsed * (singDuration * (Conductor.semiquaver * 0.9));
+			if (isSinging() && danceCooldown > 0.0) {
+				danceCooldown -= elapsed / singDuration;
 				if (danceCooldown <= 0.0)
 					dance();
 			}

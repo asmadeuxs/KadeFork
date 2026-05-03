@@ -143,7 +143,14 @@ class DummyPlayState extends MusicBeatState {
 			Conductor.current.playMusic();
 			starting = false;
 		}
-		notes.updateNotes(Conductor.time, strumlines.members, scrollSpeed);
+		var userSS:Float = Preferences.user.scrollSpeed;
+		var actualSpeed:Float = switch Preferences.user.scrollSpeedType {
+			case 3: (Conductor.bpm / 60.0) + userSS;
+			case 1: scrollSpeed + userSS;
+			case 2: userSS;
+			case _: scrollSpeed;
+		}
+		notes.updateNotes(Conductor.time, strumlines.members, actualSpeed);
 		if (generatedMusic)
 			noteUpdate(Conductor.time);
 	}

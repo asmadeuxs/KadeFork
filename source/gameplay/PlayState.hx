@@ -589,7 +589,14 @@ class PlayState extends MusicBeatState {
 		}
 
 		if (generatedMusic) {
-			notes.updateNotes(Conductor.time, strumlines.members, scrollSpeed);
+			var userSS:Float = Preferences.user.scrollSpeed;
+			var actualSpeed:Float = switch Preferences.user.scrollSpeedType {
+				case 3: (Conductor.bpm / 60.0) + userSS;
+				case 1: scrollSpeed + userSS;
+				case 2: userSS;
+				case _: scrollSpeed;
+			}
+			notes.updateNotes(Conductor.time, strumlines.members, actualSpeed);
 			noteUpdate(Conductor.time);
 		}
 	}
@@ -625,7 +632,7 @@ class PlayState extends MusicBeatState {
 				if (curSection != null && curSection.altAnim)
 					altAnim = '-alt';
 				dad.sing(daNote.noteData, altAnim, true);
-				dad.danceCooldown = (Conductor.semiquaver) + daNote.sustainLength;
+				dad.danceCooldown = 1.0 + daNote.sustainLength;
 				for (vocal in Conductor.current.tracks)
 					vocal.volume = 1;
 				notes.removeNote(daNote);
@@ -879,7 +886,7 @@ class PlayState extends MusicBeatState {
 		//		session.totalNotesHit += util.EtternaFunctions.wife3(Math.abs(daNote.strumTime - Conductor.time), 1.7);
 		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 		boyfriend.miss(direction, true);
-		boyfriend.danceCooldown = (Conductor.semiquaver) * 0.2;
+		boyfriend.danceCooldown = 0.5;
 		if (currentHUD != null)
 			currentHUD.updateScoreText();
 	}
@@ -895,7 +902,7 @@ class PlayState extends MusicBeatState {
 			return;
 		}
 		boyfriend.sing(note.noteData, true);
-		boyfriend.danceCooldown = (Conductor.semiquaver) + note.sustainLength;
+		boyfriend.danceCooldown = 1.0 + note.sustainLength;
 		note.wasGoodHit = true;
 		if (!note.isSustain) {
 			session.scoreNote(note);

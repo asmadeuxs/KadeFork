@@ -3,6 +3,10 @@ optionval_OFF,OFF
 optionval_Up,Up
 optionval_Down,Down
 optionval_Split,Split
+optionval_Chart,Chart
+optionval_Additive,Additive
+optionval_Constant,Constant
+optionval_BPM-Based,BPM-Based
 hudoption_Scripted,Scripted
 hudoption_Detailed,Detailed
 hudoption_Classic,Classic
@@ -15,6 +19,7 @@ option_centerStrums,Center Strums
 option_ghostTapping,Ghost Tapping
 option_etternaMode,Wife3 Accuracy
 option_scrollSpeed,Scroll Speed
+option_scrollSpeedType,Scroll Speed Type
 
 option_note_left,Note Left
 option_note_down,Note Down
@@ -44,7 +49,8 @@ optiondesc_scrollType,Changes where the notes scroll to
 optiondesc_centerStrums,Centers your strums and hides the opponent's
 optiondesc_ghostTapping,Lets you mash without penalty
 optiondesc_etternaMode,Changes the accuracy system to use Wife3\nIt's way more complex (math-wise) for the sake of encouraging super accurate hits\nBut may feel mean to newer players
-optiondesc_scrollSpeed,Overrides the chart's scroll speed with your own\napplies if it's not set to 1
+optiondesc_scrollSpeed,Overrides the chart's scroll speed with your own (provided you change Scroll Speed Type below)
+optiondesc_scrollSpeedType,What should the scroll speed setting do?
 
 optiondesc_note_left,Key to hit the left Note
 optiondesc_note_down,Key to hit the down Note
