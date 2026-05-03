@@ -66,12 +66,12 @@ class FreeplayState extends GenericMenu {
 			// custom songs (just for compatibility sake)
 			var initSonglist = CoolUtil.coolTextFile(Paths.getPath('data/freeplaySonglist.txt', modId));
 			for (i in 0...initSonglist.length) {
-				if (foldersPushed.contains(data[1]))
-					continue;
 				var data:Array<String> = initSonglist[i].split(':');
 				var diffs:Array<String> = null;
 				if (data.length > 2 && data[3].length > 0)
 					diffs = data[3].split(",");
+				if (foldersPushed.contains(data[1]))
+					continue;
 				songs.push(new SongMetadata(data[0], data[1], data[2], modId, diffs));
 				if (!foldersPushed.contains(data[1]))
 					foldersPushed.push(data[1]);
