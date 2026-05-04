@@ -46,8 +46,8 @@ class Kade extends BaseHUD {
 
 		healthBarBG = new FlxSprite(0, 0).loadGraphic(Paths.image('gameplay/ui/healthBar'));
 		healthBar = new FlxBar(0, 0, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), PlayState.current, 'health', 0, 2);
-		iconP1 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_1) ?? "bf", true);
-		iconP2 = new HealthIcon(PlayState.moonMeta.extraData.get(PLAYER_2) ?? "bf", false);
+		iconP1 = new HealthIcon(HealthIcon.getPlayerIcon(), true);
+		iconP2 = new HealthIcon(HealthIcon.getOpponentIcon(), false);
 		scoreTxt = new FlxText(0, healthBarBG.y + 50, 0, "", 20);
 		if (Preferences.user.showJudgeCounts) {
 			judgesTxt = new FlxText(0, 0, FlxG.width, "");

@@ -176,7 +176,7 @@ class Character extends gameplay.FunkinSprite {
 					this.singAnimations = file.singAnimations ?? DEFAULT_SING_ANIMATIONS;
 					this.missAnimations = file.missAnimations ?? DEFAULT_MISS_ANIMATIONS;
 					this.beatsToDance = file.beatsToDance ?? singAnimations.length >= 2 ? 1 : 2;
-					if (file.facesLeft == true && !isPlayer)
+					if ((file.facesLeft || file.isPlayer) && !isPlayer)
 						flipX = true;
 					this.singDuration = file.singDuration ?? 4.0;
 					this.displayName = file.name ?? file.displayName ?? "idk";

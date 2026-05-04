@@ -39,6 +39,47 @@ class CoolUtil {
 		return o1;
 	}
 
+	// i stole this from neb thanks neb NebulaZorua -asmadeuxs
+	public static function dominantColor(sprite:FlxSprite, ?ignoreColors:Array<FlxColor>):Int {
+		if (sprite.pixels == null)
+			return FlxColor.TRANSPARENT;
+		var counts:Map<Int, Int> = [];
+		var colorsToDiscard:Map<Int, Bool> = null;
+		if (ignoreColors != null && ignoreColors.length > 0) {
+			colorsToDiscard = [];
+			for (col in ignoreColors)
+				colorsToDiscard[col] = true;
+		}
+		var mapLen:Int = 0;
+		for (x in 0...sprite.pixels.width) {
+			for (y in 0...sprite.pixels.height) {
+				var col:FlxColor = sprite.pixels.getPixel32(x, y);
+				if (col.alphaFloat <= 0.05)
+					continue;
+				var current:FlxColor = FlxColor.fromRGB(col.red, col.green, col.blue, 255);
+				if (colorsToDiscard != null && colorsToDiscard.exists(current))
+					continue;
+				counts[current] = (counts[current] ?? 0) + 1;
+				mapLen++;
+			}
+		}
+		colorsToDiscard.clear();
+		ignoreColors.resize(0);
+		colorsToDiscard = null;
+		ignoreColors = null;
+		if (mapLen <= 0)
+			return FlxColor.TRANSPARENT;
+		var maxCount:Int = 0;
+		var dominant:FlxColor = 0;
+		for (colorInt => count in counts) {
+			if (count > maxCount) {
+				maxCount = count;
+				dominant = colorInt;
+			}
+		}
+		return dominant;
+	}
+
 	public static function numberArray(max:Int, ?min = 0):Array<Int>
 		return [for (i in min...max) i];
 
