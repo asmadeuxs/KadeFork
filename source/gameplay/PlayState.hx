@@ -565,7 +565,7 @@ class PlayState extends MusicBeatState {
 			#if hxdiscord_rpc
 			DiscordClient.changePresence('${moonMeta.title} (${difficulty.toUpperCase()})', 'Paused $detailsText', iconRPC);
 			#end
-			openSubState(new menus.PauseSubstate(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
+			menus.ScriptedMenu.openMenu("PauseSubstate", [boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y]);
 		}
 
 		if (startingSong && startedCountdown && Conductor.time >= 0)
@@ -740,7 +740,7 @@ class PlayState extends MusicBeatState {
 				FlxG.sound.music.time = FlxG.random.int(0, Std.int(FlxG.sound.music.length * 0.5));
 				FlxG.sound.music.fadeIn(4, 0, 0.7);
 			}
-			FlxG.switchState(new menus.FreeplayState());
+			menus.ScriptedMenu.switchToMenu("FreeplayState");
 		}
 	}
 

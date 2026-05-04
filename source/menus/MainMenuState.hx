@@ -32,14 +32,14 @@ class MainMenuState extends GenericMenu {
 		Mods.currentMod = null;
 		persistentUpdate = persistentDraw = true;
 		optionShit = [
-			// {name: 'story mode', func: () -> FlxG.switchState(new menus.FreeplayState())},
-			{name: 'freeplay', func: () -> FlxG.switchState(new menus.FreeplayState())},
+			// {name: 'story mode', func: () -> menus.ScriptedMenu.switchToMenu("StoryMenuState")},
+			{name: 'freeplay', func: () -> menus.ScriptedMenu.switchToMenu("FreeplayState")},
 			{
 				name: 'options',
 				func: () -> {
 					this.active = false;
 					tweenItemsBackIn();
-					openSubState(new menus.OptionsMenu(this));
+					openSubState(new menus.OptionsMenu());
 				}
 			}
 		];
@@ -152,6 +152,7 @@ class MainMenuState extends GenericMenu {
 	}
 
 	override function onVerticalChanged(huh:Int):Void {
+		FlxG.sound.play(Mods.menuSound("scrollMenu"));
 		for (spr in menuItems) {
 			spr.animation.play(spr.ID == huh ? 'selected' : 'idle');
 			spr.screenCenter(X);

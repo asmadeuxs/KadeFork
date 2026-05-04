@@ -1,6 +1,7 @@
 package;
 
 import flixel.FlxG;
+import flixel.addons.transition.FlxTransitionableState;
 
 class BootState extends flixel.FlxState {
 	// This is just a class to initialise variables
@@ -50,7 +51,7 @@ class BootState extends flixel.FlxState {
 					StoryMenuState.weekUnlocked[0] = true;
 		}*/
 		#if FREEPLAY
-		FlxG.switchState(new menus.FreeplayState());
+		menus.ScriptedMenu.switchToMenu("FreeplayState");
 		#elseif CHARTING
 		FlxG.switchState(new editor.ChartEditor());
 		#else

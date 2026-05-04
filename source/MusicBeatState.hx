@@ -3,7 +3,6 @@ package;
 import data.hscript.Script;
 import data.hscript.ScriptLoader;
 import flixel.FlxG;
-import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.ui.FlxUIState;
 import flixel.math.FlxRect;
 import flixel.tweens.FlxTween;
@@ -28,10 +27,18 @@ class MusicBeatState extends FlxUIState {
 
 	override function create() {
 		super.create();
+		//if (!Preferences.user.skipTransitions)
+		//	effects.Transition.playTransition(this, {out: true});
 		Conductor.stepHit.add(stepHit);
 		Conductor.beatHit.add(beatHit);
 		Conductor.barHit.add(barHit);
 	}
+
+	//override function startOutro(_) {
+	//	if (!Preferences.user.skipTransitions)
+	//		effects.Transition.playTransition(this, {out: false});
+	//	return super.startOutro(_);
+	//}
 
 	override function destroy() {
 		super.destroy();

@@ -53,6 +53,11 @@
 
 	<haxelib name="hxcpp-debug-server" if="windows" />
 
+<!-- Macros -->
+
+	<haxeflag name="--macro" value="allowPackage('flash')" />
+	<haxeflag name="--macro" value="include('menus')" />
+
 <!-- Haxedefines -->
 
 	<!--Disable the Flixel core focus lost screen-->

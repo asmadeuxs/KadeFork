@@ -16,11 +16,17 @@ class ScriptLoader {
 	// this is mainly useful for note scripts, not so much for gameplay scripts and whatnot
 	public static var scriptCache:Map<String, Script> = [];
 
-	public static function findScript(path:String, ?noCache:Bool = false):Script {
+	public static function findScript(path:String, ?noCache:Bool = true):Script {
 		var origin:String = Paths.getAssetOrigin(path);
-		var script:Script = noCache ? loadScript(path) : scriptCache.get(origin + path);
-		if (script != null && !noCache)
-			scriptCache.set(origin + path, script);
+		var script:Script = null;
+		if (!noCache) {
+			script = scriptCache.get(origin + path);
+			if (script == null) {
+				script = loadScript(path);
+				scriptCache.set(origin + path, script);
+			}
+		} else
+			script = loadScript(path);
 		return script;
 	}
 

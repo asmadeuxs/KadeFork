@@ -60,29 +60,6 @@ class TitleState extends MusicBeatState {
 	var titleText:FlxSprite;
 
 	function startIntro() {
-		if (!initialized) {
-			var diamond:FlxGraphic = FlxGraphic.fromClass(GraphicTransTileDiamond);
-			diamond.persist = true;
-			diamond.destroyOnNoUse = false;
-
-			FlxTransitionableState.defaultTransIn = new TransitionData(FADE, FlxColor.BLACK, 1, new FlxPoint(0, -1), {asset: diamond, width: 32, height: 32},
-				new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
-			FlxTransitionableState.defaultTransOut = new TransitionData(FADE, FlxColor.BLACK, 0.7, new FlxPoint(0, 1), {asset: diamond, width: 32, height: 32},
-				new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
-
-			transIn = FlxTransitionableState.defaultTransIn;
-			transOut = FlxTransitionableState.defaultTransOut;
-
-			// HAD TO MODIFY SOME BACKEND SHIT
-			// IF THIS PR IS HERE IF ITS ACCEPTED UR GOOD TO GO
-			// https://github.com/HaxeFlixel/flixel-addons/pull/348
-
-			// var music:FlxSound = new FlxSound();
-			// music.loadStream(Mods.menuMusic('freakyMenu'));
-			// FlxG.sound.list.add(music);
-			// music.play();
-		}
-
 		Conductor.bpm = 102;
 		persistentUpdate = true;
 
@@ -174,7 +151,7 @@ class TitleState extends MusicBeatState {
 			if (!transitionTmr.finished) {
 				if (spamming >= 3) {
 					transitionTmr.cancel();
-					FlxG.switchState(new menus.MainMenuState());
+					menus.ScriptedMenu.switchToMenu("MainMenuState");
 				} else
 					spamming++;
 			}
@@ -205,7 +182,7 @@ class TitleState extends MusicBeatState {
 			transitioning = true;
 			FlxG.camera.flash(FlxColor.WHITE, 1);
 			FlxG.sound.play(Mods.menuSound('confirmMenu'), 0.7);
-			transitionTmr.start(2, function(tmr:FlxTimer) FlxG.switchState(new menus.MainMenuState()));
+			transitionTmr.start(2, function(tmr:FlxTimer) menus.ScriptedMenu.switchToMenu("MainMenuState"));
 		}
 
 		if (pressedEnter && !skippedIntro) {

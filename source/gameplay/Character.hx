@@ -202,7 +202,7 @@ class Character extends gameplay.FunkinSprite {
 					placeholder = false; // make sure this is disabled
 					this.characterId = characterName;
 					var scriptPath:String = Paths.getPath('images/gameplay/characters/$characterName');
-					characterScript = ScriptLoader.findScript(ScriptLoader.getScriptFile(scriptPath, characterName), true);
+					characterScript = ScriptLoader.findScript(ScriptLoader.getScriptFile(scriptPath, characterName));
 					scriptFuncCall('onLoad', [this]);
 					dance(true);
 				}

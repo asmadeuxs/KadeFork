@@ -18,7 +18,7 @@ enum MenuVerticalStyle {
 	BOTH;
 }
 
-class GenericMenu extends MusicBeatState {
+class GenericMenu extends MusicBeatSubstate {
 	public var canInput:Bool = true;
 
 	public var curVertical:Int = 0;
@@ -65,20 +65,14 @@ class GenericMenu extends MusicBeatState {
 		}
 	}
 
-	public function changeVertical(next:Int = 0, ?playScrollSound:Bool = true) {
-		var prev:Int = curVertical;
+	public function changeVertical(next:Int = 0) {
 		curVertical = flixel.math.FlxMath.wrap(curVertical + next, minVerticals, maxVerticals);
 		onVerticalChanged(curVertical);
-		if (prev != curVertical && playScrollSound)
-			FlxG.sound.play(Mods.menuSound("scrollMenu"));
 	}
 
-	public function changeHorizontal(next:Int = 0, ?playScrollSound:Bool = true) {
-		var prev:Int = curHorizontal;
+	public function changeHorizontal(next:Int = 0) {
 		curHorizontal = flixel.math.FlxMath.wrap(curHorizontal + next, minHorizontals, maxHorizontals);
 		onHorizontalChanged(curHorizontal);
-		if (prev != curHorizontal && playScrollSound)
-			FlxG.sound.play(Mods.menuSound("scrollMenu"));
 	}
 
 	public function onBackPressed():Void {}

@@ -136,11 +136,12 @@ class FreeplayState extends GenericMenu {
 	}
 
 	override function onBackPressed():Void {
-		FlxG.switchState(new menus.MainMenuState());
+		menus.ScriptedMenu.switchToMenu("MainMenuState");
 		Mods.currentMod = null;
 	}
 
 	override function onVerticalChanged(index:Int) {
+		FlxG.sound.play(Mods.menuSound("scrollMenu"));
 		if (songs[curVertical].mod != Mods.currentMod)
 			Mods.currentMod = songs[curVertical].mod;
 		refreshDifficulties();
@@ -157,6 +158,15 @@ class FreeplayState extends GenericMenu {
 		}
 		maxHorizontals = lastDifficultyArray.length - 1;
 		changeHorizontal(); // recalculate score
+	}
+
+	override function changeHorizontal(next:Int = 0):Void {
+		// so your ears don't blow up
+		var prev:Int = curHorizontal;
+		curHorizontal = flixel.math.FlxMath.wrap(curHorizontal + next, minHorizontals, maxHorizontals);
+		onHorizontalChanged(curHorizontal);
+		if (curHorizontal != prev)
+			FlxG.sound.play(Mods.menuSound("scrollMenu"));
 	}
 
 	override function onHorizontalChanged(index:Int) {

@@ -180,16 +180,7 @@ class OptionsMenu extends MusicBeatSubstate {
 	var camScroll:FunkinCamera;
 	var camFollow:FlxObject;
 	var optionsFont = Paths.font("vcr.ttf");
-	var parent:MusicBeatState;
-
 	var binding:Bool = false;
-
-	public function new(?parent:MusicBeatState = null) {
-		if (parent == null)
-			parent = cast FlxG.state;
-		this.parent = parent;
-		super();
-	}
 
 	override function create():Void {
 		super.create();
@@ -324,13 +315,13 @@ class OptionsMenu extends MusicBeatSubstate {
 			Preferences.save();
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			new flixel.util.FlxTimer().start(0.5, (_) -> {
-				if (parent is MainMenuState) {
-					var menu:MainMenuState = cast parent;
+				if (FlxG.state is MainMenuState) {
+					var menu:MainMenuState = cast FlxG.state;
 					menu.tweenItemsBackIn();
 					menu.canInput = true;
 					menu = null;
-				} else if (parent is gameplay.PlayState) {
-					var play:gameplay.PlayState = cast parent;
+				} else if (FlxG.state is gameplay.PlayState) {
+					var play:gameplay.PlayState = cast FlxG.state;
 					play.onSettingsChanged();
 					play = null;
 				}

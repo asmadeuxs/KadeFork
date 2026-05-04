@@ -2,6 +2,7 @@ package;
 
 import flixel.FlxG;
 import flixel.FlxSubState;
+import flixel.addons.transition.FlxTransitionableState;
 
 class MusicBeatSubstate extends FlxSubState {
 	private var controls(get, never):Controls;

@@ -21,6 +21,7 @@ import util.Mods;
 	var strumUnderlay:Int = 0; // Enables a background behind the strums or stage (goes from 0 - 100)
 	var strumUnderlayType:Int = 0; // Where should the underlay be layered on
 	var noteSplashes:Bool = false; // Shows a funny note splash that gives you a boner
+	var skipTransitions:Bool = false; // Skips transitions between screens
 
 	// HUD
 	var hudStyle:String = "Detailed"; // Changes the style of the HUD

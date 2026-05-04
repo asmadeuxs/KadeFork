@@ -16,11 +16,9 @@ import menus.GenericMenu.SimpleMenuButton;
 
 using util.CoolUtil;
 
-class PauseSubstate extends MusicBeatSubstate {
+class PauseSubstate extends GenericMenu {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 	var menuItems:Array<SimpleMenuButton> = null;
-
-	var curSelected:Int = 0;
 	var pauseMusic:FlxSound;
 
 	public function new(x:Float, y:Float) {
@@ -56,10 +54,11 @@ class PauseSubstate extends MusicBeatSubstate {
 						FlxG.sound.music.time = FlxG.random.int(0, Std.int(FlxG.sound.music.length * 0.5));
 						FlxG.sound.music.fadeIn(4, 0, 0.7);
 					}
-					FlxG.switchState(new menus.FreeplayState());
+					menus.ScriptedMenu.switchToMenu("FreeplayState");
 				}
 			}
 		];
+		maxVerticals = menuItems.length - 1;
 
 		pauseMusic = new FlxSound().loadEmbedded(util.Mods.menuMusic('breakfast'), true, true);
 		pauseMusic.volume = 0;
@@ -111,27 +110,22 @@ class PauseSubstate extends MusicBeatSubstate {
 		if (pauseMusic.volume < 0.5)
 			pauseMusic.volume += 0.01 * elapsed;
 		super.update(elapsed);
-		var upP:Bool = controls.UP_P;
-		if (upP || controls.DOWN_P)
-			changeSelection(upP ? -1 : 1);
-		if (controls.ACCEPT && menuItems[curSelected] != null && menuItems[curSelected].func != null)
-			menuItems[curSelected].func();
+		if (controls.ACCEPT && canInput && menuItems[curVertical] != null && menuItems[curVertical].func != null)
+			menuItems[curVertical].func();
 	}
 
 	override function destroy() {
-		pauseMusic.destroy();
+		if (pauseMusic != null)
+			pauseMusic.destroy();
 		super.destroy();
 	}
 
-	function changeSelection(change:Int = 0):Void {
-		var prev:Int = curSelected;
-		curSelected = flixel.math.FlxMath.wrap(curSelected + change, 0, menuItems.length - 1);
-		if (prev != curSelected)
+	override function onVerticalChanged(change:Int):Void {
+		if (change != 0)
 			FlxG.sound.play(util.Mods.menuSound("scrollMenu"));
-
 		var bullShit:Int = 0;
 		for (item in grpMenuShit.members) {
-			item.targetY = bullShit - curSelected;
+			item.targetY = bullShit - curVertical;
 			bullShit++;
 			item.alpha = 0.6;
 			if (item.targetY == 0)
@@ -146,7 +140,7 @@ class PauseSubstate extends MusicBeatSubstate {
 			songText.targetY = i;
 			grpMenuShit.add(songText);
 		}
-		changeSelection();
+		changeVertical(curVertical);
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 	}
 }

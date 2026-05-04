@@ -1,0 +1,5 @@
+Currently the following files can be created to override menus:
+
+- MainMenuState.hxs
+- FreeplayState.hxs
+- PauseSubstate.hxs

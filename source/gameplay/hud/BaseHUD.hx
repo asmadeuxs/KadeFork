@@ -16,6 +16,8 @@ class BaseHUD extends FlxSpriteGroup {
 			hudScript.setVar("__name", "Unknown");
 			hudScript.setVar("add", this.add);
 			hudScript.setVar("remove", this.remove);
+			hudScript.setVar("replace", this.replace);
+			hudScript.setVar("insert", this.insert);
 			hudScript.callFunc("generateHUD", [this]);
 		}
 	}
