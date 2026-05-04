@@ -19,17 +19,17 @@ class KadeForkChart extends BasicFormat<KFCFormat, KFCMeta> {
 		return {
 			ID: "KADE_FORK",
 			name: "Kade Fork",
-			extension: "kfc",
+			extension: "json",
 			metaFileExtension: "json",
 			description: "Welcome to FNF Engine number 1225 today we're adding to the problem of having too many chart formats.",
-			hasMetaFile: POSSIBLE,
 			specialValues: ['"euskara":'],
+			hasMetaFile: POSSIBLE,
 			handler: KadeForkChart
 		}
 	}
 
 	public function new(?data:KFCFormat, ?meta:KFCMeta) {
-		super({timeFormat: MILLISECONDS, supportsDiffs: true, supportsEvents: true});
+		super({timeFormat: STEPS, supportsDiffs: true, supportsEvents: true});
 		noteTypeResolver = FNFGlobal.createNoteTypeResolver();
 		this.data = data;
 		this.meta = meta;
@@ -51,37 +51,76 @@ class KadeForkChart extends BasicFormat<KFCFormat, KFCMeta> {
 		return notes;
 	}
 
-	public override function fromFile(path:String, ?meta:StringInput, ?diff:FormatDifficulty):KadeForkChart {
-		// TODO: meta
-		return fromKfc(Paths.getText(path));
+	override function fromFile(path:String, ?meta:StringInput, ?diff:FormatDifficulty):KadeForkChart {
+		return null;
 	}
 
 	override function getEvents():Array<BasicEvent> {
 		var events:Array<BasicEvent> = [];
+		if (data.events != null)
+			for (e in data.events)
+				for (playEvent in e.timeline)
+					events.push(eventToBasic(e.time, playEvent));
 		return events;
 	}
 
-	public function getStrumlines():Array<ChartStrumline>
-		return data.strumlines;
+	function eventToBasic(time:Float, event:PlaySongEvent):BasicEvent {
+		return switch event {
+			case ChangeBPM(newBpm, denominator, numerator): {time: time, name: "ChangeBPM", data: {bpm: newBpm, denominator: denominator, numerator: numerator}};
+			case ChangeNoteVelocity(speed, strumline): {time: time, name: "ChangeNoteVelocity", data: {speed: speed, strumline: strumline}};
+			case ChangeNoteScrollType(newScrollType): {time: time, name: "ChangeNoteScrollType", data: {scrollType: newScrollType}};
+			case ZoomCamera(newZoom, smoothingSpeed): {time: time, name: "ZoomCamera", data: {zoom: newZoom, smoothingSpeed: smoothingSpeed}};
+			case ShakeCamera(intensity): {time: time, name: "ShakeCamera", data: {intensity: intensity}};
+			case FocusCamera(focusOn): {time: time, name: "FocusCamera", data: {focusOn: focusOn}};
+			case ChangeCharacter(who, to): {time: time, name: "ChangeCharacter", data: {who: who, to: to}};
+			case ChangeStage(to): {time: time, name: "ChangeStage", data: {to: to}};
+			case StartCountdown: {time: time, name: "StartCountdown", data: null};
+			case Custom(name, values): {time: time, name: name, data: values};
+		}
+	}
+
+	function eventFromBasic(event:BasicEvent):PlaySongEvent {
+		return switch event.name {
+			case "ChangeBPM": ChangeBPM(event.data.bpm, event.data.denominator, event.data.numerator);
+			case "ChangeNoteVelocity": ChangeNoteVelocity(event.data.speed, event.data.strumline);
+			case "ChangeNoteScrollType": ChangeNoteScrollType(event.data.speed, event.data.strumline);
+			case "ZoomCamera": ZoomCamera(event.data.zoom, event.data.smoothingSpeed);
+			case "ShakeCamera": ShakeCamera(event.data.intensity);
+			case "FocusCamera": FocusCamera(event.data.focusOn);
+			case "ChangeCharacter": ChangeCharacter(event.data.who, event.data.to);
+			case "ChangeStage": ChangeStage(event.data.to);
+			case "StartCountdown": StartCountdown;
+			case _:
+				var data = event.data;
+				Custom(event.name, Reflect.fields(data).map(field -> Std.string(Reflect.field(data, field))));
+		}
+	}
 
 	override function getChartMeta():BasicMetaData {
 		var bpmChanges:Array<BasicBPMChange> = [];
-
 		for (change in data.bpmChanges) {
-			bpmChanges.push({
-				time: change.time,
-				bpm: change.bpm,
-				beatsPerMeasure: change.denominator,
-				stepsPerBeat: change.numerator
-			});
+			switch change.event {
+				case ChangeBPM(newBpm, denominator, numerator):
+					bpmChanges.push({
+						time: change.time,
+						beatsPerMeasure: numerator ?? 4.0,
+						stepsPerBeat: denominator ?? 4.0,
+						bpm: newBpm
+					});
+				case _:
+			}
 		}
 		Timing.sortBPMChanges(bpmChanges);
 
+		var curDiff:String = diffs[0];
+		var scrollSpeedMap = data.scrollSpeeds;
+		if (!scrollSpeedMap.exists(curDiff))
+			scrollSpeedMap[curDiff] = 1.0;
 		return {
 			offset: 0.0,
 			title: meta?.name,
 			bpmChanges: bpmChanges,
-			scrollSpeeds: [diffs[0] => data.velocityChanges[0].speed],
+			scrollSpeeds: scrollSpeedMap,
 			extraData: [
 				PLAYER_1 => meta?.player ?? "bf",
 				PLAYER_2 => meta?.opponent ?? "bf",
@@ -92,128 +131,39 @@ class KadeForkChart extends BasicFormat<KFCFormat, KFCMeta> {
 				STAGE => meta?.stage ?? "default",
 			]
 		}
-	};
-
-	public function fromKfc(str:String):KadeForkChart {
-		var file:String = str;
-		var chart:KFCFormat = {
-			bpmChanges: [],
-			velocityChanges: [],
-			strumlines: [],
-			events: [],
-			euskara: true, // set value so library can auto-detect
-		}
-
-		var lines:Array<String> = file.split("\n");
-		var currentStrumline:ChartStrumline = null;
-		var strumlineIndex:Int = -1;
-		var parsing:Int = -1;
-		for (raw in lines) {
-			var line:String = raw.trim();
-			if (line.length == 0)
-				continue;
-
-			if (line == "[BpmChanges]") {
-				parsing = 0;
-				continue;
-			} else if (line == "[VelocityChanges]") {
-				parsing = 1;
-				continue;
-			} else if (line.startsWith("[Strumline:")) {
-				if (currentStrumline != null)
-					chart.strumlines.push(currentStrumline);
-				var slIndex:String = line.substring(10, line.length - 1);
-				strumlineIndex = Std.parseInt(slIndex);
-				currentStrumline = {notes: [], skin: "default", keyCount: 4};
-				parsing = 2;
-				continue;
-			}
-			if (!line.contains("="))
-				continue;
-			var parts = line.split("=");
-			var key = parts[0];
-			var value = parts[1];
-
-			switch parsing {
-				case 0: // BPM Changes
-					var time:Float = Std.parseFloat(key);
-					var bpm:Float = 100.0;
-					var denom:Float = 4.0;
-					var num:Float = 4.0;
-					if (value.contains(",")) {
-						var timeEvent = value.split(",");
-						bpm = Std.parseFloat(timeEvent[0]);
-						denom = Std.parseFloat(timeEvent[1]);
-						num = Std.parseFloat(timeEvent[2]);
-					} else
-						bpm = Std.parseFloat(value);
-					// @formatter:off
-					chart.bpmChanges.push({time: time, bpm: bpm, denominator: denom, numerator: num});
-					// @formatter:on
-				case 1: // Velocity Changes
-					var time:Float = Std.parseFloat(key);
-					var speed:Float = 100.0;
-					var strumline:Int = -1;
-					if (value.contains(",")) {
-						var velEvent = value.split(",");
-						speed = Std.parseFloat(velEvent[0]);
-						strumline = Std.parseInt(velEvent[1]);
-					} else
-						speed = Std.parseFloat(value);
-					chart.velocityChanges.push({time: time, speed: speed, strumline: strumline});
-
-				case 2: // Notes
-					if (currentStrumline == null)
-						continue;
-					switch key {
-						case "skin":
-							currentStrumline.skin = value;
-						case "keyCount":
-							currentStrumline.keyCount = Std.parseInt(value);
-						case "notes":
-							if (!value.contains("|")) // invalid note
-								continue;
-							var daNote = value.split("|");
-							for (token in daNote) {
-								if (token.length == 0)
-									continue;
-								var noteInfo = token.split(",");
-								if (noteInfo.length < 2)
-									continue;
-								var beat:Float = Std.parseFloat(noteInfo[0]);
-								var lane:Int = Std.parseInt(noteInfo[1]);
-								var type:String = Std.string(noteInfo[2]);
-								var length:Float = Std.parseFloat(noteInfo[3]);
-								var owner:Int = strumlineIndex;
-								// @formatter:off
-								currentStrumline.notes.push({time: beat, lane: lane, type: type, length: length, owner: owner});
-								// @formatter:on
-							}
-					}
-			}
-		}
-
-		if (currentStrumline != null)
-			chart.strumlines.push(currentStrumline);
-
-		return new KadeForkChart(chart, null);
 	}
 }
 
 private typedef EventTimeline = {name:String, args:Array<String>}
 private typedef TrackMeta = {file:String, ?bpm:Float}
 
-//
+enum PlaySongEvent {
+	// Time Modiifers
+	ChangeBPM(newBpm:Float, ?denominator:Float, ?numerator:Float);
+	// Note Modifiers
+	ChangeNoteVelocity(speed:Float, ?strumline:Int);
+	ChangeNoteScrollType(scrollType:Int, ?strumline:Int);
+	// Camera
+	ZoomCamera(newZoom:Float, ?smoothingSpeed:Float);
+	ShakeCamera(intensity:Float);
+	FocusCamera(focusOn:Int);
+	// Gameplay
+	StartCountdown();
+	ChangeCharacter(who:Int, to:String);
+	ChangeStage(to:String);
+	// Other
+	Custom(name:String, values:Array<String>);
+}
+
+typedef ChartEventSingle = BasicTimingObject & {event:PlaySongEvent}
+typedef ChartEventArray = BasicTimingObject & {timeline:Array<PlaySongEvent>}
 typedef ChartStrumline = {notes:Array<NoteData>, skin:String, keyCount:Int}
-typedef ChartEvent = {time:Float, timeline:Array<EventTimeline>}
-typedef TimeChangeEvent = {time:Float, bpm:Float, ?denominator:Float, ?numerator:Float}
-typedef VelocityChangeEvent = {time:Float, speed:Float, ?strumline:Int}
 
 typedef KFCFormat = {
-	bpmChanges:Array<TimeChangeEvent>,
-	velocityChanges:Array<VelocityChangeEvent>,
+	bpmChanges:Array<ChartEventSingle>,
 	strumlines:Array<ChartStrumline>,
-	?events:Array<ChartEvent>,
+	?events:Array<ChartEventArray>,
+	scrollSpeeds:Map<String, Float>,
 
 	/**
 	 * Don't delete this from the file

@@ -13,7 +13,7 @@ import haxe.Json5;
 using util.AnimationHelper;
 using util.CoolUtil;
 
-@:allow(ui.DeveloperMenu)
+@:allow(ui.DeveloperMenu, gameplay.PlayState)
 class StageBG extends FlxBasic {
 	public var cameraZoom:Float = 1.0;
 	public var characterOffsets:Map<String, Array<Float>> = new Map();

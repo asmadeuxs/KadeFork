@@ -5,7 +5,7 @@ import data.JudgementManager.Judgement;
 import data.PlaySession;
 import data.hscript.Script;
 import data.hscript.ScriptLoader;
-import data.song.KadeForkChart.NoteData;
+import data.song.KadeForkChart;
 import data.song.Song;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -598,6 +598,47 @@ class PlayState extends MusicBeatState {
 			}
 			notes.updateNotes(Conductor.time, strumlines.members, actualSpeed);
 			noteUpdate(Conductor.time);
+			updateEvents(Conductor.time);
+		}
+	}
+
+	var eventPosition:Int = 0;
+	var events:Array<ChartEventArray> = [];
+
+	public function updateEvents(time:Float):Void {
+		if (events == null || events.length == 0)
+			return;
+		var scheduled = events[eventPosition];
+		if (scheduled.time - time > 1000)
+			return;
+		if (scheduled == null) {
+			eventPosition++;
+			return;
+		}
+		for (event in scheduled.timeline)
+			processEvent(event);
+		eventPosition++;
+	}
+
+	public function processEvent(event:PlaySongEvent):Void {
+		if (event == null)
+			return;
+		// TODO: add the rest of the events
+		switch event {
+			case ChangeCharacter(who, to):
+				switch who {
+					case 0: boyfriend.loadCharacter(to);
+					case 1: dad.loadCharacter(to);
+					case 2: gf.loadCharacter(to);
+					case _:
+				}
+			case ChangeStage(to):
+				if (stage != null) {
+					stage.clear();
+					stage.stageFile = to;
+					positionCharacters();
+				}
+			case _:
 		}
 	}
 
