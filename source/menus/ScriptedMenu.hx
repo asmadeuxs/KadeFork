@@ -9,18 +9,6 @@ import util.Mods;
 class ScriptedMenu extends GenericMenu {
 	public var script:Script;
 
-	private static function getScriptPath(className:String, mod:String):String {
-		var path:String = null;
-		for (ext in Paths.scriptExtensions) {
-			var candidate:String = Paths.resolveAssetPath('scripts/menus/$className.$ext', mod);
-			if (Paths.fileExists(candidate)) {
-				path = candidate;
-				break;
-			}
-		}
-		return path;
-	}
-
 	public static function switchToMenu(className:String, ?args:Array<Dynamic>, ?transition:TransitionOptions) {
 		if (transition == null)
 			transition = {out: false, onFinish: () -> FlxG.switchState(ScriptedMenu.getMenu(className, args))};
@@ -43,7 +31,7 @@ class ScriptedMenu extends GenericMenu {
 		if (args == null)
 			args = [];
 		try {
-			var scriptPath = getScriptPath(className, Mods.getMenuPriorityMod());
+			var scriptPath = Paths.getScriptPath('menus/$className', Mods.getMenuPriorityMod());
 			if (scriptPath != null)
 				return Type.createInstance(ScriptedMenu, [scriptPath, args]);
 		} catch (e:haxe.Exception)

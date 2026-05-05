@@ -163,6 +163,9 @@ class Mods {
 		return ids;
 	}
 
+	public static function getConfig(mod:String):ModConfig
+		return allMods.get(mod);
+
 	inline public static function getMenuPriorityMod():String {
 		return (Mods.menuPriorityMod != null && Mods.menuPriorityMod != "core") ? Mods.menuPriorityMod : "core";
 	}

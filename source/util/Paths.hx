@@ -258,6 +258,47 @@ class Paths {
 		return soundRegistry.get(cacheKey);
 	}
 
+	inline static public function resolveSongPath(file:String, song:String, variation:String, mod:String):String {
+		var paths:Array<String> = [
+			'songs/$song/$file-$variation',
+			'songs/$song/$variation/$file-$variation',
+			'songs/$song/$file',
+		];
+		var path:String = null;
+		for (possiblePath in paths) {
+			var candidate:String = Paths.resolveAssetPath(possiblePath + '.ogg', mod);
+			if (Paths.fileExists(candidate)) {
+				path = possiblePath + '.ogg';
+				break;
+			}
+		}
+		return path;
+	}
+
+	inline static public function getScriptPath(scriptName:String, mod:String):String {
+		var path:String = null;
+		for (ext in Paths.scriptExtensions) {
+			var candidate:String = Paths.resolveAssetPath('scripts/$scriptName.$ext', mod);
+			if (Paths.fileExists(candidate)) {
+				path = candidate;
+				break;
+			}
+		}
+		return path;
+	}
+
+	inline static public function getJsonPath(json:String, mod:String):String {
+		var path:String = null;
+		for (ext in Paths.jsonExtensions) {
+			var candidate:String = Paths.resolveAssetPath('$json.$ext', mod);
+			if (Paths.fileExists(candidate)) {
+				path = candidate;
+				break;
+			}
+		}
+		return path;
+	}
+
 	// old functions for compatibility reasons.
 
 	inline static public function file(file:String, ?mod:String):String
@@ -277,23 +318,6 @@ class Paths {
 
 	inline static public function music(key:String, ?mod:String):Sound
 		return getPath('music/$key.ogg', MUSIC, mod);
-
-	inline static public function resolveSongPath(file:String, song:String, variation:String, mod:String):String {
-		var paths:Array<String> = [
-			'songs/$song/$file-$variation',
-			'songs/$song/$variation/$file-$variation',
-			'songs/$song/$file',
-		];
-		var path:String = null;
-		for (possiblePath in paths) {
-			var candidate:String = Paths.resolveAssetPath(possiblePath + '.ogg', mod);
-			if (Paths.fileExists(candidate)) {
-				path = possiblePath + '.ogg';
-				break;
-			}
-		}
-		return path;
-	}
 
 	inline static public function inst(song:String, difficulty:String, ?mod:String):Sound {
 		var path:String = resolveSongPath('Inst', song, difficulty, mod);

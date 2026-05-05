@@ -11,166 +11,19 @@ import flixel.input.keyboard.FlxKey;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import openfl.events.KeyboardEvent;
+import registry.OptionRegistry;
 import ui.FunkinCamera;
 
 using flixel.util.FlxSpriteUtil;
-
-typedef OptionCategory = {
-	name:String,
-	?type:Int,
-	options:Array<Option>
-}
+using util.CoolUtil;
 
 // I JUST MADE SOME BULLLLLLLLLLLLLLLLLLSHIT -asmadeuxs
 class OptionsMenu extends MusicBeatSubstate {
-	public var optionStash:Array<OptionCategory> = [
-		{
-			name: "Preferences",
-			options: [
-				{
-					type: "number",
-					name: "Framerate",
-					variable: "frameRate",
-					description: "How many times the game is updated and drawn to your screen",
-					numberStep: 1,
-					numberBoundLeft: 30,
-					numberBoundRight: 360,
-					setFunc: Preferences.setFPSCap
-				},
-				{
-					type: "choice",
-					name: "Scroll Type",
-					variable: "scrollType",
-					description: "Changes where the notes scroll to",
-					choices: ["Up", "Down", "Split"],
-				},
-				{type: "keybind", name: "Note Left", variable: "note_left"},
-				{type: "keybind", name: "Note Down", variable: "note_down"},
-				{type: "keybind", name: "Note Up", variable: "note_up"},
-				{type: "keybind", name: "Note Right", variable: "note_right"},
-				{
-					name: "Center Strums",
-					variable: "centerStrums",
-					description: "Centers your strums and hides the opponent's"
-				},
-				{
-					name: "Ghost Tapping",
-					description: "Lets you mash without penalty",
-					variable: "ghostTapping"
-				},
-				/*{
-					name: "Wife3 Accuracy",
-					description: "Changes the accuracy system to use Wife3\nIt's way more complex (math-wise) for the sake of encouraging super accurate hits\nBut may feel mean to newer players",
-					variable: "etternaMode"
-				},*/
-				{
-					type: "number",
-					name: "Scroll Speed",
-					variable: "scrollSpeed",
-					description: "Overrides the chart's scroll speed with your own (provided you change Scroll Speed Type below)",
-					numberStep: 0.1,
-					numberBoundLeft: 0.1,
-					numberBoundRight: 10.0
-				},
-				{
-					type: "choice",
-					name: "Scroll Speed Type",
-					variable: "scrollSpeedType",
-					description: "What should the scroll speed setting do?",
-					choices: ["Chart", "Additive", "Constant", "BPM-Based"]
-				}
-			]
-		},
-		{
-			name: "Other Controls",
-			options: [
-				{type: "keybind", name: "UI Left", variable: "ui_left"},
-				{type: "keybind", name: "UI Down", variable: "ui_down"},
-				{type: "keybind", name: "UI Up", variable: "ui_up"},
-				{type: "keybind", name: "UI Right", variable: "ui_right"},
-				{type: "keybind", name: "Accept/Forward", variable: "ui_accept"},
-				{type: "keybind", name: "Cancel/Backward", variable: "ui_back"},
-			]
-		},
-		{
-			name: "Visuals",
-			options: [
-				#if FEATURE_TRANSLATIONS
-				{
-					name: "Language",
-					description: "Changes the game's text interfaces to be on a different language",
-					variable: "language",
-					type: "choice",
-					choices: Translator.getAvailableLanguageIDs()
-				},
-				#end
-				{
-					name: "Low Quality",
-					description: "Disables certain background effects to increase loading times (and in some cases, performance.)",
-					variable: "lowQualityMode"
-				},
-				{
-					name: "HUD Style",
-					description: "Changes the style of the HUD.\n\"Detailed\" being the default",
-					choices: gameplay.hud.BaseHUD.listHUDs(),
-					valueTranslationString: "hudoption_",
-					variable: "hudStyle",
-					type: "choice"
-				},
-				{
-					name: "Show Miss Combo",
-					description: "Displays miss popups with negative combo when you miss notes",
-					variable: "showMissPopups"
-				},
-				{
-					name: "Show Song Position",
-					description: "Shows a progress bar for the song in the HUD",
-					variable: "showSongPosition"
-				},
-				{
-					name: "Show Judgement Counts",
-					description: "Shows a judgement counter during gameplay on the left side of the screen",
-					variable: "showJudgeCounts"
-				},
-				{
-					name: "Notes per Second",
-					description: "Shows a NPS counter on the Score Text",
-					variable: "showNps"
-				},
-				{
-					name: "Note Splashes",
-					description: "Hitting a sick and above spawns a funny splash that gives you a boner", // thanks josh -asmadeuxs
-					variable: "noteSplashes",
-				},
-				{
-					name: "Distractions",
-					description: "Disables certain sounds and effects that may be distracting",
-					variable: "distractions"
-				},
-				{
-					type: "number",
-					name: "Interface Dim",
-					description: "Enables a background behind the strums or stage",
-					variable: "strumUnderlay",
-					// displayStyle: "{}%",
-					numberStep: 1.0,
-					numberBoundLeft: 0,
-					numberBoundRight: 100
-				},
-				{
-					name: "Dim Type",
-					description: "Where should the underlay be layered on",
-					variable: "strumUnderlayType",
-					choices: ["Strums", "Stage"],
-					type: "choice",
-				}
-			]
-		}
-	];
-
-	var catSelected:Int = 0;
+	var optionStash:OptionRegistry = new OptionRegistry();
 	var curCatOptions:Array<Option> = null;
+
 	var curSelected:Int = 0;
+	var catSelected:Int = 0;
 
 	var catNameText:FlxText;
 	var descriptionThingy:FlxText;
@@ -185,11 +38,12 @@ class OptionsMenu extends MusicBeatSubstate {
 	override function create():Void {
 		super.create();
 		camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
-		// it wouldn't let me do it up there
-		for (cat in 0...optionStash.length)
-			for (i in optionStash[cat].options)
+		#if FEATURE_TRANSLATIONS
+		for (cat in optionStash.keys())
+			for (i in optionStash.get(cat).options)
 				if (i.variable == 'language')
 					i.setFunc = onLanguageChanged;
+		#end
 
 		var bgCover:FlxSprite = new FlxSprite().makeGraphic(1, 1, 0xFF000000);
 		bgCover.scale.set(FlxG.width, FlxG.height);
@@ -211,11 +65,7 @@ class OptionsMenu extends MusicBeatSubstate {
 		var panelWidth:Int = Std.int(FlxG.width * 0.45);
 		var panelHeight:Int = Std.int(FlxG.height * 0.5);
 
-		catFrame = new FlxSprite(0, 50).makeGraphic(1, 1, 0xFF000000);
-		// scaling it up instead of passing width and height on makeGraphic directly
-		// because of the way flixel generates rectangles, its *worse* to do it on makeGraphic
-		// scaling is generally better for memory usage
-		catFrame.scale.set(panelWidth, panelHeight);
+		catFrame = new FlxSprite(0, 50).makeScaledGraphic(panelWidth, panelHeight, 0xFF000000);
 		catFrame.scrollFactor.set();
 		catFrame.updateHitbox();
 		catFrame.screenCenter();
@@ -383,9 +233,12 @@ class OptionsMenu extends MusicBeatSubstate {
 			for (entry in catOptions)
 				entry.alpha = entry.ID == curSelected ? 1.0 : 0.6;
 		if (curCatOptions != null) {
-			var option = curCatOptions[curSelected];
 			#if FEATURE_TRANSLATIONS
-			descriptionThingy.text = Translator.translateString('options', 'optiondesc_${option.variable}');
+			var prefix:String = "";
+			var option = curCatOptions[curSelected];
+			if (option.translationString != null)
+				prefix = option.translationString;
+			descriptionThingy.text = Translator.translateString('options', prefix + 'optiondesc_${option.variable}');
 			#else
 			descriptionThingy.text = option.description;
 			#end
@@ -401,28 +254,36 @@ class OptionsMenu extends MusicBeatSubstate {
 	public function updateCat() {
 		while (catOptions.members.length > 0)
 			catOptions.members.pop().destroy();
-		curCatOptions = optionStash[catSelected].options;
+		var curCat = optionStash.getFromIndex(catSelected);
+		curCatOptions = curCat.options;
 		if (curSelected < 0 || curSelected > curCatOptions.length - 1)
 			curSelected = 0;
 		if (catNameText != null)
-			catNameText.text = 'Viewing: ${optionStash[catSelected].name}\nPress Q/E to change category\nPress Left/Right to change option';
+			catNameText.text = 'Viewing: ${curCat.name}\nPress Q/E to change category\nPress Left/Right to change option';
 
 		for (i => option in curCatOptions) {
-			var nameText = new FlxText(20, 50 + i * 40, catFrame.width, Translator.translateString('options', 'option_${option.variable}'), 24);
+			var optionName:String = option.name;
+			#if FEATURE_TRANSLATIONS
+			var prefix:String = option.translationString != null ? option.translationString : "";
+			optionName = Translator.translateString('options', prefix + 'option_${option.variable}');
+			#end
+			var nameText = new FlxText(20, 50 + i * 40, catFrame.width, optionName, 24);
 			var valText = new FlxText(0, nameText.y, catFrame.width - 20, option.valueString(), 24);
 			valText.font = optionsFont;
 			valText.alignment = RIGHT;
 			nameText.font = optionsFont;
-			valText.ID = i;
-			nameText.ID = i;
 			catOptions.add(nameText);
 			catOptions.add(valText);
+			nameText.ID = i;
+			valText.ID = i;
 		}
 		changeSelection();
 	}
 
+	#if FEATURE_TRANSLATIONS
 	function onLanguageChanged(lang:String) {
 		Translator.setLocale(lang);
 		updateCat();
 	}
+	#end
 }

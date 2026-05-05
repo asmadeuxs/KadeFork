@@ -47,6 +47,7 @@ class Character extends gameplay.FunkinSprite {
 	 *
 	 * It'll be kept here for now until we find a better way
 	 */
+	@:allow(gameplay.PlayState)
 	private var placeholder:Bool = false;
 
 	private var characterScript:Script;

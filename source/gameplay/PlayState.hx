@@ -86,6 +86,7 @@ class PlayState extends MusicBeatState {
 
 	public var notes:NoteRenderer;
 	public var scrollSpeed:Float = 2.5;
+	public var initialScrollSpeed:Float = 2.5;
 	public var unspawnNotes:Array<NoteData> = [];
 	public var noteSpawnIndex:Int = 0;
 
@@ -353,14 +354,22 @@ class PlayState extends MusicBeatState {
 	}
 
 	// For when the scroll option changes
-	public function changeScrollDirection(?scrollType:Null<Int>) {
+	public function changeScrollDirection(?scrollType:Null<Int>, ?strumlineID:Null<Int>) {
 		if (scrollType == null)
 			scrollType = Preferences.user.scrollType;
-		for (sl in strumlines.members) {
+		if (strumlineID == null) {
+			for (sl in strumlines.members) {
+				sl.x = 0;
+				for (i in 0...sl.strums.length)
+					sl.changeScrollDirection(i, scrollType);
+			}
+		} else if (strumlines.members[strumlineID] != null) {
+			var sl:Strumline = strumlines.members[strumlineID];
 			sl.x = 0;
 			for (i in 0...sl.strums.length)
 				sl.changeScrollDirection(i, scrollType);
-		}
+		} else
+			trace('Error positioning strumlines - Strumline $strumlineID not found.');
 		positionStrumlines();
 	}
 
@@ -436,7 +445,7 @@ class PlayState extends MusicBeatState {
 			Conductor.current.addTrack(Paths.voices(PlayState.songName, PlayState.difficulty, util.Mods.currentMod));
 		songLength = Conductor.current.music.length;
 		scrollSpeed = moonMeta.scrollSpeeds.get(difficulty) ?? 2.5;
-
+		initialScrollSpeed = scrollSpeed;
 		unspawnNotes.resize(0);
 		var noteTypes:Array<String> = [];
 
@@ -470,9 +479,43 @@ class PlayState extends MusicBeatState {
 				ScriptLoader.findScript(file);
 		}
 
+		preloadEvents();
 		noteTypes.resize(0);
 		noteTypes = null;
 		generatedMusic = true;
+	}
+
+	public function preloadEvents():Void {
+		if (events == null || events.length == 0)
+			return;
+		for (idx in 0...events.length) {
+			var scheduled = events[idx];
+			for (event in scheduled.timeline)
+				preloadEvent(event);
+		}
+	}
+
+	var _charMap:Map<String, Character>;
+
+	public function preloadEvent(event:PlaySongEvent):Void {
+		if (event == null)
+			return;
+		switch event {
+			case ChangeCharacter(who, to):
+				if (_charMap == null)
+					_charMap = new Map();
+				// preloading character
+				var dummyCharacter = new Character(0, 0, to);
+				dummyCharacter.alpha = 0.0000001;
+				dummyCharacter.scrollFactor.set();
+				dummyCharacter.screenCenter(XY);
+				_charMap.set(to, dummyCharacter);
+				add(dummyCharacter);
+			case ChangeStage(to):
+				if (stage != null)
+					stage.loadStage(to);
+			case _:
+		}
 	}
 
 	function sortByShit(Obj1:NoteData, Obj2:NoteData):Int
@@ -590,12 +633,7 @@ class PlayState extends MusicBeatState {
 
 		if (generatedMusic) {
 			var userSS:Float = Preferences.user.scrollSpeed;
-			var actualSpeed:Float = switch Preferences.user.scrollSpeedType {
-				case 3: (Conductor.bpm / 60.0) + userSS;
-				case 1: scrollSpeed + userSS;
-				case 2: userSS;
-				case _: scrollSpeed;
-			}
+			var actualSpeed:Float = NoteRenderer.getScrollSpeedMod(userSS);
 			notes.updateNotes(Conductor.time, strumlines.members, actualSpeed);
 			noteUpdate(Conductor.time);
 			updateEvents(Conductor.time);
@@ -625,12 +663,26 @@ class PlayState extends MusicBeatState {
 			return;
 		// TODO: add the rest of the events
 		switch event {
+			case ChangeNoteVelocity(speed, strumline):
+				if (strumline == null || strumline > strumlines.members.length - 1) {
+					if (strumline != null)
+						trace('(ChangeNoteVelocity) Strumline $strumline not found, changing speed for both strumlines');
+					scrollSpeed = speed;
+				} else
+					strumlines.members[strumline].scrollSpeed = speed;
+			case ChangeNoteScrollType(scrollType, strumline):
+				changeScrollDirection(scrollType, strumline);
 			case ChangeCharacter(who, to):
 				switch who {
 					case 0: boyfriend.loadCharacter(to);
 					case 1: dad.loadCharacter(to);
 					case 2: gf.loadCharacter(to);
 					case _:
+				}
+				if (_charMap.exists(to)) {
+					_charMap.get(to).destroy();
+					remove(_charMap.get(to));
+					_charMap.remove(to);
 				}
 			case ChangeStage(to):
 				if (stage != null) {

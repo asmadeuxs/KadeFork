@@ -55,14 +55,17 @@ class ScriptLoader {
 		return script;
 	}
 
-	private static function makeInterpreter() {
-		var interp:InterpType = null;
+	private static function setDefaultVariables(interp:InterpType, ?mod:String = null) {
 		#if FEATURE_HSCRIPT
-		var interp = new InterpType();
 		// script global
 		interp.variables.set("STOP", STOP_FUNC);
 		interp.variables.set("CONTINUE", CONTINUE_FUNC);
 		interp.variables.set("KILL", KILL_SCRIPT);
+		if (mod != null) {
+			interp.variables.set("setSetting", (name:String, value:Dynamic) -> return Preferences.setModOption(mod, name, value));
+			interp.variables.set("getSetting", (name:String) -> return Preferences.getModOption(mod, name));
+			interp.variables.set("_MODNAME", mod);
+		}
 		// standard library
 		interp.variables.set("Math", Math);
 		interp.variables.set("Std", Std);
@@ -128,7 +131,8 @@ class ScriptLoader {
 		var script:Script = null;
 		#if FEATURE_HSCRIPT
 		if (Paths.fileExists(filepath) && Paths.scriptExtensions.contains(Path.extension(filepath))) {
-			script = parseScript(Paths.getText(filepath));
+			var origin:String = Paths.getAssetOrigin(filepath);
+			script = parseScript(Paths.getText(filepath), null, filepath, origin.substr(0, -1));
 			script.fileName = Path.withoutExtension(Path.withoutDirectory(filepath));
 			script.filePath = filepath;
 			script.interp.execute(script.code);
@@ -148,7 +152,8 @@ class ScriptLoader {
 			if (Paths.scriptExtensions.contains(Path.extension(path))) {
 				if (scripts == null)
 					scripts = [];
-				var p:Script = parseScript(Paths.getText(path));
+				var origin:String = Paths.getAssetOrigin(path);
+				var p:Script = parseScript(Paths.getText(path), null, path, origin.substr(0, -1));
 				p.fileName = Path.withoutExtension(files[i]);
 				p.filePath = path;
 				p.interp.execute(p.code);
@@ -161,22 +166,21 @@ class ScriptLoader {
 		return scripts;
 	}
 
-	private static function parseScript(scriptStr:String, ?customInterp:InterpType):Script {
+	private static function parseScript(scriptStr:String, ?interp:InterpType, ?origin:String = 'hscript', ?mod:String = null):Script {
 		#if FEATURE_HSCRIPT
 		if (scriptStr.length <= 0)
 			trace('Cannot load an empty script! (HScript error)');
 		else
 			try {
+				if (interp == null)
+					interp = new InterpType();
+				setDefaultVariables(interp, mod);
 				var parser:Parser = new Parser();
 				parser.allowMetadata = true;
 				parser.allowTypes = true;
 				parser.allowJSON = true;
-				var program = parser.parseString(scriptStr);
-				var script:Script = {
-					code: program,
-					codeString: scriptStr,
-					interp: customInterp == null ? makeInterpreter() : customInterp,
-				};
+				var program = parser.parseString(scriptStr, origin);
+				var script:Script = {code: program, codeString: scriptStr, interp: interp};
 				script.initVars();
 				return script;
 			}

@@ -41,7 +41,6 @@ class NoteRenderer extends FlxBasic {
 	}
 
 	public function spawnNotes(time:Float, strumlines:Array<Strumline>, scrollSpeed:Float):Void {
-		scrollSpeed = FlxMath.roundDecimal(Preferences.user.scrollSpeed == 1 ? scrollSpeed : Preferences.user.scrollSpeed, 2);
 		while (spawnIndex < unspawnNotes.length) {
 			var noteData:NoteData = unspawnNotes[spawnIndex];
 			var timeToNote:Float = noteData.time - time;
@@ -62,8 +61,6 @@ class NoteRenderer extends FlxBasic {
 					note.holdEnd = strumline.noteskin.generateSustain(note.noteData, true);
 					note.holdBody.cameras = note.cameras;
 					note.holdEnd.cameras = note.cameras;
-					note.holdBody.alpha = 0.7;
-					note.holdEnd.alpha = note.holdBody.alpha;
 				}
 				note.revive();
 				activeNotes.push(note);
@@ -77,8 +74,19 @@ class NoteRenderer extends FlxBasic {
 		}
 	}
 
-	public function updateNotePositions(time:Float, strumlines:Array<Strumline>, scrollSpeed:Float):Void {
-		scrollSpeed = FlxMath.roundDecimal(Preferences.user.scrollSpeed == 1 ? scrollSpeed : Preferences.user.scrollSpeed, 2);
+	// idk where else to put this -asmadeuxs
+	public static function getScrollSpeedMod(defaultSpeed:Float):Float {
+		var userSS:Float = Preferences.user.scrollSpeed;
+		var result:Float = switch Preferences.user.scrollSpeedType {
+			case 3: (Conductor.bpm / 60.0) + userSS;
+			case 1: defaultSpeed + userSS;
+			case 2: userSS;
+			case _: defaultSpeed;
+		}
+		return FlxMath.roundDecimal(result, 3);
+	}
+
+	public function updateNotePositions(time:Float, strumlines:Array<Strumline>, speed:Float):Void {
 		var i:Int = 0;
 		while (i < activeNotes.length) {
 			var note:Note = activeNotes[i];
@@ -88,7 +96,14 @@ class NoteRenderer extends FlxBasic {
 				killNote(note, i);
 				continue;
 			}
+
+			var scrollSpeed:Float = speed;
 			var curStrum = strumline.getStrum(note.noteData);
+			if (Preferences.user.scrollSpeedType < 2) { // C-Mod or X-Mod
+				var slScrollSpeed:Null<Float> = strumline.getScrollSpeed(note.noteData);
+				if (slScrollSpeed != null && Math.abs(scrollSpeed - slScrollSpeed) > 0.00000001)
+					scrollSpeed = slScrollSpeed;
+			}
 			if (curStrum != null) {
 				var difference:Float = (time - note.strumTime);
 				var noteScroll:Float = difference * ((0.45 * scrollSpeed) * downscroll);

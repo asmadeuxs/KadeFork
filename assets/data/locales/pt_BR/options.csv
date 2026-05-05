@@ -7,9 +7,9 @@ optionval_Chart,Chart
 optionval_Additive,Aditiva
 optionval_Constant,Constante
 optionval_BPM-Based,Baseado no BPM
-hudoption_Scripted,Em Script
-hudoption_Detailed,Detalhado
-hudoption_Classic,Clássico
+hud_optionval_Scripted,Em Script
+hud_optionval_Detailed,Detalhado
+hud_optionval_Classic,Clássico
 optionval_Strums,Notas
 optionval_Stage,Cenário
 

@@ -12,13 +12,15 @@ using util.CoolUtil;
 
 @:access(gameplay.Note)
 class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
+	public var scrollSpeed:Null<Float> = null;
 	public var keyCount:Int = 4;
 	public var noteskin:Noteskin;
 
 	public var strums:Array<FunkinSprite> = [];
 
-	private var downscroll:Array<Int> = [];
-	private var splashPool:ObjectPool<FunkinSprite>;
+	var splashPool:ObjectPool<FunkinSprite>;
+	var speeds:Array<Null<Float>> = [];
+	var downscroll:Array<Int> = [];
 
 	public function new(?keyCount:Int = 4):Void {
 		super(0, 0);
@@ -61,6 +63,14 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 	public function getStrum(noteData:Int)
 		return strums[noteData];
 
+	public function getScrollSpeed(noteData:Int):Null<Float>
+		return speeds[noteData] ?? scrollSpeed;
+
+	public function setStrumScrollSpeed(noteData:Int, noteSpeed:Float):Null<Float> {
+		speeds[noteData] = noteSpeed;
+		return speeds[noteData];
+	}
+
 	public function getDownscrollMult(noteData:Int):Int
 		return downscroll[noteData];
 
@@ -70,6 +80,7 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 	var strumSpacing:Float = 160;
 
 	public function generateStrums():Void {
+		speeds.resize(this.keyCount);
 		downscroll.resize(this.keyCount);
 		for (i in 0...this.keyCount) {
 			var strum:FunkinSprite = noteskin.generateStrum(i);

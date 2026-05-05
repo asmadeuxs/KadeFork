@@ -28,10 +28,9 @@ typedef InterpType = #if FEATURE_HSCRIPT hscript.Interp #else Any #end;
 		}
 		if (args == null)
 			args = [];
-		var info = this.interp.posInfos();
-		try {
-			var func = this.interp.variables.get(funcName);
-			if (func != null && Reflect.isFunction(func)) {
+		var func = this.interp.variables.get(funcName);
+		if (func != null && Reflect.isFunction(func)) {
+			try {
 				var value = Reflect.callMethod(null, func, args);
 				caller = {name: funcName, value: value, caller: func};
 				if (caller.value == ScriptLoader.KILL_SCRIPT) {
@@ -39,23 +38,23 @@ typedef InterpType = #if FEATURE_HSCRIPT hscript.Interp #else Any #end;
 					return caller;
 				}
 			}
+			catch (e:Dynamic) {
+				var lineText = 'at unknown line';
+				var priorPos = getPosInfos();
+				if (Std.isOfType(e, hscript.Expr.Error)) {
+					var exprError:hscript.Expr.Error = cast e;
+					if (exprError != null)
+						lineText = 'at line ' + exprError.line;
+				} else if (priorPos != null)
+					lineText = 'at line ' + priorPos.lineNumber + ' (call site)';
+				Sys.println('Script Error (${this.filePath} $lineText) - $e');
+			}
 		}
-		catch (e)
-			Sys.println('Script Error (${this.fileName} at line ${info.lineNumber}) - $e');
 		#end
 		return caller;
 	}
 
-	public function initVars():Void {
-		if (interp != null && interp.variables != null) {
-			interp.variables.set("trace", function(...args:Array<Dynamic>) {
-				var pos:haxe.PosInfos = getPosInfos();
-				var line:Int = pos.lineNumber + 1;
-				var message:String = [for (a in args) Std.string(a)].join(" ");
-				Sys.println('[$fileName:$line] $message');
-			});
-		}
-	}
+	public function initVars():Void {}
 
 	function getPosInfos():haxe.PosInfos
 		return #if FEATURE_HSCRIPT this.interp.posInfos() #else null #end;

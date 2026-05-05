@@ -30,7 +30,7 @@ import util.Mods;
 	var showJudgeCounts:Bool = true; // Displays a judgement counter during gameplay on the left side of the screen
 	var showMissPopups:Bool = true; // Displays miss popups when you miss notes
 
-	// VISUALS
+	// OTHER VISUALS
 	// I feel like this will be very annoying to implement for Alphabet
 	// I do have roughly an idea on how I wanna do it realistically
 	// It's like for accent marks (á, à ç, ş, etc) I could like uhhh
@@ -67,40 +67,57 @@ class Preferences {
 	public static final deft:Save = new Save();
 	public static var user:Save = new Save();
 
-	public static function setFPSCap(newFramerate:Int) {
-		if (newFramerate > FlxG.drawFramerate) {
-			FlxG.updateFramerate = newFramerate;
-			FlxG.drawFramerate = newFramerate;
-		} else {
-			FlxG.drawFramerate = newFramerate;
-			FlxG.updateFramerate = newFramerate;
-		}
-	}
-
-	public static function save() {
+	public static function save(?saveName:String = 'settings') {
 		var company:String = lime.app.Application.current.meta["file"];
 		var appName:String = lime.app.Application.current.meta["company"];
-		FlxG.save.bind('$appName/settings', company);
+		FlxG.save.bind('$appName/$saveName', company);
+
 		for (_ => pref in Reflect.fields(user)) {
 			var value:Dynamic = Reflect.field(Preferences.user, pref);
 			if (value == null)
 				value = Reflect.field(Preferences.deft, pref);
 			Reflect.setField(FlxG.save.data, pref, value);
 		}
+
+		var saveModOptions:Dynamic = {};
+		for (mod => options in modOptions) {
+			var modObj:Dynamic = {};
+			for (opt => val in options) {
+				Reflect.setField(modObj, opt, val);
+			}
+			Reflect.setField(saveModOptions, mod, modObj);
+		}
+		FlxG.save.data.modOptions = saveModOptions;
 		FlxG.save.flush();
 	}
 
-	public static function load() {
+	public static function load(?saveName:String = 'settings') {
 		FlxG.autoPause = false;
 		var company:String = lime.app.Application.current.meta["file"];
 		var appName:String = lime.app.Application.current.meta["company"];
-		FlxG.save.bind('$appName/settings', company);
+		FlxG.save.bind('$appName/$saveName', company);
+
 		for (_ => pref in Reflect.fields(user)) {
 			var value:Dynamic = Reflect.field(FlxG.save.data, pref);
 			if (value == null)
 				value = Reflect.field(Preferences.deft, pref);
-			Reflect.setField(Preferences.user, pref, value);
+			Reflect.setField(user, pref, value);
 		}
+
+		var savedModOptions = FlxG.save.data.modOptions;
+		if (savedModOptions != null) {
+			for (mod in Reflect.fields(savedModOptions)) {
+				var modData = Reflect.field(savedModOptions, mod);
+				if (modData != null) {
+					var optMap:Map<String, Dynamic> = new Map();
+					for (opt in Reflect.fields(modData)) {
+						optMap.set(opt, Reflect.field(modData, opt));
+					}
+					modOptions.set(mod, optMap);
+				}
+			}
+		}
+
 		loadKeybinds();
 		if (FlxG.save.data.mute != null)
 			FlxG.sound.muted = FlxG.save.data.mute;
@@ -108,6 +125,17 @@ class Preferences {
 			FlxG.sound.volume = FlxG.save.data.volume;
 		Preferences.setFPSCap(Preferences.user.frameRate);
 		migrateSave();
+	}
+
+	public static function migrateSave():Void {
+		// To migrate options from older version of the fork
+		// Not useful if you have a completely clean save
+		if (FlxG.save.data.accuracyDisplay != null) {
+			var inf:Bool = FlxG.save.data.accuracyDisplay;
+			Preferences.user.hudStyle = inf ? "Detailed" : "Classic";
+			FlxG.save.data.hudStyle = Preferences.user.hudStyle;
+			FlxG.save.data.accuracyDisplay = null;
+		}
 	}
 
 	public static function loadKeybinds():Void {
@@ -120,14 +148,35 @@ class Preferences {
 		}
 	}
 
-	public static function migrateSave():Void {
-		// To migrate options from older version of the fork
-		// Not useful if you have a completely clean save
-		if (FlxG.save.data.accuracyDisplay != null) {
-			var inf:Bool = FlxG.save.data.accuracyDisplay;
-			Preferences.user.hudStyle = inf ? "Detailed" : "Classic";
-			FlxG.save.data.hudStyle = Preferences.user.hudStyle;
-			FlxG.save.data.accuracyDisplay = null;
+	private static var modOptions:Map<String, Map<String, Dynamic>> = new Map();
+
+	public static function setFPSCap(newFramerate:Int) {
+		if (newFramerate > FlxG.drawFramerate) {
+			FlxG.updateFramerate = newFramerate;
+			FlxG.drawFramerate = newFramerate;
+		} else {
+			FlxG.drawFramerate = newFramerate;
+			FlxG.updateFramerate = newFramerate;
 		}
+	}
+
+	public static function getModOption(mod:String, option:String):Dynamic {
+		var v:Dynamic = null;
+		if (modOptions[mod] != null && modOptions[mod].get(option) != null)
+			v = modOptions[mod].get(option);
+		return v;
+	}
+
+	public static function setModOption(mod:String, option:String, value:Dynamic):Void {
+		if (modOptions.get(mod) == null)
+			modOptions.set(mod, new Map());
+		modOptions[mod].set(option, value);
+		if (FlxG.save.data.modOptions == null)
+			FlxG.save.data.modOptions = {};
+		var modData = FlxG.save.data.modOptions;
+		if (!Reflect.hasField(modData, mod))
+			Reflect.setField(modData, mod, {});
+		Reflect.setField(Reflect.field(modData, mod), option, value);
+		FlxG.save.flush();
 	}
 }
