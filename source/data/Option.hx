@@ -12,7 +12,7 @@ using StringTools;
 	@:optional public var setFunc:(value:Dynamic) -> Void;
 	@:optional public var openSubstate:Void->Void;
 
-	@:optional public var translationString:String = null;
+	@:optional public var translationPrefix:String = null;
 	@:optional public var type:String = "bool";
 
 	@:optional public var fromMod:String = null;
@@ -41,8 +41,8 @@ using StringTools;
 			str = Translator.getNativeLangName(str);
 		else {
 			var prefix:String = '';
-			if (translationString != null)
-				prefix = translationString;
+			if (translationPrefix != null)
+				prefix = translationPrefix;
 			var transStr:String = 'optionval_';
 			// just so if mod options fail to bring a string
 			var noPrefix:String = Translator.translateString('options', '$transStr$str');

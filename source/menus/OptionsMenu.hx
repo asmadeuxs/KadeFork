@@ -236,8 +236,8 @@ class OptionsMenu extends MusicBeatSubstate {
 			#if FEATURE_TRANSLATIONS
 			var prefix:String = "";
 			var option = curCatOptions[curSelected];
-			if (option.translationString != null)
-				prefix = option.translationString;
+			if (option.translationPrefix != null)
+				prefix = option.translationPrefix;
 			descriptionThingy.text = Translator.translateString('options', prefix + 'optiondesc_${option.variable}');
 			#else
 			descriptionThingy.text = option.description;
@@ -264,7 +264,7 @@ class OptionsMenu extends MusicBeatSubstate {
 		for (i => option in curCatOptions) {
 			var optionName:String = option.name;
 			#if FEATURE_TRANSLATIONS
-			var prefix:String = option.translationString != null ? option.translationString : "";
+			var prefix:String = option.translationPrefix != null ? option.translationPrefix : "";
 			optionName = Translator.translateString('options', prefix + 'option_${option.variable}');
 			#end
 			var nameText = new FlxText(20, 50 + i * 40, catFrame.width, optionName, 24);

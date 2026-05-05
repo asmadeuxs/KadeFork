@@ -44,7 +44,7 @@ class OptionRegistry extends BaseRegistry<OptionCategory> {
 						type: d.type ?? "bool",
 						defaultValue: d.defaultValue ?? null,
 						description: d.description ?? "No description provided.",
-						translationString: d.translationString ?? 'mod_${mod}_',
+						translationPrefix: d.translationPrefix ?? 'mod_${mod}_',
 						numberBoundLeft: d.numberBoundLeft ?? 0.0,
 						numberBoundRight: d.numberBoundRight ?? 1.0,
 						numberStep: d.numberStep ?? 1.0,
@@ -152,7 +152,7 @@ class OptionRegistry extends BaseRegistry<OptionCategory> {
 					name: "HUD Style",
 					description: "Changes the style of the HUD.\n\"Detailed\" being the default",
 					choices: gameplay.hud.BaseHUD.listHUDs(),
-					translationString: "hud_",
+					translationPrefix: "hud_",
 					variable: "hudStyle",
 					type: "choice"
 				},
