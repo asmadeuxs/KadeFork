@@ -213,23 +213,26 @@ class Character extends gameplay.FunkinSprite {
 					if ((file.facesLeft || file.isPlayer) && !isPlayer)
 						flipX = true;
 
-					var atlasType:String = ConfigTypes.getAtlasType(file.texture, 'sparrow');
-					var path:String = ConfigTypes.getTexturePath(file.texture);
+					var path:String = 'gameplay/characters/$characterName/$characterName';
+					var atlasType:String = 'sparrow';
+					if (file.texture != null) {
+						path = ConfigTypes.getTexturePath(file.texture);
+						atlasType = ConfigTypes.getAtlasType(file.texture, 'sparrow');
+					}
 					var tex = switch atlasType {
-						case 'sparrow': Paths.getSparrowAtlas(path);
+						case 'spritesheet': Paths.image(path);
 						case 'packer': Paths.getPackerAtlas(path);
-						case _: Paths.image(path);
+						case _: Paths.getSparrowAtlas(path);
 					}
 					if (tex is FlxAtlasFrames)
 						frames = cast tex;
 					else
 						loadGraphic(cast tex);
 
-					if (file.offsets != null)
-						this.addOffsetsFromJson(file.offsets);
 					if (file.animations != null)
 						this.addFromJson(file.animations, file.defaultFramerate ?? 24);
-
+					if (file.offsets != null)
+						this.addOffsetsFromJson(file.offsets);
 					if (file.cameraOffset != null) {
 						var coff:Dynamic = file.cameraOffset;
 						if (coff is Array)

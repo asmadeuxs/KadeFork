@@ -78,7 +78,13 @@ class PlayState extends MusicBeatState {
 	public static var nps:Int = 0;
 	public static var maxNps:Int = 0;
 
+
+	public var camGame:FlxCamera;
+	public var camHUD:FlxCamera;
+	public var camOver:FlxCamera;
+	
 	public var stage:StageBG;
+
 	public var dad:Character;
 	public var gf:Character;
 	public var boyfriend:Character;
@@ -112,10 +118,6 @@ class PlayState extends MusicBeatState {
 
 	var generatedMusic:Bool = false;
 	var startingSong:Bool = false;
-
-	var camGame:FlxCamera;
-	var camHUD:FlxCamera;
-	var camOver:FlxCamera;
 
 	var notesHitArray:Array<Date> = [];
 	var tilNpsUpdate:Float = 1;

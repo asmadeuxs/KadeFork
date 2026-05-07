@@ -1,29 +1,13 @@
 {
-	"offsets": {
-		"idle": [0, 0],
-		"scared": [1, 0],
-		"hey": [0, 5],
-		"left": [8, -4],
-		"down": [-5, -53],
-		"up": [-43, 30],
-		"right": [-38, -6],
-		"missleft": [10, 20],
-		"missdown": [-2, -22],
-		"missup": [-37, 28],
-		"missright": [-35, 21]
-	},
-	"cameraOffset": [-100, -100],
-	"animationTimers": {
-		"hey": 1
-	},
 	"name": "Boyfriend",
+	"cameraOffset": [-100, -100],
 	"missAnimations": ["missleft", "missdown", "missup", "missright"],
 	"singAnimations": ["left", "down", "up", "right"],
 	"idleAnimations": ["idle"],
-	"singDuration": 4,
 	"defaultFramerate": 24,
 	"antialiasing": true,
 	"facesLeft": true,
+	"singDuration": 4,
 	"animations": {
 		"deathLoop": "BF Dead Loop",
 		"missright": "BF NOTE RIGHT MISS",
@@ -38,5 +22,18 @@
 		"missdown": "BF NOTE DOWN MISS",
 		"missup": "BF NOTE UP MISS",
 		"left": "BF NOTE LEFT0"
+	},
+	"offsets": {
+		"idle": [0, 0],
+		"scared": [1, 0],
+		"hey": [0, 5],
+		"left": [8, -4],
+		"down": [-5, -53],
+		"up": [-43, 30],
+		"right": [-38, -6],
+		"missleft": [10, 20],
+		"missdown": [-2, -22],
+		"missup": [-37, 28],
+		"missright": [-35, 21]
 	}
 }

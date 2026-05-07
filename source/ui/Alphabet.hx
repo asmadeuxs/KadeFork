@@ -27,8 +27,6 @@ class Alphabet extends FlxSpriteGroup {
 	var _curText:String = "";
 	var yMulti:Float = 1;
 
-
-
 	// custom shit
 	// amp, backslash, question mark, apostrophy, comma, angry faic, period
 	var lastSprite:AlphaCharacter;

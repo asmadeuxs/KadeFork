@@ -56,13 +56,6 @@
   "facesLeft": true,
 
   /**
-   * Similar to "singDuration" but for individual animations
-   */
-  "animationTimers": {
-    "hey": 1.0
-  },
-
-  /**
    * The character's animations
    *
    * Each value inside this object can be either a string

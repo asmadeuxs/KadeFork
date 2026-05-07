@@ -1,11 +1,7 @@
 {
-	"offsets": {
-		"idle": [0, 0],
-		"singRIGHT": [-4, 27],
-		"singDOWN": [5, -32],
-		"singLEFT": [-5, 10],
-		"singUP": [-10, 53]
-	},
+
+	"name": "Daddy Dearest",
+	"singDuration": 6.1,
 	"antialiasing": true,
 	"cameraOffset": [150, -100],
 	"defaultFramerate": 24,
@@ -16,6 +12,11 @@
 		"singLEFT": "Dad Sing Note LEFT",
 		"singUP": "Dad Sing Note UP"
 	},
-	"name": "Daddy Dearest",
-	"singDuration": 6.1
+	"offsets": {
+		"idle": [0, 0],
+		"singRIGHT": [-4, 27],
+		"singDOWN": [5, -32],
+		"singLEFT": [-5, 10],
+		"singUP": [-10, 53]
+	}
 }

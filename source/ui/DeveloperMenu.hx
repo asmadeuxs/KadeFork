@@ -63,6 +63,7 @@ class DeveloperMenu extends MusicBeatSubstate {
 					if (state != null && state.stage != null && stages.length != 0) {
 						state.stage.clear();
 						state.stage.stageFile = stages[alternative];
+						state.camGame.zoom = state.stage.cameraZoom;
 						FlxG.sound.play(util.Mods.menuSound("confirmMenu"));
 						state.positionCharacters();
 						if (colorTween != null)

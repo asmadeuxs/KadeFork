@@ -35,16 +35,35 @@ class ConfigTypes {
 	public static function getAnimationIndices(raw:Dynamic):Array<Int> {
 		if (Std.isOfType(raw, String))
 			return null;
+
 		var indices:Dynamic = raw.indices;
 		if (indices == null)
 			return null;
+
 		if (Std.isOfType(indices, String)) {
-			// parse range like "0...4"
-			var parts = indices.split("...");
-			var start = Std.parseInt(parts[0]);
-			var end = Std.parseInt(parts[1]);
+			var parts:Array<String> = Std.string(indices).split("...");
+			var start:Int = Std.parseInt(parts[0]);
+			var end:Int = Std.parseInt(parts[1]);
 			return [for (i in start...end + 1) i];
 		}
+
+		if (Std.isOfType(indices, Array)) {
+			var arr:Array<Dynamic> = indices;
+			var result:Array<Int> = [];
+			for (item in arr) {
+				if (Std.isOfType(item, Int)) {
+					result.push(item);
+				} else if (Std.isOfType(item, String)) {
+					var parts:Array<String> = Std.string(item).split("...");
+					var start:Int = Std.parseInt(parts[0]);
+					var end:Int = Std.parseInt(parts[1]);
+					for (i in start...end + 1)
+						result.push(i);
+				}
+			}
+			return result;
+		}
+
 		return indices;
 	}
 

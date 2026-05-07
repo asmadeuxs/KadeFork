@@ -4,7 +4,7 @@
 	"defaultFramerate": 24,
 	"idleAnimations": [ "danceLeft", "danceRight" ],
 	"antialiasing": true,
-	"beatsToDance": 2,
+	"beatsToDance": 1,
 	"animations": {
 		"cheer": "GF Cheer",
 		"singLEFT": "GF left note",
@@ -13,12 +13,11 @@
 		"singRIGHT": "GF Right Note",
 		"scared": "GF FEAR",
 		"sad": { "prefix": "gf sad", "indices": "0...12" },
-		"danceLeft": { "prefix": "GF Dancing Beat0", "indices": [ 30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ] },
+		"danceLeft": { "prefix": "GF Dancing Beat0", "indices": [ 30, "0...14" ] },
 		"danceRight": { "prefix": "GF Dancing Beat0", "indices": "15...30" },
 		"hairBlow": { "prefix": "GF Dancing Beat Hair blowing", "indices": "0...3" },
 		"hairFall": { "prefix": "GF Dancing Beat Hair Landing", "indices": "0...1" }
 	},
-
 	"offsets": {
 		"cheer": [ 0, 9 ],
 		"sad": [ -2, 7 ],

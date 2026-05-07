@@ -122,10 +122,9 @@ class Kade extends BaseHUD {
 		scoreTxt.y = healthBarBG.y + 50;
 		scoreTxt.screenCenter(X);
 
-		if (Preferences.user.showJudgeCounts) {
+		if (judgesTxt != null) {
 			judgesTxt.screenCenter(Y);
 			judgesTxt.y -= 30;
-			judgesTxt.y = 5;
 		}
 	}
 
