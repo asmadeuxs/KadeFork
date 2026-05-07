@@ -1,21 +1,21 @@
 {
-	"name": "Daddy Dearest",
-	"singDuration": 6.1,
-	"defaultFramerate": 24,
-	"cameraOffset": [150, -100],
+	"offsets": {
+		"idle": [0, 0],
+		"singRIGHT": [-5, 26],
+		"singDOWN": [0, -32],
+		"singLEFT": [-4, 12],
+		"singUP": [-3, 51]
+	},
 	"antialiasing": true,
+	"cameraOffset": [150, -100],
+	"defaultFramerate": 24,
 	"animations": {
 		"idle": "Dad idle dance",
-		"singLEFT": "Dad Sing Note LEFT",
+		"singRIGHT": "Dad Sing Note RIGHT",
 		"singDOWN": "Dad Sing Note DOWN",
-		"singUP": "Dad Sing Note UP",
-		"singRIGHT": "Dad Sing Note RIGHT"
+		"singLEFT": "Dad Sing Note LEFT",
+		"singUP": "Dad Sing Note UP"
 	},
-	"offsets": {
-		"idle": [ 0, 0 ],
-		"singLEFT": [ -10, 10 ],
-		"singDOWN": [ 0, -30 ],
-		"singUP": [ -6, 50 ],
-		"singRIGHT": [ 0, 27 ]
-	}
+	"name": "Daddy Dearest",
+	"singDuration": 6.1
 }

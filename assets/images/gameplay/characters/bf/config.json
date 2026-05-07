@@ -1,46 +1,57 @@
 {
-  "name": "Boyfriend",
-  "singDuration": 4.0,
-  "defaultFramerate": 24,
-  "cameraOffset": [-100, -100],
-  "idleAnimations": [ "idle" ],
-  "singAnimations": [ "left", "down", "up", "right" ],
-  "missAnimations": [ "missleft", "missdown", "missup", "missright" ],
-  "antialiasing": true,
-  "facesLeft": true,
-  "animationTimers": {
-    "hey": 1.0
-  },
-  "animations": {
-    "idle": "BF idle dance0",
-    "hey": "BF HEY!!",
-    "left": "BF NOTE LEFT0",
-    "down": "BF NOTE DOWN0",
-    "up": "BF NOTE UP0",
-    "right": "BF NOTE RIGHT0",
-    "missleft": "BF NOTE LEFT MISS",
-    "missdown": "BF NOTE DOWN MISS",
-    "missup": "BF NOTE UP MISS",
-    "missright": "BF NOTE RIGHT MISS",
-    "firstDeath": "BF dies",
-    "deathLoop": "BF Dead Loop",
-    "deathConfirm": "BF Dead confirm"
-  },
-
-  "offsets": {
-    "idle": [ 0, 0 ],
-    "left": [ 17, -6 ],
-    "down": [ -5, -50 ],
-    "up": [ -24, 27 ],
-    "right": [ -33, -7 ],
-    "missleft": [ 17, 24 ],
-    "missdown": [ -6, -19 ],
-    "missup": [ -24, 27 ],
-    "missright": [ -25, 21 ],
-    "hey": [ 12, 4 ],
-    "firstDeath": [ 42, 11 ],
-    "deathLoop": [ 42, 5 ],
-    "deathConfirm": [ 42, 69 ],
-    "scared": [ 1, 0 ]
-  }
+	"offsets": {
+		"scared": [1, 0],
+		"deathLoop": [28, -3],
+		"missright": [-35, 19],
+		"down": [-1, -52],
+		"missleft": [5, 20],
+		"up": [-40, 29],
+		"deathConfirm": [30, 62],
+		"firstDeath": [29, 3],
+		"hey": [3, 5],
+		"idle": [0, 0],
+		"right": [-42, -6],
+		"missdown": [0, -25],
+		"left": [8, -7],
+		"missup": [-39, 29]
+	},
+	"cameraOffset": [-100, -100],
+	"animationTimers": {
+		"hey": 1
+	},
+	"missAnimations": [
+		"missleft",
+		"missdown",
+		"missup",
+		"missright"
+	],
+	"idleAnimations": [
+		"idle"
+	],
+	"name": "Boyfriend",
+	"singDuration": 4,
+	"defaultFramerate": 24,
+	"antialiasing": true,
+	"facesLeft": true,
+	"singAnimations": [
+		"left",
+		"down",
+		"up",
+		"right"
+	],
+	"animations": {
+		"deathLoop": "BF Dead Loop",
+		"missright": "BF NOTE RIGHT MISS",
+		"down": "BF NOTE DOWN0",
+		"missleft": "BF NOTE LEFT MISS",
+		"up": "BF NOTE UP0",
+		"right": "BF NOTE RIGHT0",
+		"firstDeath": "BF dies",
+		"deathConfirm": "BF Dead confirm",
+		"hey": "BF HEY!!",
+		"idle": "BF idle dance0",
+		"missdown": "BF NOTE DOWN MISS",
+		"missup": "BF NOTE UP MISS",
+		"left": "BF NOTE LEFT0"
+	}
 }
