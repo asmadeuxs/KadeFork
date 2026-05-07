@@ -6,7 +6,6 @@ import openfl.ui.Keyboard;
 
 class InputManager {
 	public var held:Map<Int, Bool> = new Map<Int, Bool>();
-
 	public var onKeyPress:Int->Void;
 	public var onKeyRelease:Int->Void;
 

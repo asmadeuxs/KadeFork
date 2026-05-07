@@ -11,17 +11,21 @@ class DiscordClient {
 	// change this to what ever the fuck you want lol
 	static final defaultIconName:String = 'default'; // Large Icon image on Discord
 	static final defaultLargeImageText:String = "(Temporary) Art by @raincolor__ on Twitter/X";
+
 	static final appID:String = "1494062168033984583"; // ClientID/AppID on Discord Developer Portal
 
 	public static function initialize() {
 		#if hxdiscord_rpc
 		trace("Discord Client starting...");
+
 		final handlers:DiscordEventHandlers = new DiscordEventHandlers();
 		handlers.ready = cpp.Function.fromStaticFunction(onReady);
 		handlers.disconnected = cpp.Function.fromStaticFunction(onDisconnected);
 		handlers.errored = cpp.Function.fromStaticFunction(onError);
+
 		Discord.Initialize(appID, cpp.RawPointer.addressOf(handlers), false, null);
 		trace("Discord Client started.");
+
 		sys.thread.Thread.create(function():Void {
 			while (true) {
 				#if DISCORD_DISABLE_IO_THREAD
@@ -46,9 +50,11 @@ class DiscordClient {
 			endTimestamp = startTimestamp + endTimestamp;
 
 		final discordPresence:DiscordRichPresence = new DiscordRichPresence();
+
 		discordPresence.type = DiscordActivityType_Playing;
 		discordPresence.state = state;
 		discordPresence.details = details;
+
 		discordPresence.smallImageKey = smallImageKey;
 		discordPresence.largeImageText = defaultLargeImageText;
 		discordPresence.largeImageKey = defaultIconName;
@@ -65,6 +71,7 @@ class DiscordClient {
 		final username:String = request[0].username;
 		final globalName:String = request[0].username;
 		final discriminator:Int = Std.parseInt(request[0].discriminator);
+
 		if (discriminator != 0)
 			Sys.println('Discord: Connected to user ${username}#${discriminator} ($globalName)');
 		else

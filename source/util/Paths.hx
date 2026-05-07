@@ -41,20 +41,21 @@ enum abstract AssetType(String) {
  */
 class Paths {
 	static public final root:String = 'assets';
-
-	static private var avoidClearing:Array<String> = ["core:images/ui/alphabet.png"];
-
 	static public final scriptExtensions:Array<String> = ["hx", "hxc", "hxs", "hscript"];
 	static public final jsonExtensions:Array<String> = ["json", "json5", "jsonc"];
+	static public var skipNextClear:Bool = false;
+
+	static private final cacheLimit:Int = 10;
+
+	static private var avoidClearing:Array<String> = ["core:images/ui/alphabet.png"];
+	static private var cacheTracker:Array<String> = [];
 
 	static private var textureRegistry = new AssetRegistry<FlxGraphic>((key, graphic) -> {
 		@:privateAccess graphic.bitmap.__texture.dispose();
 		FlxG.bitmap.remove(graphic);
 	});
-	static private var soundRegistry = new AssetRegistry<Sound>((key, sound) -> openfl.utils.Assets.cache.clear(key));
 
-	static private var cacheTracker:Array<String> = [];
-	static private final cacheLimit:Int = 10;
+	static private var soundRegistry = new AssetRegistry<Sound>((key, sound) -> openfl.utils.Assets.cache.clear(key));
 
 	static public function getAssetOrigin(?mod:String = null):String {
 		#if FEATURE_MODS

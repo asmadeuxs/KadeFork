@@ -17,6 +17,7 @@ using util.CoolUtil;
 class Kade extends BaseHUD {
 	public var healthBar:FlxBar;
 	public var healthBarBG:FlxSprite;
+
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
 
@@ -61,6 +62,8 @@ class Kade extends BaseHUD {
 		healthBarBG.antialiasing = true;
 		healthBar.antialiasing = true;
 		scoreTxt.antialiasing = true;
+
+		positionElements();
 
 		add(healthBarBG);
 		add(healthBar);

@@ -1,9 +1,11 @@
 package gameplay;
 
+import data.ConfigTypes;
 import data.hscript.Script;
 import data.hscript.ScriptLoader;
 import flixel.FlxBasic;
 import flixel.FlxG;
+import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.util.FlxColor;
 import flixel.util.FlxSort;
 import flixel.util.typeLimit.OneOfTwo;
@@ -15,8 +17,8 @@ using util.CoolUtil;
 
 @:allow(ui.DeveloperMenu, gameplay.PlayState)
 class StageBG extends FlxBasic {
-	public var cameraZoom:Float = 1.0;
 	public var characterOffsets:Map<String, Array<Float>> = new Map();
+	public var cameraZoom:Float = 1.0;
 
 	var objects:Array<FlxBasic> = [];
 	var stageFile(default, set):String;
@@ -33,6 +35,9 @@ class StageBG extends FlxBasic {
 		scriptFuncCall('update', [elapsed, this]);
 		super.update(elapsed);
 	}
+
+	public function getStageFileName():String
+		return stageFile;
 
 	public function beatHit(beat:Int):Void
 		scriptFuncCall('onBeatHit', [beat, this]);
@@ -170,16 +175,22 @@ class StageBG extends FlxBasic {
 		if (stageData.objects != null && stageData.objects.length != 0) {
 			for (id => data in stageData.objects) {
 				var sprite = new FunkinSprite(data.position[0] ?? 0.0, data.position[1] ?? 0.0);
-				if (data.animations == null)
-					sprite.loadGraphic(Paths.image(data.file));
-				else {
-					// TODO: support other atlas types
-					sprite.frames = Paths.getSparrowAtlas(data.file);
+				var atlasType:String = ConfigTypes.getAtlasType(data.texture, 'spritesheet');
+				var path:String = ConfigTypes.getTexturePath(data.texture);
+				var tex = switch atlasType {
+					case 'sparrow': Paths.getSparrowAtlas(path);
+					case 'packer': Paths.getPackerAtlas(path);
+					case _: Paths.image(path);
+				}
+				if (tex is FlxAtlasFrames)
+					sprite.frames = cast tex;
+				else
+					sprite.loadGraphic(cast tex);
+				if (data.animations != null) {
 					sprite.addFromJson(data.animations, data.defaultFramerate ?? 24);
 					if (data.defaultAnimation != null && sprite.animation.getByName(data.defaultAnimation) != null)
 						sprite.playAnim(data.defaultAnimation, true);
 				}
-
 				if (data.scrollFactor != null) {
 					if (data.scrollFactor is Array) {
 						var scrollX:Float = data.scrollFactor[0] ?? 0.0;
@@ -212,8 +223,8 @@ class StageBG extends FlxBasic {
 				// trace('array index $id - sprite index ${sprite.ID}');
 				objects.push(sprite);
 			}
+			objects.sort((a, b) -> return FlxSort.byValues(FlxSort.ASCENDING, a.ID, b.ID));
 		}
-		objects.sort((a, b) -> return FlxSort.byValues(FlxSort.ASCENDING, a.ID, b.ID));
 	}
 
 	override function draw() {
@@ -260,28 +271,4 @@ class StageBG extends FlxBasic {
 		objects.sort((a, b) -> return FlxSort.byValues(FlxSort.ASCENDING, a.ID, b.ID));
 		return obj;
 	}
-}
-
-private typedef JsonSprite = {
-	name:String,
-	file:String,
-	?atlasType:String,
-	position:Array<Float>,
-	?defaultFramerate:Int,
-	?defaultAnimation:String,
-	?visible:OneOfTwo<String, Bool>,
-	?animations:Map<String, OneOfTwo<String, JsonAnimation>>,
-	?scale:OneOfTwo<Array<Float>, Float>,
-	?scrollFactor:OneOfTwo<Array<Float>, Float>,
-	?color:OneOfTwo<Array<Int>, String>,
-	?antialiasing:Bool,
-	?id:Int
-}
-
-typedef StageFile = {
-	?name:String,
-	?cameraZoom:Float,
-	?defaultAntialiasing:Bool,
-	?characterOffsets:Dynamic,
-	objects:Array<JsonSprite>
 }

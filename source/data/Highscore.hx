@@ -68,6 +68,7 @@ class Highscore {
 		var company:String = lime.app.Application.current.meta["file"];
 		var appName:String = lime.app.Application.current.meta["company"];
 		FlxG.save.bind('$appName/scores', company);
+
 		if (FlxG.save.data.songScores != null)
 			songScores = FlxG.save.data.songScores;
 		if (FlxG.save.data.levelScores != null)

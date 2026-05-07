@@ -30,6 +30,8 @@ class Controls {
 	// instance stuff
 	public var actions:ActionMap;
 
+	// TODO: controller support
+
 	public function new(actions:ActionMap):Void {
 		Controls.connected.push(this);
 		if (Controls.current == null)

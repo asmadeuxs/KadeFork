@@ -21,6 +21,7 @@ class Song {
 			'songs/$song/$difficulty',
 			'songs/$song/$song',
 		];
+
 		var path:String = null;
 		for (possiblePath in paths) {
 			var candidate:String = Paths.resolveAssetPath(possiblePath + '.json', mod);
@@ -29,6 +30,7 @@ class Song {
 				break;
 			}
 		}
+
 		return path;
 	}
 

@@ -24,6 +24,7 @@ class BaseHUD extends FlxSpriteGroup {
 
 	public static function listHUDs():Array<String> {
 		var hudList:Array<String> = ["Detailed", "Classic"];
+
 		function findThenPush(modId:String = 'core') {
 			var dir:String = Paths.getPath('scripts/huds', modId);
 			if (Paths.fileExists(dir)) {
@@ -36,6 +37,7 @@ class BaseHUD extends FlxSpriteGroup {
 				}
 			}
 		}
+
 		var modIDs:Array<String> = util.Mods.getEnabled();
 		for (modId in modIDs)
 			findThenPush(modId);

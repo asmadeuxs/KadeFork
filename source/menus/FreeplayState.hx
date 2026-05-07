@@ -1,5 +1,6 @@
 package menus;
 
+import data.ConfigTypes.LevelData;
 import data.Highscore;
 import data.song.Song;
 import data.song.SongMetadata;
@@ -21,6 +22,8 @@ import ui.HealthIcon;
 using StringTools;
 
 class FreeplayState extends GenericMenu {
+	static var prevSong:String = null;
+
 	var songs:Array<SongMetadata> = [];
 	var iconArray:Array<HealthIcon> = [];
 
@@ -129,6 +132,10 @@ class FreeplayState extends GenericMenu {
 		var curSong = songs[song];
 		Mods.currentMod = curSong.mod;
 		trace(curSong.mod);
+		var songID:String = '${curSong.mod}:${curSong.songFolder}';
+		if (prevSong == songID)
+			Paths.skipNextClear = true;
+		prevSong = songID;
 		PlayState.difficulty = lastDifficultyArray[difficulty].toLowerCase();
 		PlayState.moonSong = Song.loadFromFile(curSong.mod, curSong.songFolder, PlayState.difficulty);
 		PlayState.songName = curSong.songFolder;

@@ -21,13 +21,13 @@ class Alphabet extends FlxSpriteGroup {
 	public var isMenuItem:Bool = false;
 
 	public var text:String = "";
+	public var widthOfWords:Float = FlxG.width;
 
 	var _finalText:String = "";
 	var _curText:String = "";
-
-	public var widthOfWords:Float = FlxG.width;
-
 	var yMulti:Float = 1;
+
+
 
 	// custom shit
 	// amp, backslash, question mark, apostrophy, comma, angry faic, period
@@ -36,7 +36,6 @@ class Alphabet extends FlxSpriteGroup {
 	var lastWasSpace:Bool = false;
 
 	var splitWords:Array<String> = [];
-
 	var isBold:Bool = false;
 
 	public function new(x:Float, y:Float, text:String = "", ?bold:Bool = false, typed:Bool = false) {

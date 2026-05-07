@@ -16,13 +16,14 @@ using StringTools;
 using util.CoolUtil;
 
 class Note extends gameplay.FunkinSprite {
-	public var noteData:Int = 0;
+	public var strumline:Strumline = null;
+
 	public var strumTime:Float = 0;
-	public var sustainLength:Float = 0;
-	public var sustainProgress:Float = 0;
+	public var noteData:Int = 0;
 	public var noteOwner:Int = -1;
 
-	public var strumline:Strumline = null;
+	public var sustainLength:Float = 0;
+	public var sustainProgress:Float = 0;
 
 	public var noteType(default, set):String = null;
 
@@ -55,9 +56,9 @@ class Note extends gameplay.FunkinSprite {
 	public var mustPress:Bool = false;
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
-	public var isSustain:Bool = false;
 	public var missed:Bool = false;
 
+	public var isSustain:Bool = false;
 	public var holdBody:FlxSprite;
 	public var holdEnd:FlxSprite;
 
@@ -69,10 +70,8 @@ class Note extends gameplay.FunkinSprite {
 	 */
 	public var hitMultiplier:Array<Float> = [1.0, 1.0];
 
-	public var judgement:Judgement;
 	public var hitDifference:Float = 0.0;
-
-	var colorArray:Array<String> = ["purple", "blue", "green", "red"];
+	public var judgement:Judgement;
 
 	public function new() {
 		super(0, 4000);

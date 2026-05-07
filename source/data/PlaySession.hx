@@ -12,7 +12,6 @@ class PlaySession {
 
 	public var totalNotesHit:Float = 0.0;
 	public var totalPlayed:Int = 0;
-
 	public var judgeMan:JudgementManager;
 
 	public function new():Void {

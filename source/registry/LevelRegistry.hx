@@ -1,29 +1,13 @@
 package registry;
 
+import data.ConfigTypes.LevelLabel;
+import data.ConfigTypes.LevelSong;
+import data.ConfigTypes.LevelData;
 import util.CoolUtil;
 import util.Mods;
 
 using haxe.io.Path;
 using StringTools;
-
-typedef LevelLabel = {
-	texture:String,
-}
-
-typedef LevelSong = {
-	name:String,
-	folder:String,
-	?album:String,
-	?icon:String,
-	?difficulties:Array<String>,
-}
-
-typedef LevelData = {
-	tagline:String,
-	difficulties:Array<String>,
-	labelObject:LevelLabel,
-	songs:Array<LevelSong>
-}
 
 class LevelRegistry extends BaseRegistry<LevelData> {
 	public static var current:LevelRegistry = null;
@@ -58,14 +42,18 @@ class LevelRegistry extends BaseRegistry<LevelData> {
 				trace('Loading built-in levels (from assets folder)');
 			else
 				trace('Loading levels from mod "$mod"');
-			var orderFile = Paths.resolveAssetPath('data/levelList.txt', mod);
+
 			var levelNames:Array<String> = [];
+			var orderFile = Paths.resolveAssetPath('data/levelList.txt', mod);
+
 			var useOrderFile = Paths.fileExists(orderFile);
 			if (useOrderFile) {
 				var content = Paths.getText(orderFile);
 				levelNames = CoolUtil.coolList(content);
 			}
+
 			var availableLevels:Map<String, String> = new Map();
+
 			for (file in Paths.listFiles(levelDir)) {
 				var ext = file.extension();
 				if (!Paths.jsonExtensions.contains(ext))
@@ -75,6 +63,7 @@ class LevelRegistry extends BaseRegistry<LevelData> {
 				if (Paths.fileExists(filePath))
 					availableLevels.set(name, filePath);
 			}
+
 			var namesToProcess = useOrderFile ? levelNames : [for (name in availableLevels.keys()) name];
 			for (name in namesToProcess) {
 				var filePath = availableLevels.get(name);

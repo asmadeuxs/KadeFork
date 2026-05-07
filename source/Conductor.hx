@@ -9,6 +9,7 @@ import openfl.media.Sound;
 @:structInit @:publicFields class TimingPoint {
 	public var time:Float = 0;
 	public var bpm:Float = 100.0;
+
 	public var denominator:Float = 4.0; // steps per beat
 	public var numerator:Float = 4.0; // beats per bar
 
@@ -24,6 +25,7 @@ import openfl.media.Sound;
 class Conductor extends flixel.FlxBasic {
 	public static var current:Conductor;
 
+	public static var timingPoints:Array<TimingPoint> = [{}];
 	public static var bpm(default, set):Float = 100;
 	public static var denominator:Float = 4.0;
 	public static var numerator:Float = 4.0;
@@ -34,8 +36,6 @@ class Conductor extends flixel.FlxBasic {
 	public static var time:Float = 0;
 	public static var lastTime:Float = 0;
 	public static var offset:Float = 0;
-
-	public static var timingPoints:Array<TimingPoint> = [{}];
 
 	public static var beatHit:FlxTypedSignal<Int->Void> = new FlxTypedSignal();
 	public static var stepHit:FlxTypedSignal<Int->Void> = new FlxTypedSignal();

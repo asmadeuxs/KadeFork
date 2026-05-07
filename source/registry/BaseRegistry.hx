@@ -6,11 +6,11 @@ package registry;
 class BaseRegistry<Registrable> {
 	public var entries:Map<String, Registrable> = new Map();
 
-	var _toID:Map<String, Int> = new Map();
-
 	public var name:String = "BaseRegistry";
 	public var locked:Bool = false;
 	public var length(get, never):Int;
+
+	var _toID:Map<String, Int> = new Map();
 
 	public function new(name:String):Void {
 		this.name = name;

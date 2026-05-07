@@ -12,10 +12,10 @@ using util.CoolUtil;
 
 @:access(gameplay.Note)
 class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
-	public var scrollSpeed:Null<Float> = null;
 	public var keyCount:Int = 4;
 	public var noteskin:Noteskin;
 
+	public var scrollSpeed:Null<Float> = null;
 	public var strums:Array<FunkinSprite> = [];
 
 	var splashPool:ObjectPool<FunkinSprite>;

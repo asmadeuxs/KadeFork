@@ -12,15 +12,17 @@ typedef HScriptFunction = {
 typedef InterpType = #if FEATURE_HSCRIPT hscript.Interp #else Any #end;
 
 @:structInit @:publicFields class Script {
-	@:optional var priority:Int = 0;
 	var fileName:String = "hscript";
 	var filePath:String = null;
 	var codeString:String = null;
 	var code:Any = null; // fuck if i know.
 	var interp:InterpType;
 
+	@:optional var priority:Int = 0;
+
 	function callFunc(funcName:String, ?args:Array<Dynamic>):HScriptFunction {
 		var caller:HScriptFunction = null;
+
 		#if FEATURE_HSCRIPT
 		if (this.interp == null) {
 			Sys.println('Script Error (${this.fileName}) - The script interpret is null (destroyed? value is: $interp)');
@@ -28,6 +30,7 @@ typedef InterpType = #if FEATURE_HSCRIPT hscript.Interp #else Any #end;
 		}
 		if (args == null)
 			args = [];
+
 		var func = this.interp.variables.get(funcName);
 		if (func != null && Reflect.isFunction(func)) {
 			try {
@@ -41,12 +44,14 @@ typedef InterpType = #if FEATURE_HSCRIPT hscript.Interp #else Any #end;
 			catch (e:Dynamic) {
 				var lineText = 'at unknown line';
 				var priorPos = getPosInfos();
+
 				if (Std.isOfType(e, hscript.Expr.Error)) {
 					var exprError:hscript.Expr.Error = cast e;
 					if (exprError != null)
 						lineText = 'at line ' + exprError.line;
 				} else if (priorPos != null)
 					lineText = 'at line ' + priorPos.lineNumber + ' (call site)';
+
 				Sys.println('Script Error (${this.filePath} $lineText) - $e');
 			}
 		}

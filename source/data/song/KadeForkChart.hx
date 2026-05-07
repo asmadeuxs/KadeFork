@@ -116,6 +116,7 @@ class KadeForkChart extends BasicFormat<KFCFormat, KFCMeta> {
 		var scrollSpeedMap = data.scrollSpeeds;
 		if (!scrollSpeedMap.exists(curDiff))
 			scrollSpeedMap[curDiff] = 1.0;
+
 		return {
 			offset: 0.0,
 			title: meta?.name,

@@ -6,11 +6,11 @@ import flixel.FlxSprite;
 using StringTools;
 
 class FunkinSprite extends FlxSprite {
-	public var animOffsets:Map<String, Array<Dynamic>>;
+	public var animOffsets:Map<String, Array<Float>>;
 
 	public function new(x:Float, y:Float):Void {
 		super(x, y);
-		animOffsets = new Map<String, Array<Dynamic>>();
+		animOffsets = new Map<String, Array<Float>>();
 	}
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void {
@@ -21,6 +21,9 @@ class FunkinSprite extends FlxSprite {
 		// else
 		//	offset.set(0, 0);
 	}
+
+	public function getOffset(name:String):Array<Float>
+		return animOffsets[name];
 
 	public function addOffset(name:String, x:Float = 0, y:Float = 0):Void
 		animOffsets[name] = [x, y];

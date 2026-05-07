@@ -4,20 +4,20 @@
   "objects": [
     {
       "name": "bg",
-      "file": "stages/week1/stageback",
+      "texture": "stages/week1/stageback",
       "position": [ -600, -200 ],
       "scrollFactor": 0.9
     },
     {
       "name": "front",
-      "file": "stages/week1/stagefront",
+      "texture": "stages/week1/stagefront",
       "position": [ -650, 600 ],
       "scrollFactor": 0.9,
       "scale": 1.1
     },
     {
       "name": "curtains",
-      "file": "stages/week1/stagecurtains",
+      "texture": "stages/week1/stagecurtains",
       "position": [ -500, -300 ],
       "visible": "highQualityMode",
       "scrollFactor": 1.3,

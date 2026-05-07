@@ -1,5 +1,6 @@
 package data;
 
+import data.ConfigTypes;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
@@ -11,37 +12,22 @@ import gameplay.note.Note;
 import haxe.Json5;
 import util.AnimationHelper;
 
-private typedef ModAnimation = Dynamic; // OneOfTwo<Dynamic, String>;
-
-private typedef StrumAnimations = {
-	animStatic:Array<ModAnimation>,
-	animPressed:Array<ModAnimation>,
-	animConfirm:Array<ModAnimation>,
-	?animHolding:Array<ModAnimation>
-}
-
-// TODO: make this typedef just a general mod thing and not exclusive to this file
-// this file *in general* is very useful
-private typedef TextureConfig = {path:String, ?atlasType:String}
-private typedef AnimationConfig = {?antialiasing:Bool, animations:Array<ModAnimation>, ?atlas:TextureConfig};
-
-typedef NoteskinFile = {
-	?name:String,
-	?author:String,
-	?atlasType:String,
-	?keyCount:Int,
-	?defaultFramerate:Int,
-	?offsets:Array<OneOfTwo<Dynamic, Array<Float>>>,
-	defaultAtlas:TextureConfig,
-	strums:{?antialiasing:Bool, animations:StrumAnimations, ?atlas:TextureConfig, ?scale:Float},
-	arrows:AnimationConfig & {?scale:Float},
-	?holds:AnimationConfig,
-	?splashes:AnimationConfig & {?scale:Float},
-}
-
 // i hate this file in specific -asmadeuxs
 // actually i rewrote it entirely and i hate it slightly less now -asmadeuxs
 class Noteskin {
+	public static function loadNoteskinFile(noteskinPath:String):Noteskin {
+		var filePath = findNoteskinFile(noteskinPath);
+		var skinData:NoteskinFile;
+		if (!Paths.fileExists(filePath)) {
+			trace('Noteskin "$noteskinPath" not found, using default');
+			skinData = DEFAULT_SKIN;
+		} else {
+			trace('Loading noteskin from $filePath');
+			skinData = cast Json5.parse(Paths.getText(filePath));
+		}
+		return new Noteskin(skinData);
+	}
+
 	public static final DEFAULT_SKIN:NoteskinFile = {
 		name: "Classic",
 		author: "PhantomArcade",
@@ -121,17 +107,24 @@ class Noteskin {
 				conf.defaultAtlas;
 		}
 		if (texConf != null) {
-			var atlas = Paths.getSparrowAtlas(texConf.path);
+			var atlasType:String = ConfigTypes.getAtlasType(texConf);
+			var texPath:String = ConfigTypes.getTexturePath(texConf);
+			var mod:String = Paths.getAssetOrigin(texPath);
+			var atlas = switch atlasType {
+				// case 'spritesheet':Paths.image(texPath);
+				case 'packer': Paths.getPackerAtlas(texPath);
+				case _: Paths.getSparrowAtlas(texPath);
+			}
 			if (atlas != null)
 				atlasMap.set(key, atlas);
 			else
-				trace('Cannot load noteskin atlas for $key (path: ${Paths.getPath('images/${texConf.path}')})');
+				trace('Cannot load noteskin atlas for $key (path: ${Paths.resolveAssetPath('images/$texPath', mod)}');
 		}
 		return atlasMap.get(key);
 	}
 
 	private function getAtlas(key:String):FlxAtlasFrames
-		return (atlasMap.get(key) != null) ? atlasMap.get(key) : atlasMap.get("defaultAtlas");
+		return if (atlasMap.get(key) != null) atlasMap.get(key) else atlasMap.get("defaultAtlas");
 
 	private function preload():Void {
 		var conf = file;
@@ -178,16 +171,10 @@ class Noteskin {
 		splashAA = conf.splashes.antialiasing ?? DEFAULT_SKIN.splashes.antialiasing;
 	}
 
-	private static function _animMapper(anim:ModAnimation):String {
-		var mapped:String = null;
-		if (anim is String)
-			mapped = anim;
-		else if (anim.prefix != null)
-			mapped = anim.prefix;
-		return mapped;
-	}
+	private static function _animMapper(a):String
+		return ConfigTypes.getAnimationPrefix(a);
 
-	private static function loadAnimArray(arr:Array<ModAnimation>):Array<String>
+	private static function loadAnimArray(arr:Array<AnimationDef>):Array<String>
 		return arr == null ? [] : arr.map(_animMapper);
 
 	private inline function getFromArray(arr:Array<String>, noteData:Int):String
@@ -292,18 +279,5 @@ class Noteskin {
 			if (Paths.fileExists(p))
 				return p;
 		return paths[0];
-	}
-
-	public static function loadNoteskinFile(noteskinPath:String):Noteskin {
-		var filePath = findNoteskinFile(noteskinPath);
-		var skinData:NoteskinFile;
-		if (!Paths.fileExists(filePath)) {
-			trace('Noteskin "$noteskinPath" not found, using default');
-			skinData = DEFAULT_SKIN;
-		} else {
-			trace('Loading noteskin from $filePath');
-			skinData = cast Json5.parse(Paths.getText(filePath));
-		}
-		return new Noteskin(skinData);
 	}
 }

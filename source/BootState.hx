@@ -22,6 +22,7 @@ class BootState extends flixel.FlxState {
 		data.Highscore.load();
 		util.Mods.loadMods();
 		util.Mods.scan(true);
+
 		// yes we're calling them levels and not weeks
 		// they call it levels in base game so we will call it levels here -asmadeuxs
 		var levelRegistry = new registry.LevelRegistry();
@@ -32,24 +33,20 @@ class BootState extends flixel.FlxState {
 			data.Preferences.save();
 			util.Mods.saveMods();
 		});
+
 		#if FEATURE_TRANSLATIONS
 		new data.Locale(Preferences.user.language);
 		#end
-		util.Mods.saveMods();
-		// this is not great but it, its fine for now.
-		FlxG.signals.preStateSwitch.add(() -> Paths.clearCache());
 
-		/* // we're just gonna rewrite story mode altogether,
-			// the current one is genuinely hell to work with and was basically unmaintained -asmadeuxs
-			if (FlxG.save.data.weekUnlocked != null) { // FIX LATER!!!
-				// WEEK UNLOCK PROGRESSION!!
-				// StoryMenuState.weekUnlocked = FlxG.save.data.weekUnlocked;
-				if (StoryMenuState.weekUnlocked.length < 4)
-					StoryMenuState.weekUnlocked.insert(0, true);
-				// QUICK PATCH OOPS!
-				if (!StoryMenuState.weekUnlocked[0])
-					StoryMenuState.weekUnlocked[0] = true;
-		}*/
+		util.Mods.saveMods();
+
+		// this is not great but it, its fine for now.
+		FlxG.signals.preStateSwitch.add(() -> {
+			if (!Paths.skipNextClear)
+				Paths.clearCache();
+			Paths.skipNextClear = false;
+		});
+
 		#if FREEPLAY
 		menus.ScriptedMenu.switchToMenu("FreeplayState");
 		#elseif CHARTING

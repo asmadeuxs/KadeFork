@@ -10,9 +10,9 @@ enum abstract LerpingStyle(String) from String to String {
 }
 
 class AlphabetMenu extends FlxTypedSpriteGroup<Alphabet> {
+	public var lerpStyle:String = LerpingStyle.DEFAULT;
 	public var spacingBetweenItems:Int = 130;
 	public var items:Array<String> = null;
-	public var lerpStyle:String = LerpingStyle.DEFAULT;
 
 	public function new(x:Float, y:Float, ?list:Array<String>):Void {
 		super(x, y);

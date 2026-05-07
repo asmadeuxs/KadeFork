@@ -13,9 +13,6 @@ import openfl.Lib;
 class MusicBeatState extends FlxUIState {
 	private var controls(get, never):Controls;
 
-	inline function get_controls():Controls
-		return Controls.current;
-
 	public var curStep(get, never):Int;
 	public var curBeat(get, never):Int;
 
@@ -25,20 +22,23 @@ class MusicBeatState extends FlxUIState {
 	function get_curBeat()
 		return Math.floor(Conductor.currentBeat);
 
+	inline function get_controls():Controls
+		return Controls.current;
+
 	override function create() {
 		super.create();
-		//if (!Preferences.user.skipTransitions)
+		// if (!Preferences.user.skipTransitions)
 		//	effects.Transition.playTransition(this, {out: true});
 		Conductor.stepHit.add(stepHit);
 		Conductor.beatHit.add(beatHit);
 		Conductor.barHit.add(barHit);
 	}
 
-	//override function startOutro(_) {
+	// override function startOutro(_) {
 	//	if (!Preferences.user.skipTransitions)
 	//		effects.Transition.playTransition(this, {out: false});
 	//	return super.startOutro(_);
-	//}
+	// }
 
 	override function destroy() {
 		super.destroy();

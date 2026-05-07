@@ -45,12 +45,14 @@ class CoolUtil {
 			return FlxColor.TRANSPARENT;
 		var counts:Map<Int, Int> = [];
 		var colorsToDiscard:Map<Int, Bool> = null;
+
 		if (ignoreColors != null && ignoreColors.length > 0) {
 			colorsToDiscard = [];
 			for (col in ignoreColors)
 				colorsToDiscard[col] = true;
 		}
 		var mapLen:Int = 0;
+
 		for (x in 0...sprite.pixels.width) {
 			for (y in 0...sprite.pixels.height) {
 				var col:FlxColor = sprite.pixels.getPixel32(x, y);
@@ -63,12 +65,15 @@ class CoolUtil {
 				mapLen++;
 			}
 		}
+
 		colorsToDiscard.clear();
 		ignoreColors.resize(0);
 		colorsToDiscard = null;
 		ignoreColors = null;
+
 		if (mapLen <= 0)
 			return FlxColor.TRANSPARENT;
+
 		var maxCount:Int = 0;
 		var dominant:FlxColor = 0;
 		for (colorInt => count in counts) {
@@ -92,12 +97,14 @@ class CoolUtil {
 		var file:String = Paths.getText(path);
 		if (!noTrim)
 			file = file.trim();
+
 		var daList:Array<String> = file.split('\n');
 		for (i => t in daList) {
 			t = t.trim();
 			if (t.length == 0 || isComment(t))
 				daList.remove(t);
 		}
+
 		return [for (i in 0...daList.length) daList[i] = !noTrim ? daList[i].trim() : daList[i]];
 	}
 }

@@ -32,8 +32,10 @@ class Mods {
 		var company:String = lime.app.Application.current.meta["file"];
 		var appName:String = lime.app.Application.current.meta["company"];
 		FlxG.save.bind('$appName/mods', company);
+
 		if (FlxG.save.data.menuPriorityMod != null)
 			Mods.menuPriorityMod = FlxG.save.data.menuPriorityMod;
+
 		if (FlxG.save.data.activeMods != null) {
 			var saved:Array<String> = FlxG.save.data.activeMods;
 			var available = getAvailableMods();
@@ -58,27 +60,32 @@ class Mods {
 			trace('Mods directory "$modRoot" not found (was it deleted?)');
 			return allMods;
 		}
+
 		for (modId in Paths.listFiles(modRoot)) {
 			var root:String = haxe.io.Path.removeTrailingSlashes(modRoot);
 			if (!sys.FileSystem.isDirectory('$root/$modId'))
 				continue;
+
 			if (!Paths.fileExists('$root/$modId/mod.txt')) {
 				trace('Mod "$modId" not added (missing mod.txt file.)');
 				trace('That file must look like this:\n');
 				trace('Mod Name|Mod Version (i.e: 1.0.0)|Mod description.\n');
 				continue;
 			}
+
 			var configFile:String = Paths.getText('$modRoot/$modId/mod.txt').trim();
 			var modData:Array<String> = configFile.split("|");
 			if (modData.length < 1) {
 				trace('Mod file too short (must have at least its name.)');
 				continue;
 			}
+
 			allMods.set(modId, {name: modData[0], version: modData[1] ?? apiVer, description: modData[2] ?? defaultDesc});
 			if (!activeMods.contains(modId))
 				activeMods.push(modId);
 			trace('Loaded mod folder $modId');
 		}
+
 		// TODO: re-enable this, I'll just enable every mod at once for now
 		// if (enableActive)
 		//	scanActiveMods();
@@ -93,6 +100,7 @@ class Mods {
 		#if FEATURE_MODS
 		if (!Paths.fileExists(modRoot))
 			return mods;
+
 		for (modId in Paths.listFiles(modRoot)) {
 			var path = haxe.io.Path.removeTrailingSlashes('$modRoot/$modId');
 			if (sys.FileSystem.isDirectory(path) && Paths.fileExists('$path/mod.txt'))
@@ -109,6 +117,7 @@ class Mods {
 			trace('No mods were enabled or disabled.');
 			return activeMods;
 		}
+
 		activeMods.resize(0);
 		for (info in CoolUtil.coolList(Paths.getText(modsListFile))) {
 			var data = info.split("|");
@@ -121,12 +130,14 @@ class Mods {
 				trace('mod_folder|true (or false)\n');
 			}
 		}
+
 		return activeMods;
 	}
 
 	public static function searchAssetOnMods(file:String) {
 		var assetPath:String = null;
 		var found:Bool = false;
+
 		if (currentMod != null && currentMod != 'core') {
 			var topPath:String = '$modRoot/${currentMod}/$file';
 			if (Paths.fileExists(topPath)) { // prioritize current mod
@@ -134,6 +145,7 @@ class Mods {
 				found = true;
 			}
 		}
+
 		if (!found) {
 			for (i in 0...activeMods.length) {
 				var modPath:String = '$modRoot/${activeMods[i]}/$file';
@@ -143,23 +155,28 @@ class Mods {
 				}
 			}
 		}
+
 		return assetPath;
 	}
 
 	public static function getAssetFromMod(mod:String, file:String) {
 		var assetPath:String = null;
+
 		var path:String = '$modRoot/${mod}/$file';
 		if (mod != null && mod != 'core' && Paths.fileExists(path))
 			assetPath = path;
+
 		return assetPath;
 	}
 
 	public static function getEnabled(?appendCore:Bool = true):Array<String> {
 		var ids:Array<String> = [];
+
 		if (appendCore)
 			ids.push('core');
 		for (modId in activeMods)
 			ids.push(modId);
+
 		return ids;
 	}
 

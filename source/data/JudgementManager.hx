@@ -10,11 +10,11 @@ import flixel.util.FlxColor;
 	@:optional public var hittable:Bool = true;
 	@:optional public var healthBonus:Float->Float = null;
 	@:optional public var comboBreak:Bool = false;
+	@:optional public var color:FlxColor = 0xFFFFFFFF;
 	@:optional public var accuracy:Float = 0.0;
+	@:optional public var splash:Bool = false;
 	@:optional public var score:Int = 0;
 	@:optional public var hits:Int = 0;
-	@:optional public var color:FlxColor = 0xFFFFFFFF;
-	@:optional public var splash:Bool = false;
 }
 
 class JudgementManager {

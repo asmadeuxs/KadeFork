@@ -9,10 +9,9 @@ import openfl.geom.Matrix;
 class ChartingGrid extends FlxSprite {
 	public var columns:Int;
 	public var rows:Int;
-
 	public var cellSize:Int;
-	public var beatInterval:Int = 4;
 
+	public var beatInterval:Int = 4;
 	public var lineColor1:FlxColor = 0xFF505050;
 	public var lineColor2:FlxColor = 0xFF808080;
 

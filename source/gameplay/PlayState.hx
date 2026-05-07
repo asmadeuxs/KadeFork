@@ -75,7 +75,6 @@ class PlayState extends MusicBeatState {
 
 	public static var campaignScore:Int = 0;
 	public static var session:PlaySession;
-
 	public static var nps:Int = 0;
 	public static var maxNps:Int = 0;
 
@@ -84,21 +83,22 @@ class PlayState extends MusicBeatState {
 	public var gf:Character;
 	public var boyfriend:Character;
 
+	public var strumlines:FlxTypedSpriteGroup<Strumline>;
+	public var opponentStrums:Strumline;
+	public var playerStrums:Strumline;
+
 	public var notes:NoteRenderer;
 	public var scrollSpeed:Float = 2.5;
 	public var initialScrollSpeed:Float = 2.5;
 	public var unspawnNotes:Array<NoteData> = [];
 	public var noteSpawnIndex:Int = 0;
 
+	public var perfectMode:Bool = false;
+
 	public var comboDisplay:FlxSpriteGroup;
-	public var strumlines:FlxTypedSpriteGroup<Strumline>;
 	public var camFollow:FlxObject;
 
 	static var prevCamFollow:FlxObject;
-
-	public var opponentStrums:Strumline;
-	public var playerStrums:Strumline;
-	public var perfectMode:Bool = false;
 
 	public var maxHealth:Float = 2.0;
 	public var minHealth:Float = 0.0;
@@ -138,7 +138,6 @@ class PlayState extends MusicBeatState {
 	public var inputEnabled:Bool = false;
 
 	var uiDimBackground:FlxSprite;
-
 	var inputQueue:Array<Array<Note>> = [];
 	var twoPlayerMode:Bool = false;
 	var inputMgr:InputManager;
@@ -205,9 +204,9 @@ class PlayState extends MusicBeatState {
 		defaultCamZoom = stage.cameraZoom;
 		add(stage);
 
-		gf = new Character(400, 130, moonMeta.extraData.exists(PLAYER_3) ? moonMeta.extraData.get(PLAYER_3) : "bf");
-		dad = new Character(100, 100, moonMeta.extraData.exists(PLAYER_2) ? moonMeta.extraData.get(PLAYER_2) : "bf");
-		boyfriend = new Character(770, 450, moonMeta.extraData.exists(PLAYER_1) ? moonMeta.extraData.get(PLAYER_1) : "bf", true);
+		gf = new Character(0, 0, moonMeta.extraData.exists(PLAYER_3) ? moonMeta.extraData.get(PLAYER_3) : "bf");
+		dad = new Character(0, 0, moonMeta.extraData.exists(PLAYER_2) ? moonMeta.extraData.get(PLAYER_2) : "bf");
+		boyfriend = new Character(0, 0, moonMeta.extraData.exists(PLAYER_1) ? moonMeta.extraData.get(PLAYER_1) : "bf", true);
 
 		positionCharacters();
 		add(gf);
@@ -314,20 +313,29 @@ class PlayState extends MusicBeatState {
 	// For stage reloading
 	public function positionCharacters() {
 		// this looks ugly.
-		if (boyfriend != null && stage.characterOffsets.exists('player')) {
-			var o:Array<Float> = stage.characterOffsets.get('player');
-			boyfriend.x = 770 + o[0];
-			boyfriend.y = 450 + o[1];
+		if (boyfriend != null) {
+			boyfriend.setPosition(770, 450);
+			if (stage.characterOffsets.exists('player')) {
+				var o:Array<Float> = stage.characterOffsets.get('player');
+				dad.x += o[0] ?? 0;
+				dad.y += o[1] ?? 0;
+			}
 		}
-		if (dad != null && stage.characterOffsets.exists('opponent')) {
-			var o:Array<Float> = stage.characterOffsets.get('opponent');
-			dad.x = 100 + o[0];
-			dad.y = 100 + o[1];
+		if (dad != null) {
+			dad.setPosition(100, 100);
+			if (stage.characterOffsets.exists('opponent')) {
+				var o:Array<Float> = stage.characterOffsets.get('opponent');
+				dad.x += o[0] ?? 0;
+				dad.y += o[1] ?? 0;
+			}
 		}
-		if (gf != null && stage.characterOffsets.exists('metronome')) {
-			var o:Array<Float> = stage.characterOffsets.get('metronome');
-			gf.x = 400 + o[0];
-			gf.y = 130 + o[1];
+		if (gf != null) {
+			gf.setPosition(400, 130);
+			if (stage.characterOffsets.exists('metronome')) {
+				var o:Array<Float> = stage.characterOffsets.get('metronome');
+				gf.x += o[0] ?? 0;
+				gf.y += o[1] ?? 0;
+			}
 		}
 		// gf.scrollFactor.set(0.95, 0.95);
 		if (dad != null) {
@@ -572,19 +580,28 @@ class PlayState extends MusicBeatState {
 			session.invalid = true;
 			endSong();
 		}
-		if (FlxG.keys.justPressed.SEVEN && startedCountdown)
-			FlxG.switchState(new editor.ChartEditor());
+		if (startedCountdown) {
+			if (FlxG.keys.justPressed.FIVE && canPause) {
+				pause();
+				openSubState(new ui.DeveloperMenu());
+			}
+			if (FlxG.keys.justPressed.SEVEN)
+				FlxG.switchState(new editor.ChartEditor());
+			if (FlxG.keys.justPressed.EIGHT) {
+				Paths.skipNextClear = true;
+				var curStage:String = stage.getStageFileName();
+				var ids = [boyfriend.characterId, dad.characterId];
+				if (gf != null && gf.visible && gf.characterId != 'placeholder')
+					ids.push(gf.characterId);
+				FlxG.switchState(new editor.CharacterEditor(Type.getClassName(Type.getClass(this)), ids, curStage));
+			}
+		}
 		#end
 		if (FlxG.keys.justPressed.F6) {
 			session.invalid = true;
 			perfectMode = !perfectMode;
 			perfectText.visible = perfectMode;
 		}
-		if (FlxG.keys.justPressed.FIVE && startedCountdown && canPause) {
-			pause();
-			openSubState(new ui.DeveloperMenu());
-		}
-		// end of debug keys
 
 		tilNpsUpdate -= elapsed;
 		if (tilNpsUpdate <= 0) {
@@ -798,6 +815,7 @@ class PlayState extends MusicBeatState {
 		if (!session.invalid)
 			Highscore.saveScore(songName, difficulty, session.score);
 
+		Paths.skipNextClear = true;
 		/*
 			if (isStoryMode) {
 				campaignScore += Math.round(session.score);
@@ -962,6 +980,7 @@ class PlayState extends MusicBeatState {
 		if (session.combo > 5 && gf.animOffsets.exists('sad'))
 			gf.playAnim('sad');
 		session.breakCombo();
+
 		var missJudge = session.judgeMan.getMiss();
 		if (missJudge != null) {
 			health += session.judgeMan.getHealthBonus(missJudge, health);
@@ -975,6 +994,7 @@ class PlayState extends MusicBeatState {
 				popUpCombo(session.combo, missJudge);
 			}
 		}
+
 		// if (daNote != null && Preferences.user.etternaMode)
 		//		session.totalNotesHit += util.EtternaFunctions.wife3(Math.abs(daNote.strumTime - Conductor.time), 1.7);
 		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
@@ -990,13 +1010,16 @@ class PlayState extends MusicBeatState {
 			if (caller == ScriptLoader.STOP_FUNC)
 				return;
 		}
+
 		if (note.isMine) {
 			noteMiss(note.noteData, note);
 			return;
 		}
+
 		boyfriend.sing(note.noteData, true);
 		boyfriend.danceCooldown = 1.0 + note.sustainLength;
 		note.wasGoodHit = true;
+
 		if (!note.isSustain) {
 			session.scoreNote(note);
 			session.increaseCombo(1);
@@ -1004,10 +1027,9 @@ class PlayState extends MusicBeatState {
 			if (Preferences.user.noteSplashes && note.judgement.splash)
 				playerStrums.spawnSplash(note.noteData);
 			notesHitArray.push(Date.now());
+			session.totalPlayed += 1;
 			popUpScore(note);
-		} else
-			session.totalNotesHit += 1;
-		session.totalPlayed += 1;
+		}
 		notes.removeNote(note);
 		for (vocal in Conductor.current.tracks)
 			vocal.volume = 1;

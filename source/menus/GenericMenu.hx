@@ -19,6 +19,7 @@ enum MenuVerticalStyle {
 }
 
 class GenericMenu extends MusicBeatSubstate {
+	public var menuScrollType:MenuVerticalStyle = MenuVerticalStyle.VERTICAL;
 	public var canInput:Bool = true;
 
 	public var curVertical:Int = 0;
@@ -38,8 +39,6 @@ class GenericMenu extends MusicBeatSubstate {
 	 * Changes the item by this much when pressing left/right
 	**/
 	public var horizontalFactor:Int = 1;
-
-	public var menuScrollType:MenuVerticalStyle = MenuVerticalStyle.VERTICAL;
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
