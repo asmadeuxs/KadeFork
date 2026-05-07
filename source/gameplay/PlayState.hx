@@ -319,8 +319,8 @@ class PlayState extends MusicBeatState {
 			boyfriend.setPosition(770, 450);
 			if (stage.characterOffsets.exists('player')) {
 				var o:Array<Float> = stage.characterOffsets.get('player');
-				dad.x += o[0] ?? 0;
-				dad.y += o[1] ?? 0;
+				boyfriend.x += o[0] ?? 0;
+				boyfriend.y += o[1] ?? 0;
 			}
 		}
 		if (dad != null) {
