@@ -4,6 +4,7 @@ import data.ConfigTypes;
 import data.hscript.Script;
 import data.hscript.ScriptLoader;
 import flixel.FlxG;
+import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxPoint;
 import flixel.util.typeLimit.OneOfTwo;
 import util.Mods;
@@ -72,17 +73,16 @@ class Character extends gameplay.FunkinSprite {
 			return;
 
 		var v = scriptFuncCall('update', [this, elapsed]);
-		if (v != null && v.value == ScriptLoader.STOP_FUNC)
-			return;
-
-		if (!debugMode) {
-			if (isSinging() && danceCooldown > 0.0) {
-				danceCooldown -= elapsed / singDuration;
-				if (danceCooldown <= 0.0)
-					dance();
+		if (v != null && v.value == ScriptLoader.STOP_FUNC) {
+			if (!debugMode) {
+				if (isSinging() && danceCooldown > 0.0) {
+					danceCooldown -= elapsed / singDuration;
+					if (danceCooldown <= 0.0)
+						dance();
+				}
+				if (isMissing() && animation.curAnim.finished)
+					dance(true, false, 10);
 			}
-			if (isMissing() && animation.curAnim.finished)
-				dance(true, false, 10);
 		}
 		scriptFuncCall('postUpdate', [this]);
 	}
@@ -102,7 +102,6 @@ class Character extends gameplay.FunkinSprite {
 			playAnim(idleAnimations[currentDance] + idleSuffix, force, reversed, frame);
 			currentDance = flixel.math.FlxMath.wrap(currentDance + 1, 0, idleAnimations.length - 1);
 		}
-
 		scriptFuncCall('onDance', [this, force, reversed, frame]);
 	}
 
@@ -113,7 +112,6 @@ class Character extends gameplay.FunkinSprite {
 		var v = scriptFuncCall('preSing', [this, direction, suffix, force, reversed, frame]);
 		if (v == null || v.value != ScriptLoader.STOP_FUNC)
 			playAnim(singAnimations[direction] + suffix, force, reversed, frame);
-
 		scriptFuncCall('onSing', [this, direction, suffix, force, reversed, frame]);
 	}
 
@@ -124,7 +122,6 @@ class Character extends gameplay.FunkinSprite {
 		var v = scriptFuncCall('preMiss', [this, direction, force, reversed, frame]);
 		if (v == null || v.value != ScriptLoader.STOP_FUNC)
 			playAnim(missAnimations[direction], force, reversed, frame);
-
 		scriptFuncCall('onMiss', [this, direction, force, reversed, frame]);
 	}
 
@@ -184,7 +181,7 @@ class Character extends gameplay.FunkinSprite {
 		switch characterName {
 			default:
 				this.characterId = null;
-				if (characterName == null) {
+				if (characterName == null || characterName == 'none') {
 					visible = false;
 					return loadPlaceholder();
 				}
@@ -216,11 +213,17 @@ class Character extends gameplay.FunkinSprite {
 					if ((file.facesLeft || file.isPlayer) && !isPlayer)
 						flipX = true;
 
-					// TODO: file.atlasType, OR auto-detection based on files in folder -asmadeuxs
-					if (file.texture != null)
-						frames = Paths.getSparrowAtlas(file.texture);
+					var atlasType:String = ConfigTypes.getAtlasType(file.texture, 'sparrow');
+					var path:String = ConfigTypes.getTexturePath(file.texture);
+					var tex = switch atlasType {
+						case 'sparrow': Paths.getSparrowAtlas(path);
+						case 'packer': Paths.getPackerAtlas(path);
+						case _: Paths.image(path);
+					}
+					if (tex is FlxAtlasFrames)
+						frames = cast tex;
 					else
-						frames = Paths.getSparrowAtlas('gameplay/characters/$characterName/$characterName');
+						loadGraphic(cast tex);
 
 					if (file.offsets != null)
 						this.addOffsetsFromJson(file.offsets);

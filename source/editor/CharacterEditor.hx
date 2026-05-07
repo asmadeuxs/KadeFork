@@ -37,8 +37,11 @@ class CharacterEditor extends MusicBeatState {
 		add(camFollow = new FlxObject());
 		FlxG.camera.zoom = stage.cameraZoom;
 		FlxG.camera.follow(camFollow, LOCKON, 0.04);
-		for (char in chars)
-			addChar(char);
+
+		// temporary
+		var charTypes:Array<String> = ['player', 'opponent', 'metronome'];
+		for (i => char in chars)
+			addChar(char, charTypes[i]);
 
 		infoText = new FlxText(10, 10, 0, "", 16);
 		infoText.setFormat(null, 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
@@ -46,19 +49,25 @@ class CharacterEditor extends MusicBeatState {
 		add(infoText);
 	}
 
-	public function positionCharacter(char:Character) {
+	public function positionCharacter(char:Character, ?type:String) {
 		if (char != null) {
-			char.setPosition(char.facesLeft ? 770 : 100, char.facesLeft ? 450 : 100);
-			var tag:String = char.facesLeft ? 'player' : 'opponent';
-			if (stage.characterOffsets.exists(tag)) {
-				var o:Array<Float> = stage.characterOffsets.get(tag);
+			switch type {
+				case 'player':
+					char.setPosition(770, 450);
+				case 'metronome':
+					char.setPosition(400, 130);
+				case _:
+					char.setPosition(100, 100);
+			}
+			if (stage.characterOffsets.exists(type)) {
+				var o:Array<Float> = stage.characterOffsets.get(type);
 				char.x += o[0] ?? 0;
 				char.y += o[1] ?? 0;
 			}
 		}
 	}
 
-	public function addChar(characterName:String):Void {
+	public function addChar(characterName:String, ?type:String = 'opponent'):Void {
 		var cref:Character = new Character(0, 0, characterName);
 		var char:Character = new Character(0, 0, characterName);
 
@@ -72,8 +81,8 @@ class CharacterEditor extends MusicBeatState {
 		chars[1].push(cref);
 		chars[2].push(char);
 
-		positionCharacter(cref);
-		positionCharacter(char);
+		positionCharacter(cref, type);
+		positionCharacter(char, type);
 
 		add(cref);
 		add(char);
