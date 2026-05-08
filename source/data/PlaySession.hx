@@ -34,9 +34,6 @@ class PlaySession {
 			daNote.judgement = judgeMan.judgeTime(diff);
 			daNote.hitDifference = diff;
 		}
-		// if (Preferences.user.etternaMode)
-		//	totalNotesHit += util.EtternaFunctions.wife3(judgementData.maxHitWindow, daNote.hitDifference);
-		// else
 		totalNotesHit += daNote.judgement.accuracy;
 		score += Math.round(daNote.judgement.score);
 		daNote.judgement.hits++;

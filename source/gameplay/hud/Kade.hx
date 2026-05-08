@@ -204,11 +204,12 @@ class Kade extends BaseHUD {
 		var str:String = '';
 		if (PlayState.session != null && PlayState.session.judgeMan.activeList?.length > 0)
 			for (idx => judge in PlayState.session.judgeMan.activeList) {
-				var judgeName:String = null;
+				if (idx == 0 && !judge.hittable)
+					continue;
 				#if FEATURE_TRANSLATIONS
-				judgeName = Translator.translatePlural('main', 'judge_' + judge.name);
+				var judgeName:String = Translator.translatePlural('main', 'judge_' + judge.name);
 				#else
-				judgeName = judge.name;
+				var judgeName:String = judge.name;
 				#end
 				str += '$judgeName: ${judge.hits}\n';
 			}

@@ -34,6 +34,7 @@ class Conductor extends flixel.FlxBasic {
 	public static var semiquaver:Float = crotchet / denominator; // steps in milliseconds
 
 	public static var time:Float = 0;
+	public static var rate:Float = 1.0;
 	public static var lastTime:Float = 0;
 	public static var offset:Float = 0;
 

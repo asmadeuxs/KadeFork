@@ -136,30 +136,41 @@ class Locale {
 		var localeFiles:String = path;
 		if (!Paths.fileExists(localeFiles))
 			return null;
+
 		var ats = haxe.io.Path.addTrailingSlash;
 		var language:LocaleData = {name: null, nativeName: null};
+
 		for (i in Paths.listFiles(localeFiles)) {
 			if (!i.endsWith('.csv'))
 				continue;
+
 			var path:String = ats(localeFiles) + i;
 			var lines:Array<String> = Paths.getText(path).split('\n');
 			if (lines == null || lines.length == 0) {
 				continue;
 			}
+
 			var ii:String = haxe.io.Path.withoutExtension(i);
 			if (language.strings[ii] == null)
 				language.strings.set(ii, new Map());
+
 			for (id => line in lines) {
 				var t:String = line.trim();
 				if (t.length == 0 || CoolUtil.isComment(t))
 					continue;
+
 				var lineSplit:Array<String> = line.trim().split(',');
 				if (lineSplit.length < 2) {
 					trace('Line $id has no value set (for translation file "$i")');
 					continue;
 				}
+
 				var keyTrim:String = lineSplit[0].trim();
-				var value:String = lineSplit[1];
+				var value:String = null;
+				if (lineSplit.length > 2)
+					value = [for (i in 1...lineSplit.length) lineSplit[i]].join(",");
+				else
+					value = lineSplit[1];
 				switch keyTrim {
 					case(_.toLowerCase() == 'name') => true:
 						language.name = value;

@@ -19,6 +19,8 @@ using util.CoolUtil;
 
 // I JUST MADE SOME BULLLLLLLLLLLLLLLLLLSHIT -asmadeuxs
 class OptionsMenu extends MusicBeatSubstate {
+	public var onClose:Void->Void;
+
 	var optionStash:OptionRegistry = new OptionRegistry();
 	var curCatOptions:Array<Option> = null;
 
@@ -85,7 +87,7 @@ class OptionsMenu extends MusicBeatSubstate {
 		catOptions.camera = camScroll;
 		add(catOptions);
 
-		descriptionThingy = new FlxText(catFrame.x, 0, catFrame.width, "");
+		descriptionThingy = new FlxText(catFrame.x, 0, FlxG.width * 0.6, "");
 		descriptionThingy.textField.backgroundColor = 0x80000000;
 		descriptionThingy.setFormat(optionsFont, 24, CENTER);
 		descriptionThingy.textField.background = true;
@@ -161,7 +163,6 @@ class OptionsMenu extends MusicBeatSubstate {
 		}
 		if (controls.BACK_P) {
 			closing = true;
-			close();
 			Preferences.save();
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			new flixel.util.FlxTimer().start(0.5, (_) -> {
@@ -181,6 +182,9 @@ class OptionsMenu extends MusicBeatSubstate {
 					FlxG.state.subState.persistentUpdate = false;
 				}
 			});
+			if (onClose != null)
+				onClose();
+			close();
 		}
 		updateScroll();
 	}
@@ -248,7 +252,7 @@ class OptionsMenu extends MusicBeatSubstate {
 
 	public function updateScroll() {
 		var scrollOffset:Float = 140;
-		camFollow.y = catOptions.members[curSelected].y + scrollOffset;
+		camFollow.y = catOptions.members[curSelected * 2 + 1].y + scrollOffset;
 	}
 
 	public function updateCat() {

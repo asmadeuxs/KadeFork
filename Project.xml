@@ -27,6 +27,14 @@
 	<define name="FEATURE_TRANSLATIONS" if="cpp || hl" />
 	<define name="FEATURE_HSCRIPT" if="cpp || hl" />
 
+	<!-- In-game features -->
+	<!-- Changes divergent from the usual FNF experience can be disabled here -->
+		<!-- FNF usually has only 4 judgements -->
+		<!-- The 5th one was added for parity with other rhythm games -->
+		<!-- You can comment this out to disable the feature altogether -->
+		<!-- Or just disable it on your game settings -->
+	<define name="FIFTH_JUDGEMENT" />
+
 	<classpath name="source" />
 	<assets path="assets" />
 	<assets path='example_mods' rename='mods' if="FEATURE_MODS" />

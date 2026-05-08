@@ -103,6 +103,20 @@ class OptionRegistry extends BaseRegistry<OptionCategory> {
 					variable: "etternaMode"
 				},*/
 				{
+					name: "Kino Judgement",
+					description: 'Enables a fifth judgement above "Sick!"',
+					variable: "fifthJudgement",
+				},
+				{
+					type: "number",
+					name: "Judgement Difficulty",
+					description: "Changes the hit precision required to achieve high judgements\n 4 is the base, adjust can make the game easier or more difficult",
+					variable: "judgeDifficulty",
+					numberBoundLeft: 1,
+					numberBoundRight: 9,
+					numberStep: 1
+				},
+				{
 					type: "number",
 					name: "Scroll Speed",
 					variable: "scrollSpeed",

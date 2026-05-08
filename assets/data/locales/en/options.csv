@@ -18,6 +18,8 @@ option_scrollType,Scroll Type
 option_centerStrums,Center Strums
 option_ghostTapping,Ghost Tapping
 option_etternaMode,Wife3 Accuracy
+option_fifthJudgement,Kino Judgement
+option_judgeDifficulty,Judgement Difficulty
 option_scrollSpeed,Scroll Speed
 option_scrollSpeedType,Scroll Speed Type
 
@@ -49,6 +51,8 @@ optiondesc_scrollType,Changes where the notes scroll to
 optiondesc_centerStrums,Centers your strums and hides the opponent's
 optiondesc_ghostTapping,Lets you mash without penalty
 optiondesc_etternaMode,Changes the accuracy system to use Wife3\nIt's way more complex (math-wise) for the sake of encouraging super accurate hits\nBut may feel mean to newer players
+optiondesc_fifthJudgement,Enables a fifth judgement above "Sick!"
+optiondesc_judgeDifficulty,Changes the hit precision required to achieve high judgements\n 4 is the base, adjust can make the game easier or more difficult
 optiondesc_scrollSpeed,Overrides the chart's scroll speed with your own (provided you change Scroll Speed Type below)
 optiondesc_scrollSpeedType,What should the scroll speed setting do?
 

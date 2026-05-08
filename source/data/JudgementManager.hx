@@ -21,17 +21,29 @@ class JudgementManager {
 	public var maxHitWindow:Float = 200.0;
 	public var activeList:Array<Judgement>;
 
+	public static final defaultHitWindows:Array<Float> = [22.5, 45.0, 90.0, 135.0, 180.0];
+
+	public static final difficultyScales:Array<Float> = [
+		// lol https://github.com/troll-slaiyers/FNF-Troll-Engine/blob/bc3bdb226a6d785f6d1747ed869b8dde854aecda/source/funkin/data/JudgmentManager.hx#L369
+		1.50,
+		1.33,
+		1.16,
+		1.0, // Default Scale is 4
+		0.84,
+		0.66,
+		0.5,
+		0.33,
+		0.2 // JUSTICE
+	];
+
 	public function new(?maxHitWindow:Null<Float>):Void {
 		activeList = getDefaultJudgements();
 		if (maxHitWindow != null && maxHitWindow > 0.0)
 			this.maxHitWindow = maxHitWindow;
 	}
 
-	public function getPerfect()
+	public function getBest()
 		return activeList[0];
-
-	public function getGreat()
-		return activeList[1];
 
 	public function getWorst()
 		return activeList[activeList.length - 2];
@@ -39,14 +51,19 @@ class JudgementManager {
 	public function getMiss()
 		return activeList[activeList.length - 1];
 
+	public function getJudgeDifficultyScale():Float
+		return difficultyScales[Preferences.user.judgeDifficulty];
+
 	public function getDefaultJudgements():Array<Judgement> {
+		var fifthJudge:Bool = #if FIFTH_JUDGEMENT Preferences.user.fifthJudgement #else false #end;
 		return [
 			{
 				name: "Kino",
 				image: "kino",
 				splash: true,
 				color: 0xFF97FFFF,
-				healthBonus: (health:Float) -> return health < 2 ? 0.12 : 0.0,
+				healthBonus: (health:Float) -> return health < 2 ? 0.15 : 0.0,
+				hittable: fifthJudge,
 				hitWindow: 22.5,
 				accuracy: 1.0,
 				score: 500
@@ -56,9 +73,9 @@ class JudgementManager {
 				image: "sick",
 				splash: true,
 				healthBonus: (health:Float) -> return health < 2 ? 0.1 : 0.0,
+				accuracy: fifthJudge ? 0.95 : 1.0,
 				color: 0xFFEAFF74,
 				hitWindow: 45.0,
-				accuracy: 0.95,
 				score: 350
 			},
 			{
@@ -74,7 +91,7 @@ class JudgementManager {
 				name: "Bad",
 				image: "bad",
 				comboBreak: true,
-				healthBonus: (_:Float) -> return -0.06,
+				healthBonus: (health:Float) -> return health > 0.01 ? -0.06 : 0.0,
 				color: 0xFFDC7487,
 				hitWindow: 135.0,
 				accuracy: 0.50,
@@ -84,7 +101,7 @@ class JudgementManager {
 				name: "Shit",
 				image: "shit",
 				comboBreak: true,
-				healthBonus: (_:Float) -> return -0.2,
+				healthBonus: (health:Float) -> return health > 0.1 ? -0.2 : 0.0,
 				color: 0xFFE02447,
 				hitWindow: 180.0,
 				accuracy: 0.25,
@@ -93,7 +110,7 @@ class JudgementManager {
 			{
 				name: "Miss",
 				image: "miss",
-				healthBonus: (_:Float) -> return -0.04,
+				healthBonus: (health:Float) -> return health > 0.05 ? -0.04 : 0.0,
 				color: 0xFFFF0000,
 				hitWindow: 200.0,
 				hittable: false,
@@ -129,8 +146,9 @@ class JudgementManager {
 		return judgement.healthBonus != null ? judgement.healthBonus(health) : 0.0;
 
 	public function judgeTime(noteDiff:Float):Null<Judgement> {
+		var scale:Float = getJudgeDifficultyScale();
 		for (judgement in activeList)
-			if (judgement.hittable && noteDiff <= judgement.hitWindow)
+			if (judgement.hittable && noteDiff <= (judgement.hitWindow * scale))
 				return judgement;
 		return activeList[activeList.length - 1];
 	}

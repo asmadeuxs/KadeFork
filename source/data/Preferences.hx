@@ -15,7 +15,11 @@ import util.Mods;
 	var noteOffset:Float = 0.0; // By how much should notes be offsetted?
 	var scrollSpeed:Float = 1.0; // Overrides the chart's scroll speed with your own (provided you change Scroll Speed Type below)
 	var scrollSpeedType:Int = 0; // What should the scroll speed setting do?
+
+	var fifthJudgement:Bool = true; // Enables a fifth judgement above "Sick!"
 	var etternaMode:Bool = true; // Changes the accuracy system to use Wife3
+	var judgeDifficulty:Int = 4; // Changes the difficulty of the judgement windows
+	// TODO: add custom judge windows
 
 	// Visuals & Accessibility
 	var strumUnderlay:Int = 0; // Enables a background behind the strums or stage (goes from 0 - 100)

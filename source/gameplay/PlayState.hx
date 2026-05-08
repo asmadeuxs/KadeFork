@@ -78,11 +78,10 @@ class PlayState extends MusicBeatState {
 	public static var nps:Int = 0;
 	public static var maxNps:Int = 0;
 
-
 	public var camGame:FlxCamera;
 	public var camHUD:FlxCamera;
 	public var camOver:FlxCamera;
-	
+
 	public var stage:StageBG;
 
 	public var dad:Character;
@@ -144,6 +143,10 @@ class PlayState extends MusicBeatState {
 	var twoPlayerMode:Bool = false;
 	var inputMgr:InputManager;
 
+	// Used for some dynamic setting changes
+	var initialJudgeDiff:Int = 4;
+	var currentScrollType:Int = 0;
+
 	override public function create() {
 		super.create();
 		current = this;
@@ -155,6 +158,9 @@ class PlayState extends MusicBeatState {
 			session.reset();
 		else
 			session = new PlaySession();
+
+		initialJudgeDiff = Preferences.user.judgeDifficulty;
+		currentScrollType = Preferences.user.scrollType;
 
 		inputMgr = new InputManager(keyPressed, keyReleased);
 		inputQueue.resize(noteActions.length);
@@ -273,8 +279,15 @@ class PlayState extends MusicBeatState {
 	}
 
 	public function onSettingsChanged() {
-		var currentSave = Preferences.user;
-		changeScrollDirection(currentSave.scrollType);
+		var currentSave = Preferences.user
+		if (currentSave.scrollType != currentScrollType) {
+			changeScrollDirection(currentSave.scrollType);
+			currentScrollType = currentSave.scrollType;
+		}
+		if (currentSave.judgeDifficulty < initialJudgeDiff)
+			session.invalid = true;
+		// else
+		// session.scoreMultiplier = currentSave.judgeDifficulty;
 		setupUnderlay();
 		setupKeybinds();
 		if (currentHUD != null)
@@ -860,11 +873,13 @@ class PlayState extends MusicBeatState {
 	var endingSong:Bool = false;
 	var hits:Array<Float> = [];
 	var currentTimingShown:FlxText = null;
+
 	var showRating:Bool = true;
 	var showComboNumbers:Bool = true;
 	var showComboSprite:Bool = false;
 
 	public function popUpScore(daNote:Note):Void {
+		// TODO: move this to HUD?
 		if (showRating)
 			popUpRating(daNote.judgement.image);
 		popUpCombo(session.combo, daNote.judgement);
@@ -997,8 +1012,6 @@ class PlayState extends MusicBeatState {
 			}
 		}
 
-		// if (daNote != null && Preferences.user.etternaMode)
-		//		session.totalNotesHit += util.EtternaFunctions.wife3(Math.abs(daNote.strumTime - Conductor.time), 1.7);
 		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 		boyfriend.miss(direction, true);
 		boyfriend.danceCooldown = 0.5;
