@@ -32,9 +32,9 @@ class Character extends gameplay.FunkinSprite {
 	public var characterId:String = DEFAULT_CHARACTER;
 	public var healthIconPath:String;
 
-	public var singDuration:Float = 4.0;
+	public var singDuration:Float = 1.0;
 	public var animationTimer:Float = 0.0;
-	public var beatsToDance:Int = 2;
+	public var beatsToDance:Float = 2;
 
 	public var danceCooldown:Float = 0.0;
 	public var charType:String = CharacterType.OPPONENT;
@@ -83,22 +83,12 @@ class Character extends gameplay.FunkinSprite {
 		super.update(elapsed);
 		if (placeholder)
 			return;
-
-		var v = scriptFuncCall('update', [this, elapsed]);
-		if (v != null && v.value != ScriptLoader.STOP_FUNC) {
-			if (!debugMode && !stunned) {
-				if (isSinging()) {
-					var delta:Float = danceCooldown + (elapsed / singDuration);
-					danceCooldown = Math.min(Math.max(delta, 0.0), danceCooldown);
-				} else if (charType == CharacterType.PLAYER)
-					danceCooldown = 0.0;
-				if (danceCooldown <= 0.0 && isSinging())
-					dance();
-				if (isMissing() && animation.curAnim.finished)
-					dance(true, false, 10);
-			}
+		if (!debugMode && !stunned && isSinging()) {
+			danceCooldown -= elapsed / singDuration;
+			if (danceCooldown <= 0.0)
+				dance(true);
 		}
-		scriptFuncCall('postUpdate', [this]);
+		scriptFuncCall('update', [this, elapsed]);
 	}
 
 	public function isSinging():Bool

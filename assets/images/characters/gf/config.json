@@ -1,6 +1,6 @@
 {
 	"name": "Girlfriend",
-	"singDuration": 4.0,
+	"singDuration": 1.0,
 	"defaultFramerate": 24,
 	"idleAnimations": [ "danceLeft", "danceRight" ],
 	"antialiasing": true,

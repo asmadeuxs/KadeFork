@@ -1,7 +1,7 @@
 {
 
 	"name": "Daddy Dearest",
-	"singDuration": 6.1,
+	"singDuration": 1.0,
 	"antialiasing": true,
 	"cameraOffset": [150, -100],
 	"defaultFramerate": 24,

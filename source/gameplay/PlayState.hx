@@ -313,7 +313,7 @@ class PlayState extends MusicBeatState {
 		if (uiDimBackground.visible) {
 			if (Preferences.user.strumUnderlayType == 0) {
 				uiDimBackground.scale.x = playerStrums.width; // fill strumline region
-				uiDimBackground.objectCenter(playerStrums, X); // move to last strum}
+				uiDimBackground.objectCenter(playerStrums, X); // move to last strum
 				insert(members.indexOf(currentHUD), uiDimBackground);
 			} else if (Preferences.user.strumUnderlayType == 1) {
 				uiDimBackground.scale.x = FlxG.width;
@@ -589,7 +589,7 @@ class PlayState extends MusicBeatState {
 		paused = true;
 	}
 
-	override public function update(elapsed:Float) { // debug keys
+	override public function update(elapsed:Float) {
 		#if debug
 		if (FlxG.keys.justPressed.ONE) {
 			session.invalid = true;
@@ -1115,11 +1115,12 @@ class PlayState extends MusicBeatState {
 	}
 
 	function characterDance(beat:Int) {
-		if (beat % dad.beatsToDance == 0)
+		// TODO: Figure out decimal beats
+		if (!dad.isSinging() && beat % Math.floor(dad.beatsToDance) == 0)
 			dad.dance();
-		if (beat % Math.floor(gf.beatsToDance * gfSpeed) == 0)
+		if (!gf.isSinging() && beat % Math.floor(gf.beatsToDance * gfSpeed) == 0)
 			gf.dance();
-		if (!boyfriend.isSinging() && beat % boyfriend.beatsToDance == 0)
+		if (!boyfriend.isSinging() && beat % Math.floor(boyfriend.beatsToDance) == 0)
 			boyfriend.dance();
 	}
 }

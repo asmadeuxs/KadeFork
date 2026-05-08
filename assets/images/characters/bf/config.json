@@ -6,8 +6,8 @@
 	"idleAnimations": ["idle"],
 	"defaultFramerate": 24,
 	"antialiasing": true,
+	"singDuration": 1.0,
 	"facesLeft": true,
-	"singDuration": 4,
 	"animations": {
 		"deathLoop": "BF Dead Loop",
 		"missright": "BF NOTE RIGHT MISS",

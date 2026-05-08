@@ -9,8 +9,10 @@
 
   /**
    * How long the character takes to go back to idling after a sing animation
+   *
+   * This is in seconds
    */
-  "singDuration": 4.0,
+  "singDuration": 1.0,
 
   /**
    * Offset used when the camera focuses on a character
