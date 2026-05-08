@@ -76,7 +76,7 @@ class Character extends gameplay.FunkinSprite {
 		super(x, y);
 		this.charType = charType;
 		this.characterId = character;
-		loadCharacter(this.characterId);
+		loadCharacter(character);
 	}
 
 	override function update(elapsed:Float):Void {
@@ -85,13 +85,15 @@ class Character extends gameplay.FunkinSprite {
 			return;
 
 		var v = scriptFuncCall('update', [this, elapsed]);
-		if (v != null && v.value == ScriptLoader.STOP_FUNC) {
-			if (!debugMode) {
-				if (isSinging() && danceCooldown > 0.0) {
-					danceCooldown -= elapsed / singDuration;
-					if (danceCooldown <= 0.0)
-						dance();
-				}
+		if (v != null && v.value != ScriptLoader.STOP_FUNC) {
+			if (!debugMode && !stunned) {
+				if (isSinging()) {
+					var delta:Float = danceCooldown + (elapsed / singDuration);
+					danceCooldown = Math.min(Math.max(delta, 0.0), danceCooldown);
+				} else if (charType == CharacterType.PLAYER)
+					danceCooldown = 0.0;
+				if (danceCooldown <= 0.0 && isSinging())
+					dance();
 				if (isMissing() && animation.curAnim.finished)
 					dance(true, false, 10);
 			}
@@ -253,7 +255,7 @@ class Character extends gameplay.FunkinSprite {
 
 					placeholder = false; // make sure this is disabled
 					this.characterId = characterName;
-					loadScript(this.characterId);
+					loadScript(characterName);
 					pivot = BOTTOM_CENTER;
 					updatePivot();
 					dance(true);

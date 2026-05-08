@@ -212,9 +212,9 @@ class PlayState extends MusicBeatState {
 		defaultCamZoom = stage.cameraZoom;
 		add(stage);
 
-		gf = new Character(0, 0, moonMeta.extraData.exists(PLAYER_3) ? moonMeta.extraData.get(PLAYER_3) : "bf", METRONOME);
-		dad = new Character(0, 0, moonMeta.extraData.exists(PLAYER_2) ? moonMeta.extraData.get(PLAYER_2) : "bf", OPPONENT);
-		boyfriend = new Character(0, 0, moonMeta.extraData.exists(PLAYER_1) ? moonMeta.extraData.get(PLAYER_1) : "bf", PLAYER);
+		gf = new Character(0, 0, moonMeta.extraData.get(PLAYER_3) ?? "bf", METRONOME);
+		dad = new Character(0, 0, moonMeta.extraData.get(PLAYER_2) ?? "bf", OPPONENT);
+		boyfriend = new Character(0, 0, moonMeta.extraData.get(PLAYER_1) ?? "bf", PLAYER);
 
 		positionCharacters();
 		add(gf);
@@ -405,7 +405,7 @@ class PlayState extends MusicBeatState {
 		inputEnabled = true;
 
 		Conductor.current.active = true;
-		Conductor.setTime(-Conductor.crotchet * 8);
+		Conductor.setTime(-Conductor.crotchet * 7);
 
 		var swagCounter:Int = 0;
 		startTimer = new FlxTimer().start(Conductor.crotchet * 0.001, function(tmr:FlxTimer) {
@@ -758,7 +758,7 @@ class PlayState extends MusicBeatState {
 				if (curSection != null && curSection.altAnim)
 					altAnim = '-alt';
 				dad.sing(daNote.noteData, altAnim, true);
-				dad.danceCooldown = 1.0 + daNote.sustainLength;
+				dad.danceCooldown = dad.singDuration + daNote.sustainLength;
 				for (vocal in Conductor.current.tracks)
 					vocal.volume = 1;
 				notes.removeNote(daNote);
@@ -986,9 +986,6 @@ class PlayState extends MusicBeatState {
 	}
 
 	function noteMiss(direction:Int = 1, ?daNote:Note):Void {
-		if (boyfriend.stunned)
-			return;
-
 		if (daNote != null && daNote.noteScript != null) {
 			var caller = daNote.noteScript.callFunc('onNoteMiss', [daNote, direction]).value;
 			if (caller == ScriptLoader.STOP_FUNC)
@@ -1015,7 +1012,7 @@ class PlayState extends MusicBeatState {
 
 		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 		boyfriend.miss(direction, true);
-		boyfriend.danceCooldown = 0.5;
+		boyfriend.danceCooldown = 1.0;
 		if (currentHUD != null)
 			currentHUD.updateScoreText();
 	}
@@ -1032,8 +1029,8 @@ class PlayState extends MusicBeatState {
 			return;
 		}
 
-		boyfriend.sing(note.noteData, true);
-		boyfriend.danceCooldown = 1.0 + note.sustainLength;
+		boyfriend.sing(note.noteData, null, true);
+		boyfriend.danceCooldown = boyfriend.singDuration + note.sustainLength;
 		note.wasGoodHit = true;
 
 		if (!note.isSustain) {
