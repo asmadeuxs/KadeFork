@@ -279,12 +279,12 @@ class PlayState extends MusicBeatState {
 	}
 
 	public function onSettingsChanged() {
-		var currentSave = Preferences.user
+		var currentSave = Preferences.user;
 		if (currentSave.scrollType != currentScrollType) {
 			changeScrollDirection(currentSave.scrollType);
 			currentScrollType = currentSave.scrollType;
 		}
-		if (currentSave.judgeDifficulty < initialJudgeDiff)
+		if (currentSave.judgeDifficulty != initialJudgeDiff)
 			session.invalid = true;
 		// else
 		// session.scoreMultiplier = currentSave.judgeDifficulty;

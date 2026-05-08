@@ -107,11 +107,9 @@ class Kade extends BaseHUD {
 			songName.y = songPosBG.y + 3;
 		}
 
-		// FlxG.height * 0.9 originally but I like it this way -asmadeuxs
-		// should be 630 if FlxG.height is 720
-		var healthY:Float = FlxG.height * 0.875;
+		var healthY:Float = FlxG.height * 0.9;
 		if (Preferences.user.scrollType == 1)
-			healthY = 70; // 50 originally
+			healthY = 50;
 		healthBarBG.screenCenter(X);
 		healthBarBG.y = healthY;
 		add(healthBarBG);
