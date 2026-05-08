@@ -1,0 +1,43 @@
+{
+	"offsets": {
+		"idle": {
+			"x": 0,
+			"y": 0
+		},
+		"singRIGHT": {
+			"x": -47,
+			"y": 0
+		},
+		"singDOWN": {
+			"x": 95,
+			"y": -82
+		},
+		"singLEFT": {
+			"x": 85,
+			"y": -10
+		},
+		"singUP": {
+			"x": 16,
+			"y": 25
+		}
+	},
+	"cameraOffset": [
+		10,
+		0
+	],
+	"singDuration": 5,
+	"beatsToDance": 1,
+	"name": "Pico",
+	"flipX": false,
+	"texture": "characters/Pico_FNF_assetss",
+	"antialiasing": true,
+	"defaultFramerate": 24,
+	"facesLeft": true,
+	"animations": {
+		"idle": "Pico Idle Dance",
+		"singRIGHT": "Pico Note Right0",
+		"singDOWN": "Pico Down Note0",
+		"singLEFT": "Pico NOTE LEFT0",
+		"singUP": "pico Up note0"
+	}
+}

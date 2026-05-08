@@ -15,8 +15,8 @@ import gameplay.StageBG;
 import ui.FunkinCamera;
 
 class CharacterEditor extends MusicBeatState {
-	var _prevState:String = null;
 	var camFollow:FlxObject;
+	var _prevState:String = null;
 	var showReference:Bool = false;
 	var editingChar:Int = 0;
 
@@ -36,12 +36,12 @@ class CharacterEditor extends MusicBeatState {
 		add(stage = new StageBG(daStage));
 		add(camFollow = new FlxObject());
 		FlxG.camera.zoom = stage.cameraZoom;
-		FlxG.camera.follow(camFollow, LOCKON, 0.04);
+		resetCameraPosition();
 
-		// temporary
-		var charTypes:Array<String> = ['player', 'opponent', 'metronome'];
+		// hardcoding for now
+		var types = ['player', 'opponent', 'metronome'];
 		for (i => char in chars)
-			addChar(char, charTypes[i]);
+			addChar(char, types[i]);
 
 		infoText = new FlxText(10, 10, 0, "", 16);
 		infoText.setFormat(null, 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
@@ -49,33 +49,36 @@ class CharacterEditor extends MusicBeatState {
 		add(infoText);
 	}
 
-	public function positionCharacter(char:Character, ?type:String) {
-		if (char != null) {
-			switch type {
-				case 'player':
-					char.setPosition(770, 450);
-				case 'metronome':
-					char.setPosition(400, 130);
-				case _:
-					char.setPosition(100, 100);
-			}
-			if (stage.characterOffsets.exists(type)) {
-				var o:Array<Float> = stage.characterOffsets.get(type);
-				char.x += o[0] ?? 0;
-				char.y += o[1] ?? 0;
-			}
+	public function positionCharacter(char:Character, type:String) {
+		if (char == null)
+			return;
+		switch type {
+			case 'player':
+				char.setPosition(770, 450);
+			case 'metronome':
+				char.setPosition(400, 130);
+			case _:
+				char.setPosition(100, 100);
+		}
+		var typeLower:String = type.toLowerCase();
+		if (stage.characterOffsets.exists(typeLower)) {
+			var o:Array<Float> = stage.characterOffsets.get(typeLower);
+			char.x += o[0] ?? 0;
+			char.y += o[1] ?? 0;
 		}
 	}
 
-	public function addChar(characterName:String, ?type:String = 'opponent'):Void {
-		var cref:Character = new Character(0, 0, characterName);
-		var char:Character = new Character(0, 0, characterName);
+	public function addChar(characterName:String, type:String = 'opponent'):Void {
+		var cref:Character = new Character(0, 0, characterName, type);
+		var char:Character = new Character(0, 0, characterName, type);
 
 		cref.playAnim(cref.idleAnimations[0], true);
 		cref.color = FlxColor.GRAY;
 		cref.visible = showReference;
 		cref.debugMode = true;
 		char.debugMode = true;
+		char.alpha = 0.1;
+		cref.alpha = 0.1;
 
 		chars[0].push(characterName);
 		chars[1].push(cref);
@@ -107,27 +110,24 @@ class CharacterEditor extends MusicBeatState {
 
 		if (FlxG.keys.justPressed.TAB) changeEditing(1);
 
+		var pressed = FlxG.keys.pressed;
+		var justPressed = FlxG.keys.justPressed;
+		var holdingCtrl:Bool = pressed.CONTROL;
+
 		var cameraPanSpeed:Float = FlxG.keys.pressed.SHIFT ? 4.0 : 1.0;
-		if (FlxG.keys.pressed.CONTROL) {
-			var panX:Float = 0;
-			var panY:Float = 0;
-			if (FlxG.keys.pressed.LEFT) panX = cameraPanSpeed;
-			if (FlxG.keys.pressed.RIGHT) panX = -cameraPanSpeed;
-			if (FlxG.keys.pressed.UP) panY = cameraPanSpeed;
-			if (FlxG.keys.pressed.DOWN) panY = -cameraPanSpeed;
-			if (panX != 0 || panY != 0) {
-				camFollow.x += panX;
-				camFollow.y += panY;
-			}
-		}
-		else {
-			var step:Float = FlxG.keys.pressed.SHIFT ? 0.5 : 1;
-			if (FlxG.keys.pressed.LEFT) changeOffset(step, 0);
-			if (FlxG.keys.pressed.RIGHT) changeOffset(-step, 0);
-			if (FlxG.keys.pressed.UP) changeOffset(0, step);
-			if (FlxG.keys.pressed.DOWN) changeOffset(0, -step);
-			if (FlxG.keys.justPressed.F5) saveOffsets();
-		}
+		if ((holdingCtrl ? justPressed : pressed).J) camFollow.x += cameraPanSpeed;
+		if ((holdingCtrl ? justPressed : pressed).L) camFollow.x += -cameraPanSpeed;
+		if ((holdingCtrl ? justPressed : pressed).I) camFollow.y += cameraPanSpeed;
+		if ((holdingCtrl ? justPressed : pressed).K) camFollow.y += -cameraPanSpeed;
+		if (justPressed.R) resetCameraPosition();
+
+		var step:Float = FlxG.keys.pressed.SHIFT ? 0.5 : 1;
+		if ((holdingCtrl ? justPressed : pressed).LEFT) changeOffset(step, 0);
+		if ((holdingCtrl ? justPressed : pressed).RIGHT) changeOffset(-step, 0);
+		if ((holdingCtrl ? justPressed : pressed).UP) changeOffset(0, step);
+		if ((holdingCtrl ? justPressed : pressed).DOWN) changeOffset(0, -step);
+		if (justPressed.F5) saveOffsets();
+		
 		// @formatter:on
 		var minZoom:Float = 0.3;
 		var maxZoom:Float = 5.0;
@@ -152,6 +152,11 @@ class CharacterEditor extends MusicBeatState {
 		if (chars[0].length == 0)
 			return;
 
+		if (character != null)
+			character.alpha = 0.1;
+		if (reference != null)
+			reference.alpha = 0.1;
+
 		editingChar = (editingChar + next) % chars[0].length;
 		if (editingChar < 0)
 			editingChar += chars[0].length;
@@ -162,14 +167,22 @@ class CharacterEditor extends MusicBeatState {
 			reference.visible = showReference;
 
 		if (character != null) {
+			character.alpha = 1.0;
+			reference.alpha = 1.0;
 			animList = character.animation.getAnimationList();
+			resetCameraPosition();
+		}
+	}
+
+	public function resetCameraPosition():Void {
+		camFollow.setPosition(0, 0);
+		if (character != null) {
 			var mid = character.getMidpoint();
 			var off = character.cameraOffset;
+
 			var camPos:FlxPoint = new FlxPoint(mid.x + off.x, mid.y + off.y);
 			camFollow.setPosition(camPos.x, camPos.y);
-			#if hxdiscord_rpc
-			DiscordClient.changePresence('Character ${character.characterId}', 'Editing Character');
-			#end
+			FlxG.camera.follow(camFollow, LOCKON, 0.04);
 		}
 	}
 
@@ -205,9 +218,7 @@ class CharacterEditor extends MusicBeatState {
 		if (character == null)
 			return;
 
-		var charName:String = chars[0][editingChar];
 		var jsonPath:String = character.filePath;
-
 		if (!Paths.fileExists(jsonPath)) {
 			trace('Character JSON not found at $jsonPath, cannot save offsets');
 			return;
@@ -215,18 +226,21 @@ class CharacterEditor extends MusicBeatState {
 
 		var jsonContent:String = Paths.getText(jsonPath);
 		var config:CharacterConfig = haxe.Json5.parse(jsonContent);
-		var curAnimName:String = character.animation.curAnim.name;
-		var currentOffset:Array<Float> = character.getOffset(curAnimName);
 
 		if (config.offsets == null)
-			config.offsets = {x: 0, y: 0};
-		Reflect.setField(config.offsets, curAnimName, [currentOffset[0], currentOffset[1]]);
+			config.offsets = {};
 
-		var newJson:String = haxe.Json.stringify(config, "\t");
+		var animNames:Array<String> = character.animation.getNameList();
+		for (anim in animNames) {
+			var curOffset:Array<Float> = character.getOffset(anim);
+			if (curOffset != null)
+				Reflect.setField(config.offsets, anim, {x: curOffset[0], y: curOffset[1]});
+		}
+		var newJson:String = haxe.Json.stringify(config, "\t") + "\n";
 		sys.io.File.saveContent(jsonPath + '~', jsonContent);
 		sys.io.File.saveContent(jsonPath, newJson);
-		trace('saved offset for $curAnimName: [${currentOffset[0]}, ${currentOffset[1]}]');
-		infoText.text += "\nOFFSET SAVED!";
+		trace('Saved offsets for ${animNames.length} animations');
+		infoText.text += "\nALL OFFSETS SAVED!";
 	}
 
 	function updateInfoText():Void {
@@ -239,13 +253,12 @@ class CharacterEditor extends MusicBeatState {
 		var off:Array<Float> = character.getOffset(animName);
 		var totalChars:Int = chars[0].length;
 
-		infoText.text = 'Character: ${chars[0][editingChar]} ($editingChar+1/$totalChars)\n'
-			+ 'Animation: $animName (W/S to change, SPACE to replay current animation)\n'
-			+ 'Offsets: X=${off[0]}  Y=${off[1]}  (Arrow Keys, SHIFT+Arrow Keys = 10px)\n'
-			+ 'Reference (G): ${showReference ? "ON" : "OFF"}\n'
-			+ (chars[0].length > 1 ? '[Q/E] Switch Character        ' : '')
-			+ '[F5] Save Offsets        [ESC] Exit\n'
-			+ '[Ctrl+Arrows] Move Camera        [Shift+Ctrl+Arrows] Move Camera Slowly\n[+/-] Zoom'
-			+ '        [R] Reset Camera';
+		infoText.text = 'Character: ${chars[0][editingChar]} ($editingChar+1/$totalChars)
+			[W/S] Animation: $animName (SPACE to Replay)
+			[Arrow Keys] X=${off[0]}  Y=${off[1]}  (Arrow SHIFT to move 10 pixels faster)
+			[G] Reference ${showReference ? "ON" : "OFF"} ${(chars[0].length > 1 ? '[Q/E] Switch Character' : '')}
+			[IJKL] Move Camera       [Shift+IJKL] Move Camera Slowly       [Q/E] Change Zoom        [R] Reset Camera
+			[CTRL+Arrows / CTRL+IJKL] Move offset or camera with pixel precision
+			[F5] Save Offsets       [ESC] Exit';
 	}
 }

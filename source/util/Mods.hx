@@ -79,8 +79,8 @@ class Mods {
 				trace('Mod file too short (must have at least its name.)');
 				continue;
 			}
-
-			allMods.set(modId, {name: modData[0], version: modData[1] ?? apiVer, description: modData[2] ?? defaultDesc});
+			// TODO: API version validation
+			allMods.set(modId, {name: modData[0], version: apiVer, description: modData[2] ?? defaultDesc});
 			if (!activeMods.contains(modId))
 				activeMods.push(modId);
 			trace('Loaded mod folder $modId');
@@ -139,7 +139,7 @@ class Mods {
 		var found:Bool = false;
 
 		if (currentMod != null && currentMod != 'core') {
-			var topPath:String = '$modRoot/${currentMod}/$file';
+			var topPath:String = '$modRoot/$currentMod/$file';
 			if (Paths.fileExists(topPath)) { // prioritize current mod
 				assetPath = topPath;
 				found = true;
@@ -147,8 +147,8 @@ class Mods {
 		}
 
 		if (!found) {
-			for (i in 0...activeMods.length) {
-				var modPath:String = '$modRoot/${activeMods[i]}/$file';
+			for (modId in activeMods) {
+				var modPath:String = '$modRoot/${modId}/$file';
 				if (Paths.fileExists(modPath)) {
 					assetPath = modPath;
 					break;

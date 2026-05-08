@@ -212,9 +212,9 @@ class PlayState extends MusicBeatState {
 		defaultCamZoom = stage.cameraZoom;
 		add(stage);
 
-		gf = new Character(0, 0, moonMeta.extraData.exists(PLAYER_3) ? moonMeta.extraData.get(PLAYER_3) : "bf");
-		dad = new Character(0, 0, moonMeta.extraData.exists(PLAYER_2) ? moonMeta.extraData.get(PLAYER_2) : "bf");
-		boyfriend = new Character(0, 0, moonMeta.extraData.exists(PLAYER_1) ? moonMeta.extraData.get(PLAYER_1) : "bf", true);
+		gf = new Character(0, 0, moonMeta.extraData.exists(PLAYER_3) ? moonMeta.extraData.get(PLAYER_3) : "bf", METRONOME);
+		dad = new Character(0, 0, moonMeta.extraData.exists(PLAYER_2) ? moonMeta.extraData.get(PLAYER_2) : "bf", OPPONENT);
+		boyfriend = new Character(0, 0, moonMeta.extraData.exists(PLAYER_1) ? moonMeta.extraData.get(PLAYER_1) : "bf", PLAYER);
 
 		positionCharacters();
 		add(gf);
@@ -608,7 +608,8 @@ class PlayState extends MusicBeatState {
 				var ids = [boyfriend.characterId, dad.characterId];
 				if (gf != null && gf.visible && gf.characterId != 'placeholder')
 					ids.push(gf.characterId);
-				FlxG.switchState(new editor.CharacterEditor(Type.getClassName(Type.getClass(this)), ids, curStage));
+				var name:String = Type.getClassName(Type.getClass(this));
+				FlxG.switchState(new editor.CharacterEditor(name, ids, curStage));
 			}
 		}
 		#end

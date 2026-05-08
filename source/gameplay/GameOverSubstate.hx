@@ -23,7 +23,7 @@ class GameOverSubstate extends MusicBeatSubstate {
 		Conductor.bpm = 100;
 		Conductor.setTime(0.0);
 
-		add(bf = new Character(x, y, PlayState.current.boyfriend.deathCharacter, true));
+		add(bf = new Character(x, y, PlayState.current.boyfriend.deathCharacter, PLAYER));
 		add(camFollow = new FlxObject(bf.getGraphicMidpoint().x, bf.getGraphicMidpoint().y, 1, 1));
 
 		FlxG.sound.play(Paths.sound('fnf_loss_sfx$stageSuffix'));

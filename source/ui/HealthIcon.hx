@@ -34,7 +34,7 @@ class HealthIcon extends FunkinSprite {
 
 	// might remove this in favor of a script -asmadeuxs
 	public function loadIconScript(character:String):Void {
-		var iconPath:String = Paths.getPath('images/gameplay/characters/$character/icon-$character');
+		var iconPath:String = Paths.getPath('images/characters/$character/icon-$character');
 		var path = ScriptLoader.getScriptFile(iconPath, character);
 		iconScript = ScriptLoader.loadScript(path);
 	}
@@ -49,11 +49,11 @@ class HealthIcon extends FunkinSprite {
 				}
 				var noSuffix:String = character.substring(0, character.lastIndexOf("-"));
 				var paths = [
-					'gameplay/characters/$character/icon-$character',
-					'gameplay/characters/$noSuffix/icon-$character',
-					'gameplay/characters/$noSuffix/icon-$noSuffix',
-					'gameplay/characters/icon-$character',
-					'gameplay/characters/icon-$noSuffix',
+					'characters/$character/icon-$character',
+					'characters/$noSuffix/icon-$character',
+					'characters/$noSuffix/icon-$noSuffix',
+					'characters/icon-$character',
+					'characters/icon-$noSuffix',
 				];
 				var fail:Bool = true;
 				var mainPath:String = paths[0];
@@ -124,7 +124,7 @@ class HealthIcon extends FunkinSprite {
 
 	// if you want man idk if this makes you happy ://// -asmadeuxs >:))))) -srt
 	private function loadIconGrid(character:String) {
-		loadGraphic(Paths.image('gameplay/characters/iconGrid'), true, 150, 150);
+		loadGraphic(Paths.image('characters/iconGrid'), true, 150, 150);
 
 		if (iconScript != null) {
 			iconScript.callFunc("loadIconGrid", [character]);

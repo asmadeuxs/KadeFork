@@ -120,20 +120,25 @@ typedef LevelData = {
 // --- Character Data ---
 
 typedef CharacterConfig = {
-	name:String,
-	displayName:String,
 	texture:TextureConfig,
-	facesLeft:Bool,
+	?antialiasing:Bool,
+	?defaultFramerate:Int,
+	?flipX:Bool,
+	?flipY:Bool,
+	?facesLeft:Bool,
+
+	// animations
+	animations:Dynamic, // temporary
+	?singDuration:Float,
+	?beatsToDance:Int,
 	?idleAnimations:Array<String>,
 	?singAnimations:Array<String>,
 	?missAnimations:Array<String>,
-	?beatsToDance:Int,
-	?singDuration:Float,
-	?antialiasing:Bool,
-	?defaultFramerate:Int,
-	?animations:AnimationDef,
-	?offsets:JsonOffsetField,
-	?cameraOffset:JsonOffsetField
+	?offsets:Dynamic, // temporary
+	?cameraOffset:JsonOffsetField,
+	// Editor Metadata
+	?name:String,
+	?type:String,
 }
 
 // --- Stage Data ---

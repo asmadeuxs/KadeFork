@@ -12,6 +12,12 @@ import util.Mods;
 using StringTools;
 using util.AnimationHelper;
 
+enum abstract CharacterType(String) from String to String {
+	var PLAYER:String = 'player';
+	var OPPONENT:String = 'opponent';
+	var METRONOME:String = 'metronome';
+}
+
 @:allow(editor.CharacterEditor)
 class Character extends gameplay.FunkinSprite {
 	public static final DEFAULT_CHARACTER:String = "bf";
@@ -31,7 +37,7 @@ class Character extends gameplay.FunkinSprite {
 	public var beatsToDance:Int = 2;
 
 	public var danceCooldown:Float = 0.0;
-	public var isPlayer:Bool = false;
+	public var charType:String = CharacterType.OPPONENT;
 	public var stunned:Bool = false;
 
 	public var idleAnimations:Array<String> = DEFAULT_IDLE_ANIMATIONS;
@@ -39,6 +45,7 @@ class Character extends gameplay.FunkinSprite {
 	public var singAnimations:Array<String> = DEFAULT_MISS_ANIMATIONS;
 
 	public var cameraOffset:FlxPoint = new FlxPoint(0, 0);
+
 	public var idleSuffix:String = "";
 	public var deathCharacter:String = 'bf';
 	public var gameOverSuffix:String = '';
@@ -60,9 +67,14 @@ class Character extends gameplay.FunkinSprite {
 	private var characterScript:Script;
 	private var currentDance:Int = 0;
 
-	public function new(x:Float = 0, y:Float = 0, character:String, ?isPlayer:Bool = false):Void {
+	public var isPlayer(get, never):Bool;
+
+	function get_isPlayer():Bool
+		return charType == CharacterType.PLAYER;
+
+	public function new(x:Float = 0, y:Float = 0, character:String, ?charType:CharacterType = OPPONENT):Void {
 		super(x, y);
-		this.isPlayer = isPlayer;
+		this.charType = charType;
 		this.characterId = character;
 		loadCharacter(this.characterId);
 	}
@@ -126,14 +138,12 @@ class Character extends gameplay.FunkinSprite {
 	}
 
 	private function findCharacterFile(character:String):String {
-		var begin:String = 'images/gameplay/characters';
 		var paths = [
-			'$begin/$character/config',
-			'$begin/$character/$character',
-			'$begin/$character/$character-config',
-			'$begin/$character',
+			'images/characters/$character/config',
+			'images/characters/$character/$character',
+			'images/characters/$character/$character-config',
+			'images/characters/$character',
 		];
-
 		var path:String = Paths.getPath(paths[0] + '.json');
 		for (i in paths) {
 			for (ext in Paths.jsonExtensions) {
@@ -149,7 +159,7 @@ class Character extends gameplay.FunkinSprite {
 	}
 
 	public function loadScript(charName:String):Void {
-		var scriptPath:String = Paths.getPath('images/gameplay/characters/$charName');
+		var scriptPath:String = Paths.getPath('images/characters/$charName');
 		characterScript = ScriptLoader.findScript(ScriptLoader.getScriptFile(scriptPath, charName));
 		scriptFuncCall('onLoad', [this]);
 	}
@@ -198,22 +208,22 @@ class Character extends gameplay.FunkinSprite {
 					}
 					filePath = file;
 
-					var file:Dynamic = haxe.Json5.parse(Paths.getText(file));
+					var file:CharacterConfig = haxe.Json5.parse(Paths.getText(file));
 					this.idleAnimations = file.idleAnimations ?? DEFAULT_IDLE_ANIMATIONS;
 					this.singAnimations = file.singAnimations ?? DEFAULT_SING_ANIMATIONS;
 					this.missAnimations = file.missAnimations ?? DEFAULT_MISS_ANIMATIONS;
 					this.beatsToDance = file.beatsToDance ?? singAnimations.length >= 2 ? 1 : 2;
 
+					var fileFlipX:Bool = file.flipX ?? false;
 					this.singDuration = file.singDuration ?? 4.0;
-					this.displayName = file.name ?? file.displayName ?? "idk";
-					this.isPlayer = file.facesLeft ?? file.isPlayer ?? false;
 					this.antialiasing = file.antialiasing ?? DEFAULT_ANTIALIASING;
+					this.displayName = file.name ?? "idk";
 					this.facesLeft = file.facesLeft;
+					if (file.facesLeft && !isPlayer)
+						flipX = !fileFlipX;
+					flipY = file.flipY == true;
 
-					if ((file.facesLeft || file.isPlayer) && !isPlayer)
-						flipX = true;
-
-					var path:String = 'gameplay/characters/$characterName/$characterName';
+					var path:String = 'characters/$characterName/$characterName';
 					var atlasType:String = 'sparrow';
 					if (file.texture != null) {
 						path = ConfigTypes.getTexturePath(file.texture);
@@ -244,6 +254,8 @@ class Character extends gameplay.FunkinSprite {
 					placeholder = false; // make sure this is disabled
 					this.characterId = characterName;
 					loadScript(this.characterId);
+					pivot = BOTTOM_CENTER;
+					updatePivot();
 					dance(true);
 				}
 				catch (e:haxe.Exception) {
