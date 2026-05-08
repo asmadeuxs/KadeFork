@@ -111,10 +111,10 @@ class CharacterEditor extends MusicBeatState {
 		if (FlxG.keys.pressed.CONTROL) {
 			var panX:Float = 0;
 			var panY:Float = 0;
-			if (FlxG.keys.justPressed.LEFT) panX = cameraPanSpeed;
-			if (FlxG.keys.justPressed.RIGHT) panX = -cameraPanSpeed;
-			if (FlxG.keys.justPressed.UP) panY = cameraPanSpeed;
-			if (FlxG.keys.justPressed.DOWN) panY = -cameraPanSpeed;
+			if (FlxG.keys.pressed.LEFT) panX = cameraPanSpeed;
+			if (FlxG.keys.pressed.RIGHT) panX = -cameraPanSpeed;
+			if (FlxG.keys.pressed.UP) panY = cameraPanSpeed;
+			if (FlxG.keys.pressed.DOWN) panY = -cameraPanSpeed;
 			if (panX != 0 || panY != 0) {
 				camFollow.x += panX;
 				camFollow.y += panY;
@@ -122,10 +122,10 @@ class CharacterEditor extends MusicBeatState {
 		}
 		else {
 			var step:Float = FlxG.keys.pressed.SHIFT ? 0.5 : 1;
-			if (FlxG.keys.justPressed.LEFT) changeOffset(step, 0);
-			if (FlxG.keys.justPressed.RIGHT) changeOffset(-step, 0);
-			if (FlxG.keys.justPressed.UP) changeOffset(0, step);
-			if (FlxG.keys.justPressed.DOWN) changeOffset(0, -step);
+			if (FlxG.keys.pressed.LEFT) changeOffset(step, 0);
+			if (FlxG.keys.pressed.RIGHT) changeOffset(-step, 0);
+			if (FlxG.keys.pressed.UP) changeOffset(0, step);
+			if (FlxG.keys.pressed.DOWN) changeOffset(0, -step);
 			if (FlxG.keys.justPressed.F5) saveOffsets();
 		}
 		// @formatter:on
