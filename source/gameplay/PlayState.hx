@@ -108,6 +108,8 @@ class PlayState extends MusicBeatState {
 	public var maxHealth:Float = 2.0;
 	public var minHealth:Float = 0.0;
 
+	var gameplayScripts:Array<Script> = [];
+
 	var gfSpeed:Int = 1;
 	var camZooming:Bool = false;
 	var health(default, set):Float = 1;
@@ -203,9 +205,32 @@ class PlayState extends MusicBeatState {
 		persistentUpdate = true;
 		persistentDraw = true;
 
+		// initialise array
+		gameplayScripts = ScriptLoader.runScriptsAtDir(Paths.resolveAssetPath('scripts', util.Mods.currentMod), false);
+
 		if (moonSong == null)
 			moonSong = Song.loadFromFile('core', 'test');
 		generateSong();
+
+		// song specific scripts
+		var songScripts:Array<Script> = ScriptLoader.runScriptsAtDir(Paths.resolveAssetPath('scripts/songs/$songName', util.Mods.currentMod));
+		if (songScripts != null) {
+			if (gameplayScripts == null)
+				gameplayScripts = [];
+			while (songScripts.length > 0)
+				gameplayScripts.push(songScripts.shift());
+		}
+		gameplayScripts.sort(ScriptLoader.sortByPriority);
+		songScripts = null;
+
+		setVarInScripts("game", this);
+		setVarInScripts("song", PlayState.songName);
+		setVarInScripts("songTitle", PlayState.songTitle);
+		setVarInScripts("difficulty", PlayState.difficulty);
+
+		callFuncInScripts("preCreate");
+
+		songScripts = null;
 
 		curStage = moonMeta.extraData.exists(STAGE) ? moonMeta.extraData.get(STAGE) : "stage";
 		stage = new StageBG(curStage);
@@ -225,7 +250,12 @@ class PlayState extends MusicBeatState {
 		camGame.focusOn(camFollow.getPosition());
 
 		uiDimBackground = new FlxSprite().makeScaledGraphic(1, FlxG.height, 0xFF000000);
-		currentHUD = BaseHUD.loadHUD(Preferences.user.hudStyle);
+
+		var hudName:String = Preferences.user.hudStyle;
+		if (hudName.toLowerCase() == "default")
+			hudName = getFirstVarInScripts("hudOverride", Preferences.user.hudStyle);
+
+		currentHUD = BaseHUD.loadHUD(hudName);
 		comboDisplay = new FlxSpriteGroup();
 		strumlines = new FlxTypedSpriteGroup();
 		notes = new NoteRenderer(unspawnNotes);
@@ -244,8 +274,8 @@ class PlayState extends MusicBeatState {
 		strumlines.camera = camHUD;
 		notes.camera = camHUD;
 
-		opponentStrums = new Strumline();
-		playerStrums = new Strumline();
+		opponentStrums = new Strumline(getFirstVarInScripts("opponentNoteskin", "default"));
+		playerStrums = new Strumline(getFirstVarInScripts("playerNoteskin", "default"));
 		positionStrumlines();
 
 		strumlines.add(opponentStrums);
@@ -259,23 +289,36 @@ class PlayState extends MusicBeatState {
 
 		setupUnderlay();
 		startSongCutscene();
+		callFuncInScripts("create");
 	}
 
 	public function startSongCutscene() {
+		var ret = callFirstFuncInScripts("songCutscene");
+		if (ret != null && ret.value == ScriptLoader.STOP_FUNC)
+			return;
 		switch (songName.toLowerCase()) {
-			default:
+			case _:
 				startCountdown();
 		}
 		startingSong = true;
 	}
 
 	override public function destroy() {
+		if (gameplayScripts != null && gameplayScripts.length > 0) {
+			for (i in gameplayScripts)
+				i.callFunc("gameEnd");
+			gameplayScripts.resize(0);
+			gameplayScripts = null;
+		}
+		if (currentHUD != null)
+			currentHUD.destroy();
 		Conductor.current.active = false;
 		Conductor.current.stopMusic();
 		Conductor.current.clearTracks();
 		inputMgr.destroy();
 		session.judgeMan = null;
 		current = null;
+		super.destroy();
 	}
 
 	public function onSettingsChanged() {
@@ -407,8 +450,29 @@ class PlayState extends MusicBeatState {
 		Conductor.current.active = true;
 		Conductor.setTime(-Conductor.crotchet * 7);
 
+		var scriptHUD:ScriptHUD = null;
+		if (currentHUD != null && currentHUD is ScriptHUD)
+			scriptHUD = cast currentHUD;
+
+		if (scriptHUD != null)
+			scriptHUD.callFunc("countdownStart");
+		callFuncInScripts("countdownStart");
+
 		var swagCounter:Int = 0;
 		startTimer = new FlxTimer().start(Conductor.crotchet * 0.001, function(tmr:FlxTimer) {
+			if (scriptHUD != null) {
+				var hudRet = scriptHUD.callFunc("countdownTick", [swagCounter]);
+				if (hudRet != null && hudRet.value == ScriptLoader.STOP_FUNC) {
+					swagCounter += 1;
+					return;
+				}
+			}
+			var ret = callFirstFuncInScripts("countdownTick", [swagCounter]);
+			if (ret != null && ret.value == ScriptLoader.STOP_FUNC) {
+				swagCounter += 1;
+				return;
+			}
+
 			var introPath:String = 'gameplay/ui/countdown/';
 			var introAlts:Array<String> = ['ready', 'set', 'go'];
 			var altSuffix:String = "";
@@ -632,8 +696,11 @@ class PlayState extends MusicBeatState {
 				maxNps = nps;
 			tilNpsUpdate = 1;
 		}
-
 		super.update(elapsed);
+
+		var ret = callFirstFuncInScripts("preUpdate", [elapsed]);
+		if (ret != null && ret.value == ScriptLoader.STOP_FUNC)
+			return;
 
 		if (FlxG.keys.justPressed.ENTER && startedCountdown && canPause) {
 			pause();
@@ -656,6 +723,7 @@ class PlayState extends MusicBeatState {
 			pause(true);
 			boyfriend.stunned = true;
 			Conductor.current.stopMusic();
+			callFuncInScripts("playerDeath", []);
 			openSubState(new gameplay.GameOverSubstate(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 			#if hxdiscord_rpc
 			// Game Over doesn't get his own variable because it's only used here
@@ -670,6 +738,7 @@ class PlayState extends MusicBeatState {
 			notes.updateNotes(Conductor.time, strumlines.members, actualSpeed);
 			noteUpdate(Conductor.time);
 			updateEvents(Conductor.time);
+			callFuncInScripts("update", [elapsed]);
 		}
 	}
 
@@ -734,8 +803,10 @@ class PlayState extends MusicBeatState {
 				if (daNote.strumTime <= Conductor.time && !daNote.isFake) {
 					if (daNote.mustPress)
 						goodNoteHit(daNote);
-					else
+					else {
 						daNote.wasGoodHit = true;
+						callFuncInScripts("opponentNoteHit", [daNote]);
+					}
 					noteKill = false;
 				}
 			} else if (daNote.mustPress) {
@@ -752,8 +823,6 @@ class PlayState extends MusicBeatState {
 				}
 			}
 			if (!daNote.mustPress && daNote.wasGoodHit) {
-				if (songName != 'Tutorial')
-					camZooming = true;
 				var altAnim:String = "";
 				if (curSection != null && curSection.altAnim)
 					altAnim = '-alt';
@@ -768,10 +837,6 @@ class PlayState extends MusicBeatState {
 		}
 	}
 
-	// ok listen I was so paranoid because inputs were taking 10ms (max, can be less) to hit
-	// and that sounds like I'm worrying too much I know but this is a rhythm game and I'm SURPRISED filtering is kinda slow
-	// so I completely changed how note input works just to make it faster
-	// god I need a hug. -asmadeuxs
 	public function queueInputNote(note:Note):Void {
 		if (!note.mustPress)
 			return;
@@ -798,11 +863,6 @@ class PlayState extends MusicBeatState {
 		if (!on || key == -1 || paused || inCutscene || !generatedMusic || endingSong)
 			return;
 
-		// okay now that I'm done with this code and it works I'm genuinely SO confused
-		// why the fuck was it taking 10ms before to hit a note but that DIDN'T happen in DummyPlayState
-		// the fuck is in this cursed class man, I didn't rewrite it entirely because that'd be time consuming
-		// but WHY was this taking 10ms max to respond, why, I don't get it. -asmadeuxs
-
 		var lane:Int = key;
 		var queue:Array<Note> = inputQueue[lane];
 		var next:Note = (queue.length != 0) ? queue[0] : null;
@@ -826,6 +886,10 @@ class PlayState extends MusicBeatState {
 	}
 
 	function endSong():Void {
+		var ret = callFirstFuncInScripts("songEnd");
+		if (ret != null && ret.value == ScriptLoader.STOP_FUNC)
+			return;
+
 		canPause = false;
 		Conductor.current.stopMusic();
 		if (!session.invalid)
@@ -880,7 +944,13 @@ class PlayState extends MusicBeatState {
 	var showComboSprite:Bool = false;
 
 	public function popUpScore(daNote:Note):Void {
-		// TODO: move this to HUD?
+		var scriptHUD:ScriptHUD = null;
+		if (currentHUD != null && currentHUD is ScriptHUD) {
+			scriptHUD = cast currentHUD;
+			var ret = scriptHUD.callFunc("popUpScore", [daNote]);
+			if (ret != null && ret.value == ScriptLoader.STOP_FUNC)
+				return;
+		}
 		if (showRating)
 			popUpRating(daNote.judgement.image);
 		popUpCombo(session.combo, daNote.judgement);
@@ -996,6 +1066,8 @@ class PlayState extends MusicBeatState {
 			gf.playAnim('sad');
 		session.breakCombo();
 
+		callFuncInScripts("noteMiss", [direction, daNote]);
+
 		var missJudge = session.judgeMan.getMiss();
 		if (missJudge != null) {
 			health += session.judgeMan.getHealthBonus(missJudge, health);
@@ -1029,6 +1101,8 @@ class PlayState extends MusicBeatState {
 			return;
 		}
 
+		callFuncInScripts("goodNoteHit", [note]);
+
 		boyfriend.sing(note.noteData, null, true);
 		boyfriend.danceCooldown = boyfriend.singDuration + note.sustainLength;
 		note.wasGoodHit = true;
@@ -1055,10 +1129,13 @@ class PlayState extends MusicBeatState {
 			stage.stepHit(curStep);
 		if (currentHUD != null)
 			currentHUD.stepHit(curStep);
+		callFuncInScripts("stepHit", [curStep]);
 	}
 
+	public var cameraBumpFrequency:Int = 4;
+
 	override function beatHit(curBeat:Int) {
-		if (camZooming && camGame.zoom < 1.35 && curBeat % 4 == 0) {
+		if (camZooming && camGame.zoom < 1.35 && curBeat % cameraBumpFrequency == 0) {
 			camGame.zoom += 0.015;
 			camHUD.zoom += 0.03;
 		}
@@ -1069,30 +1146,7 @@ class PlayState extends MusicBeatState {
 			currentHUD.beatHit(curBeat);
 		characterDance(curBeat);
 
-		switch songName.toLowerCase() {
-			case 'tutorial':
-				if (curBeat % 16 == 15 && dad.characterId == 'gf' && curBeat > 16 && curBeat < 48) {
-					boyfriend.playAnim('hey', true);
-					dad.playAnim('cheer', true);
-				}
-			case 'bopeebo':
-				if (curBeat % 8 == 7)
-					boyfriend.playAnim('hey', true);
-				if (curBeat > 5 && curBeat < 130 && curBeat % 8 == 7)
-					gf.playAnim('cheer');
-			case 'fresh':
-				switch (curBeat) {
-					case 16:
-						camZooming = true;
-						gfSpeed = 2;
-					case 48:
-						gfSpeed = 1;
-					case 80:
-						gfSpeed = 2;
-					case 112:
-						gfSpeed = 1;
-				}
-		}
+		callFuncInScripts("beatHit", [curBeat]);
 	}
 
 	var curSection:SwagSection;
@@ -1118,9 +1172,50 @@ class PlayState extends MusicBeatState {
 		// TODO: Figure out decimal beats
 		if (!dad.isSinging() && beat % Math.floor(dad.beatsToDance) == 0)
 			dad.dance();
-		if (!gf.isSinging() && beat % Math.floor(gf.beatsToDance * gfSpeed) == 0)
+		if (!gf.isSinging() && beat % gf.beatsToDance == 0)
 			gf.dance();
 		if (!boyfriend.isSinging() && beat % Math.floor(boyfriend.beatsToDance) == 0)
 			boyfriend.dance();
+	}
+
+	public function setVarInScripts(varName:String, value:Dynamic):Void {
+		if (gameplayScripts == null || gameplayScripts.length == 0)
+			return;
+		for (script in gameplayScripts)
+			if (script != null)
+				script.setVar(varName, value);
+	}
+
+	public function callFuncInScripts(funcName:String, ?args:Array<Dynamic>):Map<String, HScriptFunction> {
+		if (gameplayScripts == null || gameplayScripts.length == 0)
+			return null;
+		var results:Map<String, HScriptFunction> = new Map();
+		for (script in gameplayScripts) {
+			if (script == null)
+				continue;
+			var result = script.callFunc(funcName, args);
+			if (result != null)
+				results.set(script.fileName, result);
+		}
+		return results;
+	}
+
+	public function getFirstVarInScripts(varName:String, ?defaultValue:Dynamic = null):Dynamic {
+		if (gameplayScripts == null || gameplayScripts.length == 0)
+			return defaultValue;
+		for (script in gameplayScripts)
+			return script.getVar(varName);
+		return defaultValue;
+	}
+
+	public function callFirstFuncInScripts(funcName:String, ?args:Array<Dynamic>):Null<HScriptFunction> {
+		if (gameplayScripts == null || gameplayScripts.length == 0)
+			return null;
+		for (script in gameplayScripts) {
+			var result = script.callFunc(funcName, args);
+			if (result != null)
+				return result;
+		}
+		return null;
 	}
 }

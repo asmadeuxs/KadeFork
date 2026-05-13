@@ -12,46 +12,9 @@ class ScriptLoader {
 	public static inline var CONTINUE_FUNC:String = "#HSCRIPT_CONTINUE_FUNC";
 	public static inline var KILL_SCRIPT:String = "#HSCRIPT_KILL_SCRIPT";
 
-	// just a little something so we can reuse scripts instead of loading a new one that is identical to an older one.
-	// this is mainly useful for note scripts, not so much for gameplay scripts and whatnot
-	public static var scriptCache:Map<String, Script> = [];
-
-	public static function findScript(path:String, ?noCache:Bool = true):Script {
+	public static function findScript(path:String):Script {
 		var origin:String = Paths.getAssetOrigin(path);
-		var script:Script = null;
-		if (!noCache) {
-			script = scriptCache.get(origin + path);
-			if (script == null) {
-				script = loadScript(path);
-				scriptCache.set(origin + path, script);
-			}
-		} else
-			script = loadScript(path);
-		return script;
-	}
-
-	public static function removeScriptFromCachedPath(path:String, ?destroyScript:Bool = true):Script {
-		var script:Script = null;
-		for (key in scriptCache.keys()) {
-			if (key == path) {
-				script = scriptCache.get(key);
-				scriptCache.remove(key);
-				if (destroyScript)
-					script.destroy();
-			}
-		}
-		return script;
-	}
-
-	public static function removeScriptFromCache(script:Script, ?destroyScript:Bool = true):Script {
-		for (key in scriptCache.keys()) {
-			var target = scriptCache.get(key);
-			if (target == script) {
-				scriptCache.remove(key);
-				if (destroyScript)
-					script.destroy();
-			}
-		}
+		var script:Script = loadScript(path);
 		return script;
 	}
 
@@ -76,7 +39,7 @@ class ScriptLoader {
 		interp.variables.set("FlxColor", new data.hscript.FlxColorWrapper());
 		interp.variables.set("state", flixel.FlxG.state);
 		// game
-		interp.variables.set("Translator", data.Locale.current);
+		interp.variables.set("Translator", #if FEATURE_TRANSLATIONS data.Locale.current #else null #end);
 		interp.variables.set("Preferences", data.Preferences);
 		interp.variables.set("CoolUtil", util.CoolUtil);
 		interp.variables.set("Paths", util.Paths);
@@ -99,7 +62,7 @@ class ScriptLoader {
 				scripts.remove(s);
 			}
 		}
-		scripts.sort(function(a, b) return Std.int(a.priority - b.priority));
+		scripts.sort(ScriptLoader.sortByPriority);
 		return scripts;
 	}
 
@@ -143,9 +106,11 @@ class ScriptLoader {
 		return script;
 	}
 
-	public static function runScriptsAtDir(directory:String):Array<Script> {
+	public static function runScriptsAtDir(directory:String, ?sort:Bool = true):Array<Script> {
 		var scripts:Array<Script> = null;
 		#if FEATURE_HSCRIPT
+		if(!Paths.fileExists(directory))
+			return scripts;
 		var files:Array<String> = Paths.listFiles(directory);
 		for (i in 0...files.length) {
 			var path:String = Path.addTrailingSlash(directory) + files[i];
@@ -161,10 +126,14 @@ class ScriptLoader {
 				scripts.push(p);
 			}
 		}
-		scripts.sort(function(a, b) return Std.int(a.priority - b.priority));
+		if (sort)
+			scripts.sort(ScriptLoader.sortByPriority);
 		#end
 		return scripts;
 	}
+
+	public static function sortByPriority(a:Script, b:Script)
+		return Std.int(a.priority - b.priority);
 
 	private static function parseScript(scriptStr:String, ?interp:InterpType, ?origin:String = 'hscript', ?mod:String = null):Script {
 		#if FEATURE_HSCRIPT

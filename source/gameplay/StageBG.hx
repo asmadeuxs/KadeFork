@@ -84,7 +84,7 @@ class StageBG extends FlxBasic {
 
 	private function loadStageScript(stageName:String):Script {
 		var scriptPath:String = Paths.getPath('data/stages/$stageName');
-		stageScript = ScriptLoader.findScript(ScriptLoader.getScriptFile(scriptPath, stageName), true);
+		stageScript = ScriptLoader.findScript(ScriptLoader.getScriptFile(scriptPath, stageName));
 		scriptFuncCall('onLoad', [this]);
 		return stageScript;
 	}

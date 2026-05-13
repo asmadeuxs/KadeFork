@@ -164,7 +164,7 @@ class OptionRegistry extends BaseRegistry<OptionCategory> {
 				},
 				{
 					name: "HUD Style",
-					description: "Changes the style of the HUD.\n\"Detailed\" being the default",
+					description: "Changes the style of the HUD.\n\"Default\" will let mods override it",
 					choices: gameplay.hud.BaseHUD.listHUDs(),
 					translationPrefix: "hud_",
 					variable: "hudStyle",

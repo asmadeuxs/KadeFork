@@ -1,0 +1,6 @@
+function onBeatHit(curBeat) {
+	if (curBeat % 8 == 7)
+		game.boyfriend.playAnim('hey', true);
+	if (curBeat > 5 && curBeat < 130 && curBeat % 8 == 7)
+		game.gf.playAnim('cheer');
+}

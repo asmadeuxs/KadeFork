@@ -1,0 +1,10 @@
+function onCreate() {
+	game.camZooming = true;
+}
+
+function onBeatHit(curBeat) {
+	if (curBeat % 16 == 15 && curBeat > 16 && curBeat < 48) {
+		game.boyfriend.playAnim('hey', true);
+		game.dad.playAnim('cheer', true);
+	}
+}

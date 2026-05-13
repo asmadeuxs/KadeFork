@@ -22,10 +22,9 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 	var speeds:Array<Null<Float>> = [];
 	var downscroll:Array<Int> = [];
 
-	public function new(?keyCount:Int = 4):Void {
+	public function new(?skin:String = 'default', ?keyCount:Int = 4):Void {
 		super(0, 0);
 		this.keyCount = keyCount;
-		var skin:String = 'default'; // hardcoded for now
 		noteskin = Noteskin.loadNoteskinFile(skin);
 		splashPool = new ObjectPool(16, (_) -> return add(noteskin.generateNoteSplashSprite()));
 		generateStrums();

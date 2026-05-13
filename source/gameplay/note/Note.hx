@@ -37,6 +37,7 @@ class Note extends gameplay.FunkinSprite {
 				var file:String = ScriptLoader.getScriptFile(Paths.getPath('scripts/notetypes'), type);
 				if (file != null) {
 					noteScript = ScriptLoader.findScript(file);
+					noteScript?.setVar("note", this);
 					noteScript?.callFunc('generateNoteType', [this]);
 				}
 		}

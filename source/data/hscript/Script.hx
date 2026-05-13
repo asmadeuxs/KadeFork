@@ -25,7 +25,7 @@ typedef InterpType = #if FEATURE_HSCRIPT hscript.Interp #else Any #end;
 
 		#if FEATURE_HSCRIPT
 		if (this.interp == null) {
-			Sys.println('Script Error (${this.fileName}) - The script interpret is null (destroyed? value is: $interp)');
+			Sys.println('Script Error (${this.fileName}) - The script interpreter is null (destroyed? value is: $interp)');
 			return caller;
 		}
 		if (args == null)

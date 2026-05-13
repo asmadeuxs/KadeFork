@@ -7,78 +7,49 @@ import flixel.text.FlxText;
 import flixel.ui.FlxBar;
 
 class BaseHUD extends FlxSpriteGroup {
-	var hudScript:Script = null;
-
-	public function new(?hudScript:Script):Void {
+	public function new():Void {
 		super();
-		this.hudScript = hudScript;
-		if (hudScript != null) {
-			hudScript.setVar("__name", "Unknown");
-			hudScript.setVar("add", this.add);
-			hudScript.setVar("remove", this.remove);
-			hudScript.setVar("replace", this.replace);
-			hudScript.setVar("insert", this.insert);
-			hudScript.callFunc("generateHUD", [this]);
-		}
 	}
 
 	public static function listHUDs():Array<String> {
-		var hudList:Array<String> = ["Detailed", "Classic"];
-
-		function findThenPush(modId:String = 'core') {
-			var dir:String = Paths.getPath('scripts/huds', modId);
-			if (Paths.fileExists(dir)) {
-				for (i in Paths.listFiles(dir)) {
-					if (!Paths.scriptExtensions.contains(haxe.io.Path.extension(i)))
-						continue;
-					var hudName:String = haxe.io.Path.withoutExtension(i);
-					if (!hudList.contains(hudName))
-						hudList.push(hudName);
-				}
+		var names:Array<String> = ["Default", "Detailed", "Classic"];
+		var mods = util.Mods.getEnabled();
+		for (modId in mods) {
+			var scriptPath:String = Paths.getPath('scripts/huds', modId);
+			if (!Paths.fileExists(scriptPath))
+				continue;
+			for (file in Paths.listFiles(scriptPath)) {
+				var ext:String = haxe.io.Path.extension(file).toLowerCase();
+				if (!Paths.scriptExtensions.contains(ext))
+					continue;
+				var baseName:String = haxe.io.Path.withoutExtension(file);
+				if (!names.contains(baseName))
+					names.push(baseName);
 			}
 		}
-
-		var modIDs:Array<String> = util.Mods.getEnabled();
-		for (modId in modIDs)
-			findThenPush(modId);
-		return hudList;
+		return names;
 	}
 
 	public static function loadHUD(?hudName:String = null):BaseHUD {
-		var custom = ScriptLoader.findScript(ScriptLoader.getScriptFile(Paths.getPath('scripts/huds'), hudName), true);
-		if (custom != null)
-			return new gameplay.hud.BaseHUD(custom);
-		else {
-			return switch hudName.toLowerCase() {
-				case "classic": new gameplay.hud.Classic();
-				case _: new gameplay.hud.Kade();
-			}
+		var jsonPath = Paths.getJsonPath('data/huds/$hudName');
+		// @formatter:off
+		var scriptPath = ScriptLoader.getScriptFile(Paths.getPath('scripts/huds'), hudName);
+		if (scriptPath != null && Paths.fileExists(scriptPath)) {
+			try return new ScriptHUD(hudName)
+			catch (e:Dynamic) trace('Failed to load scripted HUD "$hudName" - $e');
+		}
+		// @formatter:on
+		return switch (hudName.toLowerCase()) {
+			case "classic": new Classic();
+			default: new Kade();
 		}
 	}
 
-	override function update(elapsed:Float):Void {
-		super.update(elapsed);
-		if (hudScript != null)
-			hudScript.callFunc("update", [elapsed, this]);
-	}
+	public function onSettingsChanged() {}
 
-	public function onSettingsChanged() {
-		if (hudScript != null)
-			hudScript.callFunc("onSettingsChanged", [this]);
-	}
+	public function updateScoreText(?miss:Bool) {}
 
-	public function updateScoreText(?miss:Bool) {
-		if (hudScript != null)
-			hudScript.callFunc("updateScoreText", [miss, this]);
-	}
+	public function stepHit(step:Int):Void {}
 
-	public function stepHit(step:Int):Void {
-		if (hudScript != null)
-			hudScript.callFunc("stepHit", [step, this]);
-	}
-
-	public function beatHit(beat:Int):Void {
-		if (hudScript != null)
-			hudScript.callFunc("beatHit", [beat, this]);
-	}
+	public function beatHit(beat:Int):Void {}
 }

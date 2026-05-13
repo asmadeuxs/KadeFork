@@ -288,7 +288,7 @@ class Paths {
 		return path;
 	}
 
-	inline static public function getJsonPath(json:String, mod:String):String {
+	inline static public function getJsonPath(json:String, ?mod:String):String {
 		var path:String = null;
 		for (ext in Paths.jsonExtensions) {
 			var candidate:String = Paths.resolveAssetPath('$json.$ext', mod);

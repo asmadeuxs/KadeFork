@@ -2,19 +2,68 @@ package util;
 
 import flixel.FlxObject;
 import flixel.FlxSprite;
+import flixel.math.FlxMath;
 import flixel.util.FlxAxes;
 import flixel.util.FlxColor;
+import flixel.util.FlxStringUtil;
 import lime.utils.Assets;
 
 using StringTools;
 
 class CoolUtil {
-	public static var pixelScale:Float = 6;
-	public static var defaultDifficulties:Array<String> = ['easy', "normal", "hard"];
+	public static var stringFormatters:Map<String, (Dynamic) -> String> = [
+		"moneyEN" => (v:Float) -> FlxStringUtil.formatMoney(v, true, true),
+		"moneyEU" => (v:Float) -> FlxStringUtil.formatMoney(v, true, false),
+		"time" => (v:Float) -> FlxStringUtil.formatTime(v, false),
+		"timeMs" => (v:Float) -> FlxStringUtil.formatTime(v, true),
+		"bytes" => (v:Float) -> FlxStringUtil.formatBytes(v, 2),
+		"percent" => (v:Float) -> return '${FlxMath.roundDecimal(v * 100, 1)}%'
+	];
+
+	public static function formatValue(value:Float, format:String):String {
+		if (stringFormatters.exists(format))
+			return stringFormatters.get(format)(value);
+
+		if (format.indexOf("%d") >= 0 || format.indexOf("%i") >= 0)
+			return Std.string(Std.int(value));
+
+		var decimalPlaces:Int = -1;
+		var regex = ~/%\.([0-9]+)f/;
+		if (regex.match(format))
+			decimalPlaces = Std.parseInt(regex.matched(1));
+		else if (format.indexOf("%f") >= 0)
+			decimalPlaces = 6;
+
+		if (decimalPlaces >= 0) {
+			var rounded:Float = FlxMath.roundDecimal(value, decimalPlaces);
+			var str = Std.string(rounded);
+			if (!str.contains("."))
+				str += ".";
+			var frac:String = str.split(".")[1];
+			while (frac.length < decimalPlaces) {
+				frac += "0";
+				str = str.split(".")[0] + "." + frac;
+			}
+			return str;
+		}
+		return Std.string(value);
+	}
+
+	public static function arrayEquals(a:Array<Dynamic>, b:Array<Dynamic>):Bool {
+		if (a.length != b.length)
+			return false;
+		for (i in 0...a.length)
+			if (a[i] != b[i])
+				return false;
+		return true;
+	}
 
 	public static function formatEscapeStrings(text:String):String {
 		return text.replace("\\\\", "\\").replace("\\r", "\r").replace("\\n", "\n").replace("\\t", "\r").replace("\\'", "'");
 	}
+
+	public static var pixelScale:Float = 6;
+	public static var defaultDifficulties:Array<String> = ['easy', "normal", "hard"];
 
 	public static function coolList(str:String):Array<String> {
 		var daList:Array<String> = str.trim().split('\n');

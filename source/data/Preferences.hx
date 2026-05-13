@@ -19,8 +19,8 @@ import util.Mods;
 	var fifthJudgement:Bool = true; // Enables a fifth judgement above "Sick!"
 	var etternaMode:Bool = true; // Changes the accuracy system to use Wife3
 	var judgeDifficulty:Int = 4; // Changes the difficulty of the judgement windows
-	// TODO: add custom judge windows
 
+	// TODO: add custom judge windows
 	// Visuals & Accessibility
 	var strumUnderlay:Int = 0; // Enables a background behind the strums or stage (goes from 0 - 100)
 	var strumUnderlayType:Int = 0; // Where should the underlay be layered on
@@ -136,7 +136,7 @@ class Preferences {
 		// Not useful if you have a completely clean save
 		if (FlxG.save.data.accuracyDisplay != null) {
 			var inf:Bool = FlxG.save.data.accuracyDisplay;
-			Preferences.user.hudStyle = inf ? "Detailed" : "Classic";
+			Preferences.user.hudStyle = inf ? "Default" : "Classic";
 			FlxG.save.data.hudStyle = Preferences.user.hudStyle;
 			FlxG.save.data.accuracyDisplay = null;
 		}
