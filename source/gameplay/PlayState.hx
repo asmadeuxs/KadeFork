@@ -219,8 +219,8 @@ class PlayState extends MusicBeatState {
 				gameplayScripts = [];
 			while (songScripts.length > 0)
 				gameplayScripts.push(songScripts.shift());
+			gameplayScripts.sort(ScriptLoader.sortByPriority);
 		}
-		gameplayScripts.sort(ScriptLoader.sortByPriority);
 		songScripts = null;
 
 		setVarInScripts("game", this);
