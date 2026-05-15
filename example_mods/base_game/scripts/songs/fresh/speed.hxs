@@ -1,5 +1,5 @@
-// TODO: re-add gfSpeed
-function onBeatHit(curBeat) {
+// TODO: need to turn this into a song event, not a script
+function beatHit(curBeat) {
 	switch (curBeat) {
 		case 16:
 			game.camZooming = true;

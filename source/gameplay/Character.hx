@@ -19,7 +19,7 @@ enum abstract CharacterType(String) from String to String {
 }
 
 @:allow(editor.CharacterEditor)
-class Character extends gameplay.FunkinSprite implements IBeatSynched {
+class Character extends gameplay.FunkinSprite {
 	public static final DEFAULT_CHARACTER:String = "bf";
 
 	public static final DEFAULT_IDLE_ANIMATIONS:Array<String> = ["idle"];
@@ -78,49 +78,43 @@ class Character extends gameplay.FunkinSprite implements IBeatSynched {
 		super(x, y);
 		this.charType = charType;
 		this.characterId = character;
-		Conductor.connectSynched(this);
 		loadCharacter(character);
-	}
-
-	override function destroy():Void {
-		Conductor.disconnectSynched(this);
-		super.destroy();
 	}
 
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 		if (placeholder)
 			return;
-		if (!debugMode && !stunned && isSinging()) {
-			danceCooldown -= elapsed / singDuration;
-			if (danceCooldown <= 0.0)
-				dance(true);
+		if (!debugMode && !stunned) {
+			danceCheck();
+			if (isSinging()) {
+				danceCooldown -= elapsed / singDuration;
+				if (danceCooldown <= 0.0)
+					dance(true);
+			}
 		}
 		scriptFuncCall('update', [this, elapsed]);
 	}
 
-	public function isSinging():Bool
-		return animation.curAnim != null && singAnimations.contains(animation.curAnim.name);
+	var _nextDanceBeat:Float = -1.0;
+	var _lastInterval:Float = -1.0;
 
-	public function isMissing():Bool
-		return animation.curAnim != null && missAnimations.contains(animation.curAnim.name);
-
-	var nextDanceBeat:Float = 0.0;
-
-	public function stepHit(_:Int):Void {}
-
-	public function beatHit(curBeat:Int):Void {
-		if (placeholder || isSinging())
+	public function danceCheck():Void {
+		var interval:Float = beatsToDance / danceSpeed;
+		trace('interval: $interval');
+		if (placeholder || isSinging() || interval <= 0)
 			return;
-		if (nextDanceBeat == 0)
-			nextDanceBeat = Conductor.currentBeat + beatsToDance / danceSpeed;
-		while (Conductor.currentBeat >= nextDanceBeat) {
-			dance();
-			nextDanceBeat += beatsToDance / danceSpeed;
+
+		if (_nextDanceBeat < 0)
+			_nextDanceBeat = Conductor.currentBeat + interval;
+
+		if (Conductor.currentBeat >= _nextDanceBeat) {
+			dance(true);
+			_nextDanceBeat += interval;
+			if (Conductor.currentBeat > _nextDanceBeat + interval)
+				_nextDanceBeat = Conductor.currentBeat + interval;
 		}
 	}
-
-	public function barHit(_:Int):Void {}
 
 	public function dance(?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
 		if (placeholder)
@@ -153,6 +147,12 @@ class Character extends gameplay.FunkinSprite implements IBeatSynched {
 			playAnim(missAnimations[direction], force, reversed, frame);
 		scriptFuncCall('onMiss', [this, direction, force, reversed, frame]);
 	}
+
+	public function isSinging():Bool
+		return animation.curAnim != null && singAnimations.contains(animation.curAnim.name);
+
+	public function isMissing():Bool
+		return animation.curAnim != null && missAnimations.contains(animation.curAnim.name);
 
 	private function findCharacterFile(character:String):String {
 		var paths = [
@@ -229,7 +229,10 @@ class Character extends gameplay.FunkinSprite implements IBeatSynched {
 					this.idleAnimations = file.idleAnimations ?? DEFAULT_IDLE_ANIMATIONS;
 					this.singAnimations = file.singAnimations ?? DEFAULT_SING_ANIMATIONS;
 					this.missAnimations = file.missAnimations ?? DEFAULT_MISS_ANIMATIONS;
-					this.beatsToDance = file.beatsToDance ?? singAnimations.length >= 2 ? 1 : 2;
+					if (file.beatsToDance != null)
+						this.beatsToDance = file.beatsToDance;
+					else
+						this.beatsToDance = idleAnimations.length >= 2 ? 1 : 2;
 
 					var fileFlipX:Bool = file.flipX ?? false;
 					this.singDuration = file.singDuration ?? 4.0;

@@ -129,8 +129,8 @@ typedef CharacterConfig = {
 
 	// animations
 	animations:Dynamic, // temporary
-	?singDuration:Float,
-	?beatsToDance:Int,
+	?singDuration:Null<Float>,
+	?beatsToDance:Null<Float>,
 	?idleAnimations:Array<String>,
 	?singAnimations:Array<String>,
 	?missAnimations:Array<String>,
