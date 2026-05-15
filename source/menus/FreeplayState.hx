@@ -199,6 +199,8 @@ class FreeplayState extends GenericMenuState {
 	}
 
 	override function onAcceptPressed(song:Int, difficulty:Int):Void {
+		if (PlayState.playlist == null)
+			PlayState.playlist = new data.song.SongPlaylist();
 		var curSong = songs[song];
 		PlayState.playlist.clear();
 		PlayState.playlist.toggleStory(false);
@@ -210,12 +212,12 @@ class FreeplayState extends GenericMenuState {
 			curSong.curDifficulty = lastDifficultyArray[curHorizontal].toLowerCase();
 			PlayState.playlist.addSongFromMetadata(curSong, curSong.curDifficulty);
 		}
+		PlayState.playlist.getCurrent(); // set the song to the current one.
+		PlayState.playlist.updateSong();
 		var songID:String = '${curSong.mod}:${curSong.songFolder}';
 		if (prevSong == songID)
 			Paths.skipNextClear = true;
 		prevSong = songID;
-
-		PlayState.playlist.getCurrent(); // set the song to the current one.
 		FlxG.switchState(new gameplay.PlayState());
 	}
 

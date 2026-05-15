@@ -3,8 +3,8 @@ package data;
 import flixel.FlxG;
 
 class Highscore {
-	public static var songScores:Map<String, Int> = new Map();
-	public static var levelScores:Map<String, Int> = new Map();
+	public static var songScores:Map<String, Int> = new Map<String, Int>();
+	public static var levelScores:Map<String, Int> = new Map<String, Int>();
 
 	private static function formatSong(song:String, diff:String):String
 		return '$song-$diff';

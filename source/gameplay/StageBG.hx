@@ -17,7 +17,7 @@ using util.CoolUtil;
 
 @:allow(ui.DeveloperMenu, gameplay.PlayState)
 class StageBG extends FlxBasic {
-	public var characterOffsets:Map<String, Array<Float>> = new Map();
+	public var characterOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
 	public var cameraZoom:Float = 1.0;
 
 	var objects:Array<FlxBasic> = [];

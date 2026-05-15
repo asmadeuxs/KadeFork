@@ -113,7 +113,7 @@ class Preferences {
 			for (mod in Reflect.fields(savedModOptions)) {
 				var modData = Reflect.field(savedModOptions, mod);
 				if (modData != null) {
-					var optMap:Map<String, Dynamic> = new Map();
+					var optMap:Map<String, Dynamic> = new Map<String, Dynamic>();
 					for (opt in Reflect.fields(modData)) {
 						optMap.set(opt, Reflect.field(modData, opt));
 					}
@@ -152,7 +152,7 @@ class Preferences {
 		}
 	}
 
-	private static var modOptions:Map<String, Map<String, Dynamic>> = new Map();
+	private static var modOptions:Map<String, Map<String, Dynamic>> = new Map<String, Map<String, Dynamic>>();
 
 	public static function setFPSCap(newFramerate:Int) {
 		if (newFramerate > FlxG.drawFramerate) {
@@ -173,7 +173,7 @@ class Preferences {
 
 	public static function setModOption(mod:String, option:String, value:Dynamic):Void {
 		if (modOptions.get(mod) == null)
-			modOptions.set(mod, new Map());
+			modOptions.set(mod, new Map<String, Dynamic>());
 		modOptions[mod].set(option, value);
 		if (FlxG.save.data.modOptions == null)
 			FlxG.save.data.modOptions = {};

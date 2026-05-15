@@ -45,24 +45,25 @@ class PlayState extends MusicBeatState {
 
 	// level info
 	public static var songName:String = "test";
-	public static var songTitle(get, never):String;
 	public static var difficulty:String = "";
 	public static var songLength:Float = 1.0;
 
 	public static var playlist:SongPlaylist = new SongPlaylist();
+
 	public static var moonSong(get, never):DynamicFormat;
 	public static var moonMeta(get, never):BasicMetaData;
-
-	public static var curStage:String = '';
+	public static var songTitle(get, never):String;
 
 	static function get_moonSong()
-		return playlist.getCurrent();
+		return playlist?.getCurrent() ?? null;
 
 	static function get_moonMeta()
-		return playlist.getMeta();
+		return playlist?.getMeta() ?? null;
 
-	static function get_songTitle():String
-		return moonMeta?.title ?? songName ?? 'Unknown Song';
+	static function get_songTitle()
+		return moonMeta.title ?? songName ?? 'Unknown Song';
+
+	public static var curStage:String = '';
 
 	public static var campaignScore:Int = 0;
 	public static var session:PlaySession;
@@ -104,7 +105,6 @@ class PlayState extends MusicBeatState {
 	var events:Array<ChartEventArray> = [];
 	var eventPosition:Int = 0;
 
-	var gfSpeed:Int = 1;
 	var camZooming:Bool = false;
 	var health(default, set):Float = 1;
 
@@ -141,11 +141,6 @@ class PlayState extends MusicBeatState {
 	var currentScrollType:Int = 0;
 
 	override public function create() {
-		var metadata = playlist.getFreeplayMeta();
-		PlayState.songName = metadata.songFolder;
-		PlayState.difficulty = metadata.curDifficulty;
-		util.Mods.currentMod = metadata.mod;
-
 		camGame = FlxG.camera;
 		camHUD = new FlxCamera();
 		camOver = new FlxCamera();
@@ -511,8 +506,8 @@ class PlayState extends MusicBeatState {
 	}
 
 	function generateSong():Void {
-		Conductor.bpm = moonMeta.bpmChanges[0].bpm;
 		Conductor.mapTimingPoints(moonSong);
+		Conductor.bpm = moonMeta.bpmChanges[0].bpm;
 		Conductor.current.loadMusic(Paths.inst(PlayState.songName, PlayState.difficulty, util.Mods.currentMod));
 		if (moonMeta.extraData.get(NEEDS_VOICES) == true) // TODO: separate Player and Opponent vocals
 			Conductor.current.addTrack(Paths.voices(PlayState.songName, PlayState.difficulty, util.Mods.currentMod));
@@ -576,7 +571,7 @@ class PlayState extends MusicBeatState {
 		switch event {
 			case ChangeCharacter(who, to):
 				if (_charMap == null)
-					_charMap = new Map();
+					_charMap = new Map<String, Character>();
 				// preloading character
 				var dummyCharacter = new Character(0, 0, to);
 				dummyCharacter.alpha = 0.0000001;
@@ -891,6 +886,7 @@ class PlayState extends MusicBeatState {
 				FlxG.sound.music.time = FlxG.random.int(0, Std.int(FlxG.sound.music.length * 0.5));
 				FlxG.sound.music.fadeIn(4, 0, 0.7);
 			}
+			playlist.clear();
 			util.StateOverride.switchState("menus.FreeplayState");
 		}
 
@@ -900,7 +896,8 @@ class PlayState extends MusicBeatState {
 		}
 
 		if (playlist.getNext() != null) {
-			playlist.next(); // update song
+			playlist.next();
+			playlist.updateSong();
 			// campaignScore += Math.round(session.score);
 			Conductor.current.active = false;
 			Conductor.current.stopMusic();
@@ -1164,7 +1161,7 @@ class PlayState extends MusicBeatState {
 	public function callFuncInScripts(funcName:String, ?args:Array<Dynamic>):Map<String, HScriptFunction> {
 		if (gameplayScripts == null || gameplayScripts.length == 0)
 			return null;
-		var results:Map<String, HScriptFunction> = new Map();
+		var results:Map<String, HScriptFunction> = new Map<String, HScriptFunction>();
 		for (script in gameplayScripts) {
 			if (script == null)
 				continue;

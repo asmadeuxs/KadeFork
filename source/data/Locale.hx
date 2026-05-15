@@ -93,13 +93,13 @@ class Locale {
 					// merging strings and stuff
 					for (cat => map in lang.strings) {
 						if (!existing.strings.exists(cat))
-							existing.strings.set(cat, new Map());
+							existing.strings.set(cat, new StringMap());
 						for (key => value in map)
 							existing.strings[cat].set(key, value);
 					}
 					for (cat => map in lang.pathOverrides) {
 						if (!existing.pathOverrides.exists(cat))
-							existing.pathOverrides.set(cat, new Map());
+							existing.pathOverrides.set(cat, new StringMap());
 						for (key => value in map)
 							existing.pathOverrides[cat].set(key, value);
 					}
@@ -152,7 +152,7 @@ class Locale {
 
 			var ii:String = haxe.io.Path.withoutExtension(i);
 			if (language.strings[ii] == null)
-				language.strings.set(ii, new Map());
+				language.strings.set(ii, new StringMap());
 
 			for (id => line in lines) {
 				var t:String = line.trim();
@@ -178,7 +178,7 @@ class Locale {
 						language.nativeName = value;
 					case(Paths.fileExists(_)) => true:
 						if (language.pathOverrides[ii] == null)
-							language.pathOverrides.set(ii, new Map());
+							language.pathOverrides.set(ii, new StringMap());
 						language.pathOverrides[ii].set(keyTrim, value);
 					case _:
 						language.strings[ii].set(keyTrim, CoolUtil.formatEscapeStrings(value));

@@ -165,7 +165,7 @@ class OptionsMenu extends MusicBeatSubstate {
 			closing = true;
 			Preferences.save();
 			FlxG.sound.play(util.Mods.menuSound('cancelMenu'));
-			new flixel.util.FlxTimer().start(0.5, (_) -> {
+			new flixel.util.FlxTimer().start(0.3, (_) -> {
 				if (FlxG.state is MainMenuState) {
 					var menu:MainMenuState = cast FlxG.state;
 					menu.tweenItemsBackIn();

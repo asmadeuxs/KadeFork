@@ -12,7 +12,7 @@ using StringTools;
 class LevelRegistry extends BaseRegistry<LevelData> {
 	public static var current:LevelRegistry = null;
 
-	var ordered:Map<String, Array<LevelData>> = new Map();
+	var ordered:Map<String, Array<LevelData>> = new Map<String, Array<LevelData>>();
 
 	public function new():Void {
 		super("LevelRegistry");
@@ -52,7 +52,7 @@ class LevelRegistry extends BaseRegistry<LevelData> {
 				levelNames = CoolUtil.coolList(content);
 			}
 
-			var availableLevels:Map<String, String> = new Map();
+			var availableLevels:Map<String, String> = new Map<String, String>();
 
 			for (file in Paths.listFiles(levelDir)) {
 				var ext = file.extension();

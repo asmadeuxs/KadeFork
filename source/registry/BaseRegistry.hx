@@ -4,13 +4,13 @@ package registry;
  * @author asmadeuxs
  */
 class BaseRegistry<Registrable> {
-	public var entries:Map<String, Registrable> = new Map();
+	public var entries:Map<String, Registrable> = new Map<String, Registrable>();
 
 	public var name:String = "BaseRegistry";
 	public var locked:Bool = false;
 	public var length(get, never):Int;
 
-	var _toID:Map<String, Int> = new Map();
+	var _toID:Map<String, Int> = new Map<String, Int>();
 
 	public function new(name:String):Void {
 		this.name = name;
