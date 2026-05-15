@@ -5,6 +5,7 @@ package data.song;
 	public var songFolder:String = null;
 	public var songCharacter:String = "";
 	public var difficulties:Array<String> = null;
+	public var curDifficulty:String = null; // For playlists.
 	public var mod:String = null;
 
 	public function new(songName:String, songFolder:String, songCharacter:String, mod:String = 'core', ?difficulties:Array<String>):Void {

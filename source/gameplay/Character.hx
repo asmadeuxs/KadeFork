@@ -19,7 +19,7 @@ enum abstract CharacterType(String) from String to String {
 }
 
 @:allow(editor.CharacterEditor)
-class Character extends gameplay.FunkinSprite {
+class Character extends gameplay.FunkinSprite implements IBeatSynched {
 	public static final DEFAULT_CHARACTER:String = "bf";
 
 	public static final DEFAULT_IDLE_ANIMATIONS:Array<String> = ["idle"];
@@ -34,7 +34,9 @@ class Character extends gameplay.FunkinSprite {
 
 	public var singDuration:Float = 1.0;
 	public var animationTimer:Float = 0.0;
+
 	public var beatsToDance:Float = 2;
+	public var danceSpeed:Float = 1;
 
 	public var danceCooldown:Float = 0.0;
 	public var charType:String = CharacterType.OPPONENT;
@@ -58,7 +60,7 @@ class Character extends gameplay.FunkinSprite {
 	 * It'll be kept here for now until we find a better way
 	 */
 	@:allow(gameplay.PlayState)
-	private var placeholder:Bool = false;
+	private var placeholder:Bool = true;
 
 	private var debugMode:Bool = false;
 	private var facesLeft:Bool = false;
@@ -76,7 +78,13 @@ class Character extends gameplay.FunkinSprite {
 		super(x, y);
 		this.charType = charType;
 		this.characterId = character;
+		Conductor.connectSynched(this);
 		loadCharacter(character);
+	}
+
+	override function destroy():Void {
+		Conductor.disconnectSynched(this);
+		super.destroy();
 	}
 
 	override function update(elapsed:Float):Void {
@@ -96,6 +104,23 @@ class Character extends gameplay.FunkinSprite {
 
 	public function isMissing():Bool
 		return animation.curAnim != null && missAnimations.contains(animation.curAnim.name);
+
+	var nextDanceBeat:Float = 0.0;
+
+	public function stepHit(_:Int):Void {}
+
+	public function beatHit(curBeat:Int):Void {
+		if (placeholder || isSinging())
+			return;
+		if (nextDanceBeat == 0)
+			nextDanceBeat = Conductor.currentBeat + beatsToDance / danceSpeed;
+		while (Conductor.currentBeat >= nextDanceBeat) {
+			dance();
+			nextDanceBeat += beatsToDance / danceSpeed;
+		}
+	}
+
+	public function barHit(_:Int):Void {}
 
 	public function dance(?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
 		if (placeholder)

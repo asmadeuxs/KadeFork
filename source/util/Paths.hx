@@ -45,7 +45,7 @@ class Paths {
 	static public final jsonExtensions:Array<String> = ["json", "json5", "jsonc"];
 	static public var skipNextClear:Bool = false;
 
-	static private final cacheLimit:Int = 10;
+	static private final cacheLimit:Int = 15;
 
 	static private var avoidClearing:Array<String> = ["core:images/ui/alphabet.png"];
 	static private var cacheTracker:Array<String> = [];

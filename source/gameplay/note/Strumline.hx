@@ -40,12 +40,14 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 				splash.objectCenter(strum, XY);
 			splash.x += x;
 			splash.y += y;
+
 			var played:Bool = false;
 			if (note != null && note.noteScript != null) {
 				var scriptCall = note.noteScript?.callFunc('generateNoteSplash', [splash, noteData, note]);
 				played = scriptCall.value != null;
 			} else
 				played = noteskin.playSplashAnimation(splash, noteData);
+
 			if (played) {
 				splash.revive();
 				splash.animation.finishCallback = function(_) {

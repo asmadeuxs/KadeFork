@@ -3,14 +3,13 @@ package;
 import data.hscript.Script;
 import data.hscript.ScriptLoader;
 import flixel.FlxG;
-import flixel.addons.ui.FlxUIState;
 import flixel.math.FlxRect;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import openfl.Lib;
 
-class MusicBeatState extends FlxUIState {
+class MusicBeatState extends flixel.addons.transition.FlxTransitionableState implements IBeatSynched {
 	private var controls(get, never):Controls;
 
 	public var curStep(get, never):Int;
@@ -27,24 +26,12 @@ class MusicBeatState extends FlxUIState {
 
 	override function create() {
 		super.create();
-		// if (!Preferences.user.skipTransitions)
-		//	effects.Transition.playTransition(this, {out: true});
-		Conductor.stepHit.add(stepHit);
-		Conductor.beatHit.add(beatHit);
-		Conductor.barHit.add(barHit);
+		Conductor.connectSynched(this);
 	}
 
-	// override function startOutro(_) {
-	//	if (!Preferences.user.skipTransitions)
-	//		effects.Transition.playTransition(this, {out: false});
-	//	return super.startOutro(_);
-	// }
-
 	override function destroy() {
+		Conductor.disconnectSynched(this);
 		super.destroy();
-		Conductor.stepHit.remove(stepHit);
-		Conductor.beatHit.remove(beatHit);
-		Conductor.barHit.remove(barHit);
 	}
 
 	public function stepHit(step:Int):Void {}

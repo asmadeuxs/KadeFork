@@ -109,7 +109,7 @@ class ScriptLoader {
 	public static function runScriptsAtDir(directory:String, ?sort:Bool = true):Array<Script> {
 		var scripts:Array<Script> = null;
 		#if FEATURE_HSCRIPT
-		if(!Paths.fileExists(directory))
+		if (!Paths.fileExists(directory))
 			return scripts;
 		var files:Array<String> = Paths.listFiles(directory);
 		for (i in 0...files.length) {

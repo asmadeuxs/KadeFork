@@ -12,12 +12,12 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import lime.app.Application;
-import menus.GenericMenu.SimpleMenuButton;
+import menus.GenericMenuState.SimpleMenuButton;
 import util.Mods;
 
 using StringTools;
 
-class MainMenuState extends GenericMenu {
+class MainMenuState extends GenericMenuState {
 	var menuItems:FlxTypedGroup<FlxSprite>;
 	var optionShit:Array<SimpleMenuButton> = null;
 	var magenta:FlxSprite;
@@ -32,8 +32,8 @@ class MainMenuState extends GenericMenu {
 		Mods.currentMod = null;
 		persistentUpdate = persistentDraw = true;
 		optionShit = [
-			// {name: 'story mode', func: () -> menus.ScriptedMenu.switchToMenu("StoryMenuState")},
-			{name: 'freeplay', func: () -> menus.ScriptedMenu.switchToMenu("FreeplayState")},
+			// {name: 'story mode', func: () -> util.StateOverride.switchState("menus.StoryMenuState")},
+			{name: 'freeplay', func: () -> util.StateOverride.switchState("menus.FreeplayState")},
 			{
 				name: 'options',
 				func: () -> {

@@ -115,10 +115,10 @@ class CharacterEditor extends MusicBeatState {
 		var holdingCtrl:Bool = pressed.CONTROL;
 
 		var cameraPanSpeed:Float = FlxG.keys.pressed.SHIFT ? 4.0 : 1.0;
-		if ((holdingCtrl ? justPressed : pressed).J) camFollow.x += cameraPanSpeed;
-		if ((holdingCtrl ? justPressed : pressed).L) camFollow.x += -cameraPanSpeed;
-		if ((holdingCtrl ? justPressed : pressed).I) camFollow.y += cameraPanSpeed;
-		if ((holdingCtrl ? justPressed : pressed).K) camFollow.y += -cameraPanSpeed;
+		if ((holdingCtrl ? justPressed : pressed).J) camFollow.x += -cameraPanSpeed;
+		if ((holdingCtrl ? justPressed : pressed).L) camFollow.x += cameraPanSpeed;
+		if ((holdingCtrl ? justPressed : pressed).I) camFollow.y += -cameraPanSpeed;
+		if ((holdingCtrl ? justPressed : pressed).K) camFollow.y += cameraPanSpeed;
 		if (justPressed.R) resetCameraPosition();
 
 		var step:Float = FlxG.keys.pressed.SHIFT ? 0.5 : 1;

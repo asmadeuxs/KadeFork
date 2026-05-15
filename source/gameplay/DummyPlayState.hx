@@ -59,7 +59,7 @@ class DummyPlayState extends MusicBeatState {
 			inputQueue[i] = [];
 		for (noteData in 0...PlayState.noteActions.length) {
 			var action = PlayState.noteActions[noteData];
-			var keys:Array<FlxKey> = Controls.current.actions[action];
+			var keys:Array<FlxKey> = controls.actions[action];
 			for (key in keys)
 				inputMgr.remapKeyCode(key, noteData);
 		}

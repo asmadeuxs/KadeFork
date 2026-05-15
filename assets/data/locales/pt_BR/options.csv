@@ -36,6 +36,7 @@ option_ui_back,Menu Voltar
 
 option_language,Idioma
 option_lowQualityMode,Qualidade Baixa
+option_skipTransitions,Pular Transições
 hud_option_hudStyle,Estilo do HUD
 option_showMissPopups,Mostrar Combo Negativo
 option_showSongPosition,Barra de Progresso
@@ -68,7 +69,8 @@ optiondesc_ui_accept,Tecla para confirmar ou ativar um elemento em um menu
 optiondesc_ui_back,Tecla para recusar ou sair de um menu
 
 optiondesc_lowQualityMode,Esconde certos elementos no fundo para ajudar com o carregamento (em algums casos, pode ajudar com desempenho)
-optiondesc_hudStyle,Muda o Estilo do HUD,\n"Padrão" deixará seus mods mudarem esse valor como bem entenderem
+hud_optiondesc_hudStyle,Muda o Estilo do HUD,\n"Padrão" deixará seus mods mudarem esse valor como bem entenderem
+optiondesc_skipTransitions,Pula transições entre telas
 optiondesc_showMissPopups,Mostra quantas vezes tu errou notas em sequência
 optiondesc_showSongPosition,Auto-explicativo, Afeta o HUD
 optiondesc_showJudgeCounts,Mostra um contador de classificações na esquerda do HUD

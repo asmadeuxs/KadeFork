@@ -12,14 +12,17 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import gameplay.PlayState;
-import menus.GenericMenu.SimpleMenuButton;
+import menus.GenericMenuState.SimpleMenuButton;
 
 using util.CoolUtil;
 
-class PauseSubstate extends GenericMenu {
+class PauseSubstate extends MusicBeatSubstate {
+	var curSelected:Int = 0;
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 	var menuItems:Array<SimpleMenuButton> = null;
 	var pauseMusic:FlxSound;
+
+	var canInput:Bool = false;
 
 	var cheatInfo:FlxText;
 
@@ -45,6 +48,8 @@ class PauseSubstate extends GenericMenu {
 					Paths.skipNextClear = true;
 					if (PlayState.session != null)
 						PlayState.session.invalid = false;
+					FlxTransitionableState.skipNextTransIn = true;
+					FlxTransitionableState.skipNextTransOut = true;
 					FlxG.resetState();
 				}
 			},
@@ -67,11 +72,10 @@ class PauseSubstate extends GenericMenu {
 						FlxG.sound.music.time = FlxG.random.int(0, Std.int(FlxG.sound.music.length * 0.5));
 						FlxG.sound.music.fadeIn(4, 0, 0.7);
 					}
-					menus.ScriptedMenu.switchToMenu("FreeplayState");
+					util.StateOverride.switchState("menus.FreeplayState");
 				}
 			}
 		];
-		maxVerticals = menuItems.length - 1;
 
 		pauseMusic = new FlxSound().loadEmbedded(util.Mods.menuMusic('breakfast'), true, true);
 		pauseMusic.volume = 0;
@@ -122,6 +126,7 @@ class PauseSubstate extends GenericMenu {
 		add(grpMenuShit);
 
 		reloadMenu();
+		canInput = true;
 
 		camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 	}
@@ -130,8 +135,13 @@ class PauseSubstate extends GenericMenu {
 		if (pauseMusic.volume < 0.5)
 			pauseMusic.volume += 0.01 * elapsed;
 		super.update(elapsed);
-		if (controls.ACCEPT && canInput && menuItems[curVertical] != null && menuItems[curVertical].func != null)
-			menuItems[curVertical].func();
+		var upP:Bool = controls.UP_P;
+		if (canInput) {
+			if (controls.DOWN_P || upP)
+				changeSelection(upP ? -1 : 1);
+			if (controls.ACCEPT && menuItems[curSelected] != null && menuItems[curSelected].func != null)
+				menuItems[curSelected].func();
+		}
 	}
 
 	override function destroy() {
@@ -140,12 +150,13 @@ class PauseSubstate extends GenericMenu {
 		super.destroy();
 	}
 
-	override function onVerticalChanged(change:Int):Void {
+	function changeSelection(change:Int):Void {
+		curSelected = flixel.math.FlxMath.wrap(curSelected + change, 0, menuItems.length - 1);
 		if (change != 0)
 			FlxG.sound.play(util.Mods.menuSound("scrollMenu"));
 		var bullShit:Int = 0;
 		for (item in grpMenuShit.members) {
-			item.targetY = bullShit - curVertical;
+			item.targetY = bullShit - curSelected;
 			bullShit++;
 			item.alpha = 0.6;
 			if (item.targetY == 0)
@@ -160,7 +171,7 @@ class PauseSubstate extends GenericMenu {
 			songText.targetY = i;
 			grpMenuShit.add(songText);
 		}
-		changeVertical(curVertical);
+		changeSelection(curSelected);
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 	}
 }

@@ -49,6 +49,23 @@ class Conductor extends flixel.FlxBasic {
 	public var music:FlxSound;
 	public var tracks:Array<FlxSound> = [];
 
+	private static var synchedObjects:Array<IBeatSynched> = [];
+
+	public static function connectSynched(instance:IBeatSynched):IBeatSynched {
+		synchedObjects.push(instance);
+		return instance;
+	}
+
+	public static function disconnectSynched(instance:IBeatSynched):IBeatSynched {
+		synchedObjects.remove(instance);
+		return instance;
+	}
+
+	public static function disconnectAllSynched():Void {
+		for (i in synchedObjects)
+			synchedObjects.remove(i);
+	}
+
 	public function new():Void {
 		super();
 		current = this;
@@ -181,16 +198,31 @@ class Conductor extends flixel.FlxBasic {
 		var newBeat = Math.floor(currentBeat);
 		var newStep = Math.floor(currentStep);
 		var newBar = Math.floor(currentBar);
-		if (lastBeat != newBeat)
-			beatHit.dispatch(newBeat);
-		if (lastStep != newStep) {
-			checkNeedResync();
-			stepHit.dispatch(newStep);
-		}
-		if (lastBar != newBar)
-			barHit.dispatch(newBar);
-
+		// @formatter:off
+		for (step in (lastStep + 1)...(newStep + 1)) onStep(step);
+		for (beat in (lastBeat + 1)...(newBeat + 1)) onBeat(beat);
+		for (bar in (lastBar + 1)...(newBar + 1)) onBar(bar);
+		// @formatter:on
 		lastTime = time;
+	}
+
+	public function onStep(step:Int):Void {
+		checkNeedResync();
+		for (i in synchedObjects)
+			i.stepHit(step);
+		stepHit.dispatch(step);
+	}
+
+	public function onBeat(beat:Int):Void {
+		beatHit.dispatch(beat);
+		for (i in synchedObjects)
+			i.beatHit(beat);
+	}
+
+	public function onBar(bar:Int):Void {
+		barHit.dispatch(bar);
+		for (i in synchedObjects)
+			i.barHit(bar);
 	}
 
 	public function checkNeedResync():Void {

@@ -2,7 +2,7 @@ package menus;
 
 import flixel.group.FlxSpriteGroup;
 
-class ModsMenu extends GenericMenu {}
+class ModsMenu extends GenericMenuState {}
 
 @:structInit class ModMenuItem extends FlxSpriteGroup {
 	public function new():Void {

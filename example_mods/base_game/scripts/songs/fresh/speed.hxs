@@ -1,15 +1,14 @@
 // TODO: re-add gfSpeed
-/*
 function onBeatHit(curBeat) {
 	switch (curBeat) {
 		case 16:
 			game.camZooming = true;
-			gfSpeed = 2;
+			game.gf.danceSpeed = 2;
 		case 48:
-			gfSpeed = 1;
+			game.gf.danceSpeed = 1;
 		case 80:
-			gfSpeed = 2;
+			game.gf.danceSpeed = 2;
 		case 112:
-			gfSpeed = 1;
+			game.gf.danceSpeed = 1;
 	}
-}*/
+}

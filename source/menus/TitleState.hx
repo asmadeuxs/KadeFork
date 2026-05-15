@@ -151,7 +151,7 @@ class TitleState extends MusicBeatState {
 			if (!transitionTmr.finished) {
 				if (spamming >= 3) {
 					transitionTmr.cancel();
-					menus.ScriptedMenu.switchToMenu("MainMenuState");
+					util.StateOverride.switchState("menus.MainMenuState");
 				} else
 					spamming++;
 			}
@@ -182,7 +182,7 @@ class TitleState extends MusicBeatState {
 			transitioning = true;
 			FlxG.camera.flash(FlxColor.WHITE, 1);
 			FlxG.sound.play(Mods.menuSound('confirmMenu'), 0.7);
-			transitionTmr.start(2, function(tmr:FlxTimer) menus.ScriptedMenu.switchToMenu("MainMenuState"));
+			transitionTmr.start(2, function(tmr:FlxTimer) util.StateOverride.switchState("menus.MainMenuState"));
 		}
 
 		if (pressedEnter && !skippedIntro) {

@@ -4,24 +4,25 @@ import data.ConfigTypes.LevelData;
 import data.Highscore;
 import data.song.Song;
 import data.song.SongMetadata;
-import flash.text.TextField;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.addons.display.FlxGridOverlay;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import gameplay.PlayState;
 import lime.utils.Assets;
 import registry.LevelRegistry;
-import util.Mods;
 import ui.AlphabetMenu;
 import ui.HealthIcon;
+import util.Mods;
 
 using StringTools;
+using util.CoolUtil;
 
-class FreeplayState extends GenericMenu {
+class FreeplayState extends GenericMenuState {
 	static var prevSong:String = null;
 
 	var songs:Array<SongMetadata> = [];
@@ -30,11 +31,18 @@ class FreeplayState extends GenericMenu {
 	var lastDifficultyArray:Array<String> = null;
 	var grpSongs:AlphabetMenu;
 
+	var scoreBG:FlxSprite;
 	var scoreText:FlxText;
 	var diffText:FlxText;
+	var infoText:FlxText;
 
 	var lerpScore:Int = 0;
 	var intendedScore:Int = 0;
+
+	// holyyyy shiiiiit -asmadeuxs
+	var playlistVisible:Bool = false;
+	var playlistGroup:FlxTypedGroup<FlxText>;
+	var selectedSongs:Array<SongMetadata> = [];
 
 	override function create() {
 		super.create();
@@ -100,21 +108,84 @@ class FreeplayState extends GenericMenu {
 		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, "", 32);
 		scoreText.setFormat(Mods.menuFont("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
 
-		var scoreBG:FlxSprite = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 66, 0xFF000000);
-		scoreBG.alpha = 0.6;
-
+		scoreBG = new FlxSprite().makeScaledGraphic(Std.int(FlxG.width * 0.35), 100, 0xFF000000);
 		diffText = new FlxText(scoreText.x, scoreText.y + 36, 0, "", 24);
+		infoText = new FlxText(scoreText.x, diffText.y + 36, scoreBG.width - 10, "", 32);
 		diffText.font = scoreText.font;
+		infoText.font = diffText.font;
+		infoText.alignment = CENTER;
+		infoText.size = 20;
 
 		add(scoreBG);
 		add(diffText);
+		add(infoText);
 		add(scoreText);
 
+		playlistGroup = new FlxTypedGroup();
+		playlistGroup.visible = playlistVisible;
+		add(playlistGroup);
+
+		togglePlaylist(playlistVisible);
 		changeVertical();
+	}
+
+	function togglePlaylist(v:Bool) {
+		scoreBG.updateHitbox();
+		playlistVisible = v;
+		scoreBG.scale.y = v ? FlxG.height : 100;
+		scoreBG.alpha = v ? 0.7 : 0.6;
+		scoreBG.updateHitbox();
+		scoreBG.x = scoreText.x - 6;
+		refreshPlaylistDisplay();
+	}
+
+	function refreshPlaylistDisplay() {
+		playlistGroup.visible = playlistVisible;
+		while (playlistGroup.members.length != 0)
+			playlistGroup.members.pop().destroy();
+		if (!playlistVisible) {
+			infoText.text = "Press CTRL to view playlist";
+			return;
+		}
+		refreshPlaylistItems();
+	}
+
+	function refreshPlaylistItems() {
+		var text:String = "Empty (TAB to add selected song)";
+		if (selectedSongs != null && selectedSongs.length > 0)
+			text = "=== PLAYLIST ===";
+		infoText.text = text;
+		while (playlistGroup.members.length != 0)
+			playlistGroup.members.pop().destroy();
+		var yPos:Float = infoText.y + 50;
+		var xPos:Float = infoText.x;
+		for (song in selectedSongs) {
+			var lineText:FlxText = playlistGroup.recycle(FlxText);
+			lineText.setFormat(Mods.menuFont("vcr.ttf"), 22, FlxColor.WHITE);
+			lineText.text = song.songName + ' [${song.curDifficulty.toUpperCase()}]';
+			lineText.setPosition(xPos, yPos);
+			playlistGroup.add(lineText);
+			if (yPos > FlxG.height - 40)
+				break;
+			yPos += lineText.height;
+		}
 	}
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
+		if (FlxG.keys.justPressed.CONTROL)
+			togglePlaylist(!playlistVisible);
+		if (FlxG.keys.justPressed.TAB && playlistVisible) {
+			var curSong = songs[curVertical];
+			var index:Int = selectedSongs.indexOf(curSong);
+			if (index != -1)
+				selectedSongs.splice(index, 1);
+			else {
+				curSong.curDifficulty = lastDifficultyArray[curHorizontal].toLowerCase();
+				selectedSongs.push(curSong);
+			}
+			refreshPlaylistItems();
+		}
 		if (FlxG.sound.music != null && FlxG.sound.music.playing && FlxG.sound.music.volume < 0.7)
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, 0.4));
@@ -128,29 +199,39 @@ class FreeplayState extends GenericMenu {
 	}
 
 	override function onAcceptPressed(song:Int, difficulty:Int):Void {
-		PlayState.isStoryMode = false;
 		var curSong = songs[song];
-		Mods.currentMod = curSong.mod;
-		trace(curSong.mod);
+		PlayState.playlist.clear();
+		PlayState.playlist.toggleStory(false);
+		if (selectedSongs.length > 0) {
+			curSong = selectedSongs[0];
+			for (song in selectedSongs)
+				PlayState.playlist.addSongFromMetadata(song, song.curDifficulty);
+		} else {
+			curSong.curDifficulty = lastDifficultyArray[curHorizontal].toLowerCase();
+			PlayState.playlist.addSongFromMetadata(curSong, curSong.curDifficulty);
+		}
 		var songID:String = '${curSong.mod}:${curSong.songFolder}';
 		if (prevSong == songID)
 			Paths.skipNextClear = true;
 		prevSong = songID;
-		PlayState.difficulty = lastDifficultyArray[difficulty].toLowerCase();
-		PlayState.moonSong = Song.loadFromFile(curSong.mod, curSong.songFolder, PlayState.difficulty);
-		PlayState.songName = curSong.songFolder;
+
+		PlayState.playlist.getCurrent(); // set the song to the current one.
 		FlxG.switchState(new gameplay.PlayState());
 	}
 
 	override function onBackPressed():Void {
-		menus.ScriptedMenu.switchToMenu("MainMenuState");
+		if (playlistVisible) {
+			togglePlaylist(false);
+			return;
+		}
+		util.StateOverride.switchState("menus.MainMenuState");
 		Mods.currentMod = null;
 	}
 
 	override function onVerticalChanged(index:Int) {
-		FlxG.sound.play(Mods.menuSound("scrollMenu"));
 		if (songs[curVertical].mod != Mods.currentMod)
 			Mods.currentMod = songs[curVertical].mod;
+		FlxG.sound.play(Mods.menuSound("scrollMenu"));
 		refreshDifficulties();
 		var bullShit:Int = 0;
 		for (i in 0...iconArray.length)
@@ -168,11 +249,10 @@ class FreeplayState extends GenericMenu {
 	}
 
 	override function changeHorizontal(next:Int = 0):Void {
-		// so your ears don't blow up
 		var prev:Int = curHorizontal;
 		curHorizontal = flixel.math.FlxMath.wrap(curHorizontal + next, minHorizontals, maxHorizontals);
 		onHorizontalChanged(curHorizontal);
-		if (curHorizontal != prev)
+		if (curHorizontal != prev) // so your ears don't blow up
 			FlxG.sound.play(Mods.menuSound("scrollMenu"));
 	}
 

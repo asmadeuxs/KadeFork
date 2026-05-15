@@ -34,7 +34,7 @@ class OptionsMenu extends MusicBeatSubstate {
 
 	var camScroll:FunkinCamera;
 	var camFollow:FlxObject;
-	var optionsFont = Paths.font("vcr.ttf");
+	var optionsFont = util.Mods.menuFont("vcr.ttf");
 	var binding:Bool = false;
 
 	override function create():Void {
@@ -158,13 +158,13 @@ class OptionsMenu extends MusicBeatSubstate {
 		var leftCat:Bool = FlxG.keys.justPressed.Q;
 		if (leftCat || FlxG.keys.justPressed.E) {
 			catSelected = flixel.math.FlxMath.wrap(catSelected + (leftCat ? -1 : 1), 0, optionStash.length - 1);
-			FlxG.sound.play(Paths.sound('scrollMenu'));
+			FlxG.sound.play(util.Mods.menuSound('scrollMenu'));
 			updateCat();
 		}
 		if (controls.BACK_P) {
 			closing = true;
 			Preferences.save();
-			FlxG.sound.play(Paths.sound('cancelMenu'));
+			FlxG.sound.play(util.Mods.menuSound('cancelMenu'));
 			new flixel.util.FlxTimer().start(0.5, (_) -> {
 				if (FlxG.state is MainMenuState) {
 					var menu:MainMenuState = cast FlxG.state;
@@ -208,10 +208,10 @@ class OptionsMenu extends MusicBeatSubstate {
 			return;
 		}
 		var curOption:Option = curCatOptions[curSelected];
-		if (!Controls.current.actions.exists(curOption.variable))
-			Controls.current.actions.set(curOption.variable, []);
+		if (!controls.actions.exists(curOption.variable))
+			controls.actions.set(curOption.variable, []);
 		Preferences.user.keybinds.get(curOption.variable)[0] = key.keyCode;
-		Controls.current.actions.get(curOption.variable)[0] = key.keyCode;
+		controls.actions.get(curOption.variable)[0] = key.keyCode;
 		catOptions.members[curSelected * 2 + 1].text = curOption.valueString();
 		changeOption();
 		binding = false;
@@ -219,7 +219,7 @@ class OptionsMenu extends MusicBeatSubstate {
 
 	public function changeOption(by:Int = 0, ?playSound:Bool = true) {
 		if (playSound)
-			FlxG.sound.play(Paths.sound('scrollMenu'));
+			FlxG.sound.play(util.Mods.menuSound('scrollMenu'));
 		curCatOptions[curSelected].change(by);
 
 		var curOption:Option = curCatOptions[curSelected];
@@ -231,7 +231,7 @@ class OptionsMenu extends MusicBeatSubstate {
 	public function changeSelection(next:Int = 0, ?playSound:Bool = true) {
 		curSelected = flixel.math.FlxMath.wrap(curSelected + next, 0, curCatOptions.length - 1);
 		if (next != 0 && playSound)
-			FlxG.sound.play(Paths.sound('scrollMenu'));
+			FlxG.sound.play(util.Mods.menuSound('scrollMenu'));
 
 		if (catOptions.members.length > 0)
 			for (entry in catOptions)

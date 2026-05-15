@@ -7,6 +7,7 @@ import data.hscript.Script;
 import data.hscript.ScriptLoader;
 import data.song.KadeForkChart;
 import data.song.Song;
+import data.song.SongPlaylist;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -43,32 +44,22 @@ class PlayState extends MusicBeatState {
 	public static var current:PlayState;
 
 	// level info
-	public static var SONG(get, set):SwagSong;
-	public static var moonSong(default, set):DynamicFormat;
-	public static var moonMeta:BasicMetaData;
-
-	public static var curStage:String = '';
-	public static var isStoryMode:Bool = false;
-	public static var storyWeek:Int = 0;
-	public static var storyPlaylist:Array<String> = [];
-
 	public static var songName:String = "test";
 	public static var songTitle(get, never):String;
 	public static var difficulty:String = "";
 	public static var songLength:Float = 1.0;
 
-	static function set_moonSong(to:DynamicFormat) {
-		moonMeta = to.getChartMeta();
-		return moonSong = to;
-	}
+	public static var playlist:SongPlaylist = new SongPlaylist();
+	public static var moonSong(get, never):DynamicFormat;
+	public static var moonMeta(get, never):BasicMetaData;
 
-	static function get_SONG()
-		return (moonSong is FNFPsych) ? cast(moonSong).data.song : null; // for now (menacing face cuz i can so do that) -srt
+	public static var curStage:String = '';
 
-	static function set_SONG(to:SwagSong) {
-		moonSong = new FNFPsych(to);
-		return to;
-	}
+	static function get_moonSong()
+		return playlist.getCurrent();
+
+	static function get_moonMeta()
+		return playlist.getMeta();
 
 	static function get_songTitle():String
 		return moonMeta?.title ?? songName ?? 'Unknown Song';
@@ -110,6 +101,9 @@ class PlayState extends MusicBeatState {
 
 	var gameplayScripts:Array<Script> = [];
 
+	var events:Array<ChartEventArray> = [];
+	var eventPosition:Int = 0;
+
 	var gfSpeed:Int = 1;
 	var camZooming:Bool = false;
 	var health(default, set):Float = 1;
@@ -119,9 +113,6 @@ class PlayState extends MusicBeatState {
 
 	var generatedMusic:Bool = false;
 	var startingSong:Bool = false;
-
-	var notesHitArray:Array<Date> = [];
-	var tilNpsUpdate:Float = 1;
 
 	var currentHUD:BaseHUD;
 
@@ -150,16 +141,31 @@ class PlayState extends MusicBeatState {
 	var currentScrollType:Int = 0;
 
 	override public function create() {
+		var metadata = playlist.getFreeplayMeta();
+		PlayState.songName = metadata.songFolder;
+		PlayState.difficulty = metadata.curDifficulty;
+		util.Mods.currentMod = metadata.mod;
+
+		camGame = FlxG.camera;
+		camHUD = new FlxCamera();
+		camOver = new FlxCamera();
+		camHUD.bgColor.alpha = 0;
+		camOver.bgColor.alpha = 0;
+		FlxG.cameras.add(camHUD, false);
+		FlxG.cameras.add(camOver, false);
+		transCam = camOver;
+
 		super.create();
 		current = this;
 		Conductor.current.active = false;
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
-		if (session != null)
-			session.reset();
-		else
+		nps = maxNps = 0;
+		if (session == null)
 			session = new PlaySession();
+		if (!playlist.isStory())
+			session.reset();
 
 		initialJudgeDiff = Preferences.user.judgeDifficulty;
 		currentScrollType = Preferences.user.scrollType;
@@ -170,24 +176,14 @@ class PlayState extends MusicBeatState {
 			inputQueue[i] = [];
 		setupKeybinds();
 		inputMgr.init(); // NEED to do this
+
 		#if hxdiscord_rpc
 		iconRPC = moonMeta.extraData.get(PLAYER_2) ?? "bf";
-
 		// String that contains the mode defined here so it isn't necessary to call changePresence for each mode
 		detailsText = isStoryMode ? 'on Story Mode (Level $storyWeek)' : "in Freeplay";
-
 		// Updating Discord Rich Presence.
 		DiscordClient.changePresence('${moonMeta.title} (${difficulty.toUpperCase()})', detailsText, iconRPC);
 		#end
-
-		camGame = FlxG.camera;
-		camHUD = new FlxCamera();
-		camOver = new FlxCamera();
-		camHUD.bgColor.alpha = 0;
-		camOver.bgColor.alpha = 0;
-
-		FlxG.cameras.add(camHUD, false);
-		FlxG.cameras.add(camOver, false);
 
 		camFollow = new FlxObject(0, 0, 1, 1);
 		if (prevCamFollow != null) {
@@ -198,7 +194,6 @@ class PlayState extends MusicBeatState {
 
 		camGame.follow(camFollow, LOCKON, 0.04);
 		// camGame.setScrollBounds(0, FlxG.width, 0, FlxG.height);
-
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
 		FlxG.fixedTimestep = false;
 
@@ -208,8 +203,6 @@ class PlayState extends MusicBeatState {
 		// initialise array
 		gameplayScripts = ScriptLoader.runScriptsAtDir(Paths.resolveAssetPath('scripts', util.Mods.currentMod), false);
 
-		if (moonSong == null)
-			moonSong = Song.loadFromFile('core', 'test');
 		generateSong();
 
 		// song specific scripts
@@ -230,11 +223,10 @@ class PlayState extends MusicBeatState {
 
 		callFuncInScripts("preCreate");
 
-		songScripts = null;
-
 		curStage = moonMeta.extraData.exists(STAGE) ? moonMeta.extraData.get(STAGE) : "stage";
 		stage = new StageBG(curStage);
 		defaultCamZoom = stage.cameraZoom;
+		camGame.zoom = defaultCamZoom;
 		add(stage);
 
 		gf = new Character(0, 0, moonMeta.extraData.get(PLAYER_3) ?? "bf", METRONOME);
@@ -245,9 +237,6 @@ class PlayState extends MusicBeatState {
 		add(gf);
 		add(dad);
 		add(boyfriend);
-
-		camGame.zoom = defaultCamZoom;
-		camGame.focusOn(camFollow.getPosition());
 
 		uiDimBackground = new FlxSprite().makeScaledGraphic(1, FlxG.height, 0xFF000000);
 
@@ -296,11 +285,11 @@ class PlayState extends MusicBeatState {
 		var ret = callFirstFuncInScripts("songCutscene");
 		if (ret != null && ret.value == ScriptLoader.STOP_FUNC)
 			return;
+		startingSong = true;
 		switch (songName.toLowerCase()) {
 			case _:
 				startCountdown();
 		}
-		startingSong = true;
 	}
 
 	override public function destroy() {
@@ -340,7 +329,7 @@ class PlayState extends MusicBeatState {
 	public function setupKeybinds() {
 		for (noteData in 0...noteActions.length) {
 			var action = noteActions[noteData];
-			var keys:Array<FlxKey> = Controls.current.actions[action];
+			var keys:Array<FlxKey> = controls.actions[action];
 			for (key in keys)
 				inputMgr.remapKeyCode(key, noteData);
 		}
@@ -400,13 +389,8 @@ class PlayState extends MusicBeatState {
 			if (gf != null && dad.characterId == gf.characterId) {
 				dad.setPosition(gf.x, gf.y);
 				gf.visible = false;
-				if (isStoryMode)
-					tweenCamIn();
 			}
-			var mid = dad.getMidpoint();
-			var off = dad.cameraOffset;
-			var camPos:FlxPoint = new FlxPoint(mid.x + off.x, mid.y + off.y);
-			camFollow.setPosition(camPos.x, camPos.y);
+			focusOnCharacter(dad);
 		}
 	}
 
@@ -442,13 +426,15 @@ class PlayState extends MusicBeatState {
 	var startTimer:FlxTimer;
 	var perfectText:FlxText;
 
-	function startCountdown():Void {
-		inCutscene = false;
-		startedCountdown = true;
+	public function startCountdown():Void {
 		inputEnabled = true;
 
-		Conductor.current.active = true;
-		Conductor.setTime(-Conductor.crotchet * 7);
+		if (startingSong) {
+			inCutscene = false;
+			startedCountdown = true;
+			Conductor.current.active = true;
+			Conductor.setTime(-Conductor.crotchet * 7);
+		}
 
 		var scriptHUD:ScriptHUD = null;
 		if (currentHUD != null && currentHUD is ScriptHUD)
@@ -516,7 +502,7 @@ class PlayState extends MusicBeatState {
 		}, 5);
 	}
 
-	function startSong():Void {
+	public function startSong():Void {
 		canPause = true; // temporary
 		// need to figure out why the song just doesn't start if you pause or go to chart editing early -asmadeuxs
 		startingSong = false;
@@ -524,7 +510,7 @@ class PlayState extends MusicBeatState {
 		Conductor.current.music.onComplete = endSong;
 	}
 
-	private function generateSong():Void {
+	function generateSong():Void {
 		Conductor.bpm = moonMeta.bpmChanges[0].bpm;
 		Conductor.mapTimingPoints(moonSong);
 		Conductor.current.loadMusic(Paths.inst(PlayState.songName, PlayState.difficulty, util.Mods.currentMod));
@@ -607,9 +593,6 @@ class PlayState extends MusicBeatState {
 
 	function sortByShit(Obj1:NoteData, Obj2:NoteData):Int
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.time, Obj2.time);
-
-	function tweenCamIn():Void
-		FlxTween.tween(camGame, {zoom: 1.3}, (Conductor.semiquaver * 4 * 0.001), {ease: FlxEase.elasticInOut});
 
 	override function openSubState(substate:flixel.FlxSubState) {
 		if (paused) {
@@ -708,7 +691,7 @@ class PlayState extends MusicBeatState {
 			#if hxdiscord_rpc
 			DiscordClient.changePresence('${moonMeta.title} (${difficulty.toUpperCase()})', 'Paused $detailsText', iconRPC);
 			#end
-			menus.ScriptedMenu.openMenu("PauseSubstate", [boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y]);
+			util.StateOverride.openSubState("menus.PauseSubstate", [boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y]);
 		}
 
 		if (startingSong && startedCountdown && Conductor.time >= 0)
@@ -738,12 +721,9 @@ class PlayState extends MusicBeatState {
 			notes.updateNotes(Conductor.time, strumlines.members, actualSpeed);
 			noteUpdate(Conductor.time);
 			updateEvents(Conductor.time);
-			callFuncInScripts("update", [elapsed]);
+			callFuncInScripts("update song", [elapsed]);
 		}
 	}
-
-	var eventPosition:Int = 0;
-	var events:Array<ChartEventArray> = [];
 
 	public function updateEvents(time:Float):Void {
 		if (events == null || events.length == 0)
@@ -765,6 +745,12 @@ class PlayState extends MusicBeatState {
 			return;
 		// TODO: add the rest of the events
 		switch event {
+			case FocusCamera(on):
+				focusOnCharacter(switch on {
+					case 2: gf;
+					case 1: boyfriend;
+					case _: dad;
+				});
 			case ChangeNoteVelocity(speed, strumline):
 				if (strumline == null || strumline > strumlines.members.length - 1) {
 					if (strumline != null)
@@ -796,14 +782,16 @@ class PlayState extends MusicBeatState {
 		}
 	}
 
-	public function noteUpdate(time:Float):Void {
+	function noteUpdate(time:Float):Void {
 		for (daNote in notes.getActiveNotes()) {
 			var noteKill:Bool = false;
+			// temporary until camera events are added
 			if (!daNote.mustPress || (daNote.mustPress && perfectMode)) {
 				if (daNote.strumTime <= Conductor.time && !daNote.isFake) {
 					if (daNote.mustPress)
 						goodNoteHit(daNote);
 					else {
+						focusOnCharacter(dad);
 						daNote.wasGoodHit = true;
 						callFuncInScripts("opponentNoteHit", [daNote]);
 					}
@@ -824,8 +812,8 @@ class PlayState extends MusicBeatState {
 			}
 			if (!daNote.mustPress && daNote.wasGoodHit) {
 				var altAnim:String = "";
-				if (curSection != null && curSection.altAnim)
-					altAnim = '-alt';
+				// if (curSection != null && curSection.altAnim)
+				//	altAnim = '-alt';
 				dad.sing(daNote.noteData, altAnim, true);
 				dad.danceCooldown = dad.singDuration + daNote.sustainLength;
 				for (vocal in Conductor.current.tracks)
@@ -837,7 +825,7 @@ class PlayState extends MusicBeatState {
 		}
 	}
 
-	public function queueInputNote(note:Note):Void {
+	function queueInputNote(note:Note):Void {
 		if (!note.mustPress)
 			return;
 		var lane:Int = note.noteData;
@@ -885,7 +873,7 @@ class PlayState extends MusicBeatState {
 		playerStrums.playAnim(key, "static");
 	}
 
-	function endSong():Void {
+	public function endSong():Void {
 		var ret = callFirstFuncInScripts("songEnd");
 		if (ret != null && ret.value == ScriptLoader.STOP_FUNC)
 			return;
@@ -896,43 +884,46 @@ class PlayState extends MusicBeatState {
 			Highscore.saveScore(songName, difficulty, session.score);
 
 		Paths.skipNextClear = true;
-		/*
-			if (isStoryMode) {
-				campaignScore += Math.round(session.score);
-				storyPlaylist.remove(storyPlaylist[0]);
-
-				if (storyPlaylist.length <= 0) {
-					Conductor.current.clearTracks();
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
-					transIn = FlxTransitionableState.defaultTransIn;
-					transOut = FlxTransitionableState.defaultTransOut;
-					FlxG.switchState(new StoryMenuState());
-					StoryMenuState.weekUnlocked[Std.int(Math.min(storyWeek + 1, StoryMenuState.weekUnlocked.length - 1))] = true;
-					if (!session.invalid)
-						Highscore.saveWeekScore(storyWeek, campaignScore, difficulty);
-					FlxG.save.data.weekUnlocked = StoryMenuState.weekUnlocked;
-					FlxG.save.flush();
-				} else {
-					trace('LOADING NEXT SONG');
-					trace(PlayState.storyPlaylist[0].toLowerCase() + difficulty);
-					FlxTransitionableState.skipNextTransIn = true;
-					FlxTransitionableState.skipNextTransOut = true;
-					PlayState.moonSong = Song.loadFromFile(util.Mods.currentMod, PlayState.storyPlaylist[0].toLowerCase(), difficulty);
-					prevCamFollow = camFollow;
-
-					Conductor.current.active = false;
-					Conductor.current.stopMusic();
-					FlxG.switchState(new gameplay.PlayState());
-				}
-		} else*/ {
+		function goBackToFreeplay() {
 			trace('WENT BACK TO FREEPLAY??');
 			if (!FlxG.sound.music.playing) {
 				FlxG.sound.playMusic(Paths.inst(PlayState.songName, PlayState.difficulty, util.Mods.currentMod), 0);
 				FlxG.sound.music.time = FlxG.random.int(0, Std.int(FlxG.sound.music.length * 0.5));
 				FlxG.sound.music.fadeIn(4, 0, 0.7);
 			}
-			menus.ScriptedMenu.switchToMenu("FreeplayState");
+			util.StateOverride.switchState("menus.FreeplayState");
 		}
+
+		if (playlist == null) {
+			goBackToFreeplay();
+			return;
+		}
+
+		if (playlist.getNext() != null) {
+			playlist.next(); // update song
+			// campaignScore += Math.round(session.score);
+			Conductor.current.active = false;
+			Conductor.current.stopMusic();
+			trace('LOADING NEXT SONG ($songTitle)');
+			FlxTransitionableState.skipNextTransIn = true;
+			FlxTransitionableState.skipNextTransOut = true;
+			prevCamFollow = camFollow;
+			FlxG.switchState(new gameplay.PlayState());
+		}
+		/*else if (playlist.isStory()) {
+			Conductor.current.clearTracks();
+			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			transIn = FlxTransitionableState.defaultTransIn;
+			transOut = FlxTransitionableState.defaultTransOut;
+			util.StateOverride.switchState("menus.StoryMenuState");
+			StoryMenuState.weekUnlocked[Std.int(Math.min(storyWeek + 1, StoryMenuState.weekUnlocked.length - 1))] = true;
+			if (!session.invalid)
+				Highscore.saveWeekScore(storyWeek, campaignScore, difficulty);
+			FlxG.save.data.weekUnlocked = StoryMenuState.weekUnlocked;
+			FlxG.save.flush();
+		}*/
+		else
+			goBackToFreeplay();
 	}
 
 	var endingSong:Bool = false;
@@ -1055,7 +1046,7 @@ class PlayState extends MusicBeatState {
 		});
 	}
 
-	function noteMiss(direction:Int = 1, ?daNote:Note):Void {
+	public function noteMiss(direction:Int = 1, ?daNote:Note):Void {
 		if (daNote != null && daNote.noteScript != null) {
 			var caller = daNote.noteScript.callFunc('onNoteMiss', [daNote, direction]).value;
 			if (caller == ScriptLoader.STOP_FUNC)
@@ -1089,7 +1080,10 @@ class PlayState extends MusicBeatState {
 			currentHUD.updateScoreText();
 	}
 
-	function goodNoteHit(note:Note):Void {
+	var notesHitArray:Array<Date> = [];
+	var tilNpsUpdate:Float = 1;
+
+	public function goodNoteHit(note:Note):Void {
 		if (note != null && note.noteScript != null) {
 			var caller = note.noteScript.callFunc('onNoteHit', [note]).value;
 			if (caller == ScriptLoader.STOP_FUNC)
@@ -1103,6 +1097,7 @@ class PlayState extends MusicBeatState {
 
 		callFuncInScripts("goodNoteHit", [note]);
 
+		focusOnCharacter(boyfriend);
 		boyfriend.sing(note.noteData, null, true);
 		boyfriend.danceCooldown = boyfriend.singDuration + note.sustainLength;
 		note.wasGoodHit = true;
@@ -1144,38 +1139,18 @@ class PlayState extends MusicBeatState {
 			stage.beatHit(curBeat);
 		if (currentHUD != null)
 			currentHUD.beatHit(curBeat);
-		characterDance(curBeat);
 
 		callFuncInScripts("beatHit", [curBeat]);
 	}
 
-	var curSection:SwagSection;
-
-	override function barHit(bar:Int) {
-		curSection = SONG.notes[bar];
-
-		if (generatedMusic && curSection != null) {
-			var mustHitSec:Bool = curSection.mustHitSection;
-			var nextChar:Character = mustHitSec ? boyfriend : dad;
-			var mid = nextChar.getMidpoint();
-			var off = nextChar.cameraOffset;
-			camFollow.setPosition(mid.x + off.x, mid.y + off.y);
-			// do not remove this line its funny as fuck PLEASEEEEE don't remove it lmao -asmadeuxs
-			// camFollow.setPosition(lucky.getMidpoint().x - 120, lucky.getMidpoint().y + 210);
-
-			if (songName.toLowerCase() == 'tutorial')
-				FlxTween.tween(camGame, {zoom: 1}, (Conductor.semiquaver * 4 * 0.001), {ease: FlxEase.elasticInOut});
-		}
-	}
-
-	function characterDance(beat:Int) {
-		// TODO: Figure out decimal beats
-		if (!dad.isSinging() && beat % Math.floor(dad.beatsToDance) == 0)
-			dad.dance();
-		if (!gf.isSinging() && beat % gf.beatsToDance == 0)
-			gf.dance();
-		if (!boyfriend.isSinging() && beat % Math.floor(boyfriend.beatsToDance) == 0)
-			boyfriend.dance();
+	public function focusOnCharacter(nextChar:Character):Void {
+		if (!generatedMusic)
+			return;
+		var mid = nextChar.getMidpoint();
+		var off = nextChar.cameraOffset;
+		camFollow.setPosition(mid.x + off.x, mid.y + off.y);
+		// do not remove this line its funny as fuck PLEASEEEEE don't remove it lmao -asmadeuxs
+		// camFollow.setPosition(lucky.getMidpoint().x - 120, lucky.getMidpoint().y + 210);
 	}
 
 	public function setVarInScripts(varName:String, value:Dynamic):Void {

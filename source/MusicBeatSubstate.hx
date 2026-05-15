@@ -1,27 +1,30 @@
 package;
 
 import flixel.FlxG;
-import flixel.FlxSubState;
-import flixel.addons.transition.FlxTransitionableState;
 
-class MusicBeatSubstate extends FlxSubState {
+class MusicBeatSubstate extends flixel.FlxSubState implements IBeatSynched {
 	private var controls(get, never):Controls;
+
+	public var curStep(get, never):Int;
+	public var curBeat(get, never):Int;
 
 	inline function get_controls():Controls
 		return Controls.current;
 
+	function get_curStep()
+		return Math.floor(Conductor.currentStep);
+
+	function get_curBeat()
+		return Math.floor(Conductor.currentBeat);
+
 	public function new() {
 		super();
-		Conductor.stepHit.add(stepHit);
-		Conductor.beatHit.add(beatHit);
-		Conductor.barHit.add(barHit);
+		Conductor.connectSynched(this);
 	}
 
 	override function destroy() {
+		Conductor.disconnectSynched(this);
 		super.destroy();
-		Conductor.stepHit.remove(stepHit);
-		Conductor.beatHit.remove(beatHit);
-		Conductor.barHit.remove(barHit);
 	}
 
 	public function stepHit(step:Int):Void {}

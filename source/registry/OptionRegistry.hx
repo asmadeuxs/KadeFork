@@ -163,6 +163,11 @@ class OptionRegistry extends BaseRegistry<OptionCategory> {
 					variable: "lowQualityMode"
 				},
 				{
+					name: "Skip Transitions",
+					description: "Skips transitions between screens",
+					variable: "skipTransitions"
+				},
+				{
 					name: "HUD Style",
 					description: "Changes the style of the HUD.\n\"Default\" will let mods override it",
 					choices: gameplay.hud.BaseHUD.listHUDs(),

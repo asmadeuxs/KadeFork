@@ -1,12 +1,33 @@
 package;
 
 import flixel.FlxG;
+import flixel.addons.transition.FlxTransitionSprite.GraphicTransTileDiamond;
 import flixel.addons.transition.FlxTransitionableState;
+import flixel.addons.transition.TransitionData;
+import flixel.graphics.FlxGraphic;
+import flixel.math.FlxPoint;
+import flixel.math.FlxRect;
+import flixel.util.FlxColor;
 
 class BootState extends flixel.FlxState {
+	function setupTransition() {
+		var diamond:FlxGraphic = FlxGraphic.fromClass(GraphicTransTileDiamond);
+		diamond.persist = true;
+		diamond.destroyOnNoUse = false;
+
+		FlxTransitionableState.defaultTransIn = new TransitionData(FADE, FlxColor.BLACK, 1, new FlxPoint(0, -1), {asset: diamond, width: 32, height: 32},
+			new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
+		FlxTransitionableState.defaultTransOut = new TransitionData(FADE, FlxColor.BLACK, 0.7, new FlxPoint(0, 1), {asset: diamond, width: 32, height: 32},
+			new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
+	}
+
 	// This is just a class to initialise variables
 	// Preferably only mess with it if you need to do some save-file related stuff
 	override function create() {
+		setupTransition();
+		FlxTransitionableState.skipNextTransIn = true;
+		FlxTransitionableState.skipNextTransOut = true;
+
 		/*\#if sys
 			if (!sys.FileSystem.exists(Sys.getCwd() + "/assets/replays"))
 				sys.FileSystem.createDirectory(Sys.getCwd() + "/assets/replays");
@@ -48,7 +69,7 @@ class BootState extends flixel.FlxState {
 		});
 
 		#if FREEPLAY
-		menus.ScriptedMenu.switchToMenu("FreeplayState");
+		util.StateOverride.switchState("menus.FreeplayState");
 		#elseif CHARTING
 		FlxG.switchState(new editor.ChartEditor());
 		#else

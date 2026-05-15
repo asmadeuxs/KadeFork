@@ -18,7 +18,7 @@ enum MenuVerticalStyle {
 	BOTH;
 }
 
-class GenericMenu extends MusicBeatSubstate {
+class GenericMenuState extends MusicBeatState {
 	public var menuScrollType:MenuVerticalStyle = MenuVerticalStyle.VERTICAL;
 	public var canInput:Bool = true;
 
