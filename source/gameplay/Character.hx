@@ -101,7 +101,6 @@ class Character extends gameplay.FunkinSprite {
 
 	public function danceCheck():Void {
 		var interval:Float = beatsToDance / danceSpeed;
-		trace('interval: $interval');
 		if (placeholder || isSinging() || interval <= 0)
 			return;
 

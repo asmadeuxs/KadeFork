@@ -53,12 +53,12 @@ class NoteRenderer extends FlxBasic {
 			if (strumline != null) {
 				note.setup(strumline, noteData);
 				if (noteData.type == null || noteData.type == 'default' || noteData.type == '0')
-					strumline.noteskin.generateArrow(noteData.lane, note);
+					note.skin.generateArrow(noteData.lane, note);
 				note.mustPress = (strumline == strumlines[1]);
 				note.cameras = this.cameras;
 				if (note.isSustain) {
-					note.holdBody = strumline.noteskin.generateSustain(note.noteData, false);
-					note.holdEnd = strumline.noteskin.generateSustain(note.noteData, true);
+					note.holdBody = note.skin.generateSustain(note.noteData, false);
+					note.holdEnd = note.skin.generateSustain(note.noteData, true);
 					note.holdBody.cameras = note.cameras;
 					note.holdEnd.cameras = note.cameras;
 				}

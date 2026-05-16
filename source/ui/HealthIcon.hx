@@ -21,10 +21,10 @@ class HealthIcon extends FunkinSprite {
 
 	// so Custom HUDs can get icon data
 	public static function getPlayerIcon()
-		return PlayState.moonMeta?.extraData.get(PLAYER_1) ?? "bf";
+		return PlayState.chartMetadata.player ?? "face";
 
 	public static function getOpponentIcon()
-		return PlayState.moonMeta?.extraData.get(PLAYER_2) ?? "bf";
+		return PlayState.chartMetadata.opponent ?? "face";
 
 	public function new(char:String = 'bf', ?isPlayer:Bool = false) {
 		super(0, 0);

@@ -206,6 +206,25 @@ class Conductor extends flixel.FlxBasic {
 		lastTime = time;
 	}
 
+	public static function getStepDuration(tp:TimingPoint):Float {
+		var secondsPerBeat:Float = 60.0 / tp.bpm;
+		var secondsPerStep:Float = secondsPerBeat / tp.denominator;
+		return secondsPerStep * 1000;
+	}
+
+	// stole from my Mad Rat Dead pc recreation lolll
+	public static function secondsToBeats(seconds:Float, bpm:Float):Float {
+		return seconds * (bpm / 60.0);
+	}
+
+	public static function beatsToSeconds(beats:Float, bpm:Float):Float {
+		return beats / (bpm / 60.0);
+	}
+
+	public static function timeToBeat(beat:Float, bpm:Float):Float {
+		return (time * bpm) / 60.0;
+	}
+
 	public function onStep(step:Int):Void {
 		checkNeedResync();
 		for (i in synchedObjects)
@@ -242,6 +261,7 @@ class Conductor extends flixel.FlxBasic {
 				}
 			}
 		];
+		Conductor.bpm = timingPoints[0].bpm;
 		trace("new Timing Points BUDDY " + timingPoints);
 	}
 

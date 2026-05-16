@@ -20,7 +20,7 @@ class Noteskin {
 		var skinData:NoteskinFile;
 		if (!Paths.fileExists(filePath)) {
 			trace('Noteskin "$noteskinPath" not found, using default');
-			skinData = DEFAULT_SKIN;
+			skinData = DEFAULT_SKIN_CONFIG;
 		} else {
 			trace('Loading noteskin from $filePath');
 			skinData = cast Json5.parse(Paths.getText(filePath));
@@ -28,7 +28,7 @@ class Noteskin {
 		return new Noteskin(skinData);
 	}
 
-	public static final DEFAULT_SKIN:NoteskinFile = {
+	public static final DEFAULT_SKIN_CONFIG:NoteskinFile = {
 		name: "Classic",
 		author: "PhantomArcade",
 		defaultAtlas: {path: "gameplay/noteskins/NOTE_assets", atlasType: "sparrow"},
@@ -128,8 +128,8 @@ class Noteskin {
 
 	private function preload():Void {
 		var conf = file;
-		keyCount = conf.keyCount ?? DEFAULT_SKIN.keyCount;
-		defaultFramerate = conf.defaultFramerate ?? DEFAULT_SKIN.defaultFramerate;
+		keyCount = conf.keyCount ?? DEFAULT_SKIN_CONFIG.keyCount;
+		defaultFramerate = conf.defaultFramerate ?? DEFAULT_SKIN_CONFIG.defaultFramerate;
 
 		for (type in ["defaultAtlas", "strums", "arrows", "holds", "splashes"])
 			loadNoteskinTextures(conf, type);
@@ -162,13 +162,13 @@ class Noteskin {
 		} else
 			splashAnimNames = [];
 
-		strumScale = conf.strums.scale ?? DEFAULT_SKIN.strums.scale;
-		arrowScale = conf.arrows.scale ?? DEFAULT_SKIN.arrows.scale;
-		splashScale = conf.splashes.scale ?? DEFAULT_SKIN.splashes.scale;
+		strumScale = conf.strums.scale ?? DEFAULT_SKIN_CONFIG.strums.scale;
+		arrowScale = conf.arrows.scale ?? DEFAULT_SKIN_CONFIG.arrows.scale;
+		splashScale = conf.splashes.scale ?? DEFAULT_SKIN_CONFIG.splashes.scale;
 
-		strumAA = conf.strums.antialiasing ?? DEFAULT_SKIN.strums.antialiasing;
-		arrowAA = conf.arrows.antialiasing ?? DEFAULT_SKIN.arrows.antialiasing;
-		splashAA = conf.splashes.antialiasing ?? DEFAULT_SKIN.splashes.antialiasing;
+		strumAA = conf.strums.antialiasing ?? DEFAULT_SKIN_CONFIG.strums.antialiasing;
+		arrowAA = conf.arrows.antialiasing ?? DEFAULT_SKIN_CONFIG.arrows.antialiasing;
+		splashAA = conf.splashes.antialiasing ?? DEFAULT_SKIN_CONFIG.splashes.antialiasing;
 	}
 
 	private static function _animMapper(a):String
@@ -267,7 +267,7 @@ class Noteskin {
 	}
 
 	public static function getDefaultConfig():NoteskinFile
-		return DEFAULT_SKIN;
+		return DEFAULT_SKIN_CONFIG;
 
 	private static function findNoteskinFile(skin:String):String {
 		var paths = [

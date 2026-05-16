@@ -1,6 +1,7 @@
 package gameplay.note;
 
 import data.JudgementManager.Judgement;
+import data.Noteskin;
 import data.hscript.Script;
 import data.hscript.ScriptLoader;
 import data.song.KadeForkChart.NoteData;
@@ -17,6 +18,11 @@ using util.CoolUtil;
 
 class Note extends gameplay.FunkinSprite {
 	public var strumline:Strumline = null;
+
+	// mainly for chart editor
+	public var debugMode:Bool = false;
+	public var rawNoteData:NoteData = null;
+	public var skin:Noteskin;
 
 	public var strumTime:Float = 0;
 	public var noteData:Int = 0;
@@ -83,6 +89,7 @@ class Note extends gameplay.FunkinSprite {
 
 		this.isMine = false;
 		this.isFake = false;
+		this.rawNoteData = data;
 		this.isSustain = data.length > 0.0;
 		this.sustainProgress = data.length;
 		this.sustainLength = data.length;
@@ -90,6 +97,7 @@ class Note extends gameplay.FunkinSprite {
 		if (this.strumTime < 0)
 			this.strumTime = 0;
 		this.strumline = strumline;
+		this.skin = strumline?.noteskin;
 		this.noteData = data.lane;
 		this.noteOwner = data.owner;
 		this.noteType = data.type;
@@ -105,8 +113,15 @@ class Note extends gameplay.FunkinSprite {
 		return this;
 	}
 
+	public function setSkin(skin:Noteskin) {
+		this.skin = skin ?? strumline?.noteskin ?? null;
+		return this;
+	}
+
 	override function update(elapsed:Float) {
 		super.update(elapsed);
+		if (debugMode)
+			return;
 		noteScript?.callFunc("update", [elapsed, this]);
 		if (tooLate) {
 			if (alpha > 0.3)
@@ -115,7 +130,7 @@ class Note extends gameplay.FunkinSprite {
 	}
 
 	public function updateSustain(time:Float, scrollSpeed:Float):Void {
-		if (!isSustain || strumline == null)
+		if (debugMode || !isSustain || strumline == null)
 			return;
 		if (holdEnd != null)
 			holdEnd.objectCenter(this, X);

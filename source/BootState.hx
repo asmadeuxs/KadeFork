@@ -68,6 +68,9 @@ class BootState extends flixel.FlxState {
 			Paths.skipNextClear = false;
 		});
 
+		FlxG.mouse.visible = false;
+		FlxG.mouse.useSystemCursor = true;
+
 		#if FREEPLAY
 		util.StateOverride.switchState("menus.FreeplayState");
 		#elseif CHARTING

@@ -1,18 +1,13 @@
 package data.song;
 
+import data.song.KadeForkChart.KFCHandler;
+import moonchart.Moonchart;
 import moonchart.formats.BasicFormat;
 import moonchart.formats.fnf.legacy.FNFPsych;
 
 using StringTools;
 
-typedef SwagSection = moonchart.formats.fnf.legacy.FNFLegacy.FNFLegacySection;
-typedef SwagSong = PsychJsonFormat;
-
 class Song {
-	public static function detect() {
-		//
-	}
-
 	public static function getSongPath(mod:String, song:String, difficulty:String = 'normal'):String {
 		var paths:Array<String> = [
 			'songs/$song/$song-$difficulty',
@@ -34,10 +29,11 @@ class Song {
 		return path;
 	}
 
-	public static function loadFromFile(mod:String, song:String, ?difficulty:String):DynamicFormat {
+	public static function loadFromFile(mod:String, song:String, ?difficulty:String):KadeForkChart {
 		var path:String = getSongPath(mod, song, difficulty);
 		if (path == null)
 			throw 'Song file not found for $song ($difficulty) in mod $mod';
-		return new FNFPsych().fromFile(path, null, null);
+		var fnfPsychFormat = new FNFPsych().fromFile(path, null, null);
+		return new KFCHandler().fromFormat(fnfPsychFormat);
 	}
 }

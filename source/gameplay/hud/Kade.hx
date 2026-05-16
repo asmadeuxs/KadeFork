@@ -86,7 +86,7 @@ class Kade extends BaseHUD {
 		#if FEATURE_TRANSLATIONS
 		diff = Translator.translateString('menus', 'difficulty_' + PlayState.difficulty);
 		#end
-		var watermark:FlxText = new FlxText(5, 0, 0, '${PlayState.moonMeta.title} - ${diff.toUpperCase()}', 12);
+		var watermark:FlxText = new FlxText(5, 0, 0, '${PlayState.songTitle} - ${diff.toUpperCase()}', 12);
 		watermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
 		watermark.y = (FlxG.height - watermark.height) - 3;
 		watermark.antialiasing = true;

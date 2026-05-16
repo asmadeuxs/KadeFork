@@ -50,20 +50,18 @@ class PlayState extends MusicBeatState {
 
 	public static var playlist:SongPlaylist = new SongPlaylist();
 
-	public static var moonSong(get, never):DynamicFormat;
-	public static var moonMeta(get, never):BasicMetaData;
+	public static var currentChart(get, never):KadeForkChart;
+	public static var chartMetadata(get, never):KFCMeta;
 	public static var songTitle(get, never):String;
 
-	static function get_moonSong()
+	static function get_currentChart()
 		return playlist?.getCurrent() ?? null;
 
-	static function get_moonMeta()
+	static function get_chartMetadata()
 		return playlist?.getMeta() ?? null;
 
 	static function get_songTitle()
-		return moonMeta.title ?? songName ?? 'Unknown Song';
-
-	public static var curStage:String = '';
+		return chartMetadata.name ?? songName ?? 'Unknown Song';
 
 	public static var campaignScore:Int = 0;
 	public static var session:PlaySession;
@@ -91,6 +89,7 @@ class PlayState extends MusicBeatState {
 	public var noteSpawnIndex:Int = 0;
 
 	public var perfectMode:Bool = false;
+	public var curStage:String = '';
 
 	public var comboDisplay:FlxSpriteGroup;
 	public var camFollow:FlxObject;
@@ -173,11 +172,11 @@ class PlayState extends MusicBeatState {
 		inputMgr.init(); // NEED to do this
 
 		#if hxdiscord_rpc
-		iconRPC = moonMeta.extraData.get(PLAYER_2) ?? "bf";
+		iconRPC = chartMetadata.opponent;
 		// String that contains the mode defined here so it isn't necessary to call changePresence for each mode
 		detailsText = isStoryMode ? 'on Story Mode (Level $storyWeek)' : "in Freeplay";
 		// Updating Discord Rich Presence.
-		DiscordClient.changePresence('${moonMeta.title} (${difficulty.toUpperCase()})', detailsText, iconRPC);
+		DiscordClient.changePresence('${chartMetadata.name} (${difficulty.toUpperCase()})', detailsText, iconRPC);
 		#end
 
 		camFollow = new FlxObject(0, 0, 1, 1);
@@ -218,15 +217,15 @@ class PlayState extends MusicBeatState {
 
 		callFuncInScripts("preCreate");
 
-		curStage = moonMeta.extraData.exists(STAGE) ? moonMeta.extraData.get(STAGE) : "stage";
+		curStage = chartMetadata.stage;
 		stage = new StageBG(curStage);
 		defaultCamZoom = stage.cameraZoom;
 		camGame.zoom = defaultCamZoom;
 		add(stage);
 
-		gf = new Character(0, 0, moonMeta.extraData.get(PLAYER_3) ?? "bf", METRONOME);
-		dad = new Character(0, 0, moonMeta.extraData.get(PLAYER_2) ?? "bf", OPPONENT);
-		boyfriend = new Character(0, 0, moonMeta.extraData.get(PLAYER_1) ?? "bf", PLAYER);
+		gf = new Character(0, 0, chartMetadata.metronome, METRONOME);
+		dad = new Character(0, 0, chartMetadata.opponent, OPPONENT);
+		boyfriend = new Character(0, 0, chartMetadata.player, PLAYER);
 
 		positionCharacters();
 		add(gf);
@@ -258,8 +257,11 @@ class PlayState extends MusicBeatState {
 		strumlines.camera = camHUD;
 		notes.camera = camHUD;
 
-		opponentStrums = new Strumline(getFirstVarInScripts("opponentNoteskin", "default"));
-		playerStrums = new Strumline(getFirstVarInScripts("playerNoteskin", "default"));
+		var opponentNoteskin:String =  getFirstVarInScripts("opponentNoteskin", currentChart.data.strumlines[1].skin ?? "default");
+		var playerNoteskin:String = getFirstVarInScripts("playerNoteskin", currentChart.data.strumlines[0].skin ?? "default");
+
+		opponentStrums = new Strumline(opponentNoteskin, currentChart.data.strumlines[1].keyCount ?? 4);
+		playerStrums = new Strumline(playerNoteskin, currentChart.data.strumlines[0].keyCount ?? 4);
 		positionStrumlines();
 
 		strumlines.add(opponentStrums);
@@ -506,39 +508,37 @@ class PlayState extends MusicBeatState {
 	}
 
 	function generateSong():Void {
-		Conductor.mapTimingPoints(moonSong);
-		Conductor.bpm = moonMeta.bpmChanges[0].bpm;
+		Conductor.mapTimingPoints(currentChart);
 		Conductor.current.loadMusic(Paths.inst(PlayState.songName, PlayState.difficulty, util.Mods.currentMod));
-		if (moonMeta.extraData.get(NEEDS_VOICES) == true) // TODO: separate Player and Opponent vocals
-			Conductor.current.addTrack(Paths.voices(PlayState.songName, PlayState.difficulty, util.Mods.currentMod));
+		var voices = Paths.voices(PlayState.songName, PlayState.difficulty, util.Mods.currentMod);
+		if (voices != null)
+			Conductor.current.addTrack(voices);
 		songLength = Conductor.current.music.length;
-		scrollSpeed = moonMeta.scrollSpeeds.get(difficulty) ?? 2.5;
+		scrollSpeed = currentChart.data.scrollSpeed;
 		initialScrollSpeed = scrollSpeed;
 		unspawnNotes.resize(0);
 		var noteTypes:Array<String> = [];
 
-		for (note in moonSong.getNotes(difficulty)) {
+		for (note in currentChart.data.notes) {
 			var daStrumTime:Float = note.time;
 			if (daStrumTime < 0)
 				continue;
-			var oldNote:NoteData = null;
-			if (unspawnNotes.length > 0)
-				oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
-
-			final lane = Std.int(note.lane % 4);
-			final owner = Math.floor(note.lane / 4);
 			// delete duplicates
+			var oldNote:NoteData = unspawnNotes[unspawnNotes.length - 1];
 			if (oldNote != null)
-				if (Math.abs(oldNote.time - daStrumTime) < 0.00001 && oldNote.lane == lane && oldNote.owner == owner)
+				if (Math.abs(oldNote.time - daStrumTime) < 0.00001 && oldNote.lane == note.lane && oldNote.owner == note.owner)
 					continue;
 			// @formatter:off
-			var swagNote:NoteData = {time: daStrumTime, lane: lane, type: note.type, length: 0, owner: owner};
+			// TODO: use note.length when I have holds.
+			var swagNote:NoteData = {time: daStrumTime, lane: note.lane, type: note.type, length: 0, owner: note.owner};
 			unspawnNotes.push(swagNote);
 			// @formatter:on
-			if (!noteTypes.contains(swagNote.type))
+			if (swagNote.type != null && !noteTypes.contains(swagNote.type))
 				noteTypes.push(swagNote.type);
 		}
 		unspawnNotes.sort(sortByShit);
+
+		events = currentChart.data.events;
 
 		// preload scripts
 		for (i in noteTypes) {
@@ -586,7 +586,7 @@ class PlayState extends MusicBeatState {
 		}
 	}
 
-	function sortByShit(Obj1:NoteData, Obj2:NoteData):Int
+	public static function sortByShit(Obj1:NoteData, Obj2:NoteData):Int
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.time, Obj2.time);
 
 	override function openSubState(substate:flixel.FlxSubState) {
@@ -611,9 +611,9 @@ class PlayState extends MusicBeatState {
 			paused = false;
 			#if hxdiscord_rpc
 			if (startTimer.finished)
-				DiscordClient.changePresence('${moonMeta.title} (${difficulty.toUpperCase()})', detailsText, iconRPC, true, songLength - Conductor.time);
+				DiscordClient.changePresence('${chartMetadata.name} (${difficulty.toUpperCase()})', detailsText, iconRPC, true, songLength - Conductor.time);
 			else
-				DiscordClient.changePresence('${moonMeta.title} (${difficulty.toUpperCase()})', detailsText, iconRPC);
+				DiscordClient.changePresence('${chartMetadata.name} (${difficulty.toUpperCase()})', detailsText, iconRPC);
 			#end
 		}
 		super.closeSubState();
@@ -646,7 +646,6 @@ class PlayState extends MusicBeatState {
 				FlxG.switchState(new editor.ChartEditor());
 			if (FlxG.keys.justPressed.EIGHT) {
 				Paths.skipNextClear = true;
-				var curStage:String = stage.getStageFileName();
 				var ids = [boyfriend.characterId, dad.characterId];
 				if (gf != null && gf.visible && gf.characterId != 'placeholder')
 					ids.push(gf.characterId);
@@ -684,7 +683,7 @@ class PlayState extends MusicBeatState {
 			pause();
 			Conductor.current.stopMusic();
 			#if hxdiscord_rpc
-			DiscordClient.changePresence('${moonMeta.title} (${difficulty.toUpperCase()})', 'Paused $detailsText', iconRPC);
+			DiscordClient.changePresence('${chartMetadata.name} (${difficulty.toUpperCase()})', 'Paused $detailsText', iconRPC);
 			#end
 			util.StateOverride.openSubState("menus.PauseSubstate", [boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y]);
 		}
@@ -705,17 +704,17 @@ class PlayState extends MusicBeatState {
 			openSubState(new gameplay.GameOverSubstate(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 			#if hxdiscord_rpc
 			// Game Over doesn't get his own variable because it's only used here
-			DiscordClient.changePresence('${moonMeta.title} (${difficulty.toUpperCase()})', 'Game Over!', iconRPC);
+			DiscordClient.changePresence('${chartMetadata.name} (${difficulty.toUpperCase()})', 'Game Over!', iconRPC);
 			#end
 			return;
 		}
 
 		if (generatedMusic) {
+			updateEvents(Conductor.time);
 			var userSS:Float = Preferences.user.scrollSpeed;
 			var actualSpeed:Float = NoteRenderer.getScrollSpeedMod(userSS);
 			notes.updateNotes(Conductor.time, strumlines.members, actualSpeed);
 			noteUpdate(Conductor.time);
-			updateEvents(Conductor.time);
 			callFuncInScripts("update song", [elapsed]);
 		}
 	}
@@ -724,7 +723,7 @@ class PlayState extends MusicBeatState {
 		if (events == null || events.length == 0)
 			return;
 		var scheduled = events[eventPosition];
-		if (scheduled.time - time > 1000)
+		if (scheduled.time - time > 10)
 			return;
 		if (scheduled == null) {
 			eventPosition++;
@@ -772,6 +771,7 @@ class PlayState extends MusicBeatState {
 					stage.clear();
 					stage.stageFile = to;
 					positionCharacters();
+					curStage = to;
 				}
 			case _:
 		}
@@ -786,7 +786,6 @@ class PlayState extends MusicBeatState {
 					if (daNote.mustPress)
 						goodNoteHit(daNote);
 					else {
-						focusOnCharacter(dad);
 						daNote.wasGoodHit = true;
 						callFuncInScripts("opponentNoteHit", [daNote]);
 					}
@@ -1094,7 +1093,6 @@ class PlayState extends MusicBeatState {
 
 		callFuncInScripts("goodNoteHit", [note]);
 
-		focusOnCharacter(boyfriend);
 		boyfriend.sing(note.noteData, null, true);
 		boyfriend.danceCooldown = boyfriend.singDuration + note.sustainLength;
 		note.wasGoodHit = true;

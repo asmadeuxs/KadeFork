@@ -1,12 +1,10 @@
 package data.song;
 
+import data.song.KadeForkChart;
 import data.song.SongMetadata;
 import flixel.FlxG;
 import flixel.math.FlxMath;
 import gameplay.PlayState;
-import moonchart.formats.BasicFormat;
-import moonchart.formats.fnf.legacy.FNFLegacy.FNFLegacyMetaValues;
-import moonchart.formats.fnf.legacy.FNFPsych;
 import util.Mods;
 
 class SongPlaylist {
@@ -14,11 +12,11 @@ class SongPlaylist {
 
 	var storyMode:Bool = false;
 
-	var songs:Array<DynamicFormat> = [];
+	var songs:Array<KadeForkChart> = [];
 	var current:Int = 0;
 
-	var curSong:DynamicFormat;
-	var songMeta:BasicMetaData;
+	var curSong:KadeForkChart;
+	var songMeta:KFCMeta;
 
 	function _resetSong() {
 		if (curSong != null)
@@ -27,10 +25,10 @@ class SongPlaylist {
 			curSong = songs[current];
 		else
 			curSong = Song.loadFromFile('core', 'test');
-		songMeta = curSong.getChartMeta();
+		songMeta = curSong.meta;
 	}
 
-	var _songToFreeplayMeta:Map<DynamicFormat, SongMetadata> = new Map<DynamicFormat, SongMetadata>();
+	var _songToFreeplayMeta:Map<KadeForkChart, SongMetadata> = new Map<KadeForkChart, SongMetadata>();
 
 	public function addSongFromMetadata(song:SongMetadata, ?difficulty:String = 'normal') {
 		if (song == null || song.songFolder == null)
@@ -41,14 +39,14 @@ class SongPlaylist {
 		return daSong;
 	}
 
-	public function addSong(song:DynamicFormat) {
+	public function addSong(song:KadeForkChart) {
 		if (songs == null)
 			songs = [];
 		songs.push(song);
 		return song;
 	}
 
-	public function removeSong(song:DynamicFormat) {
+	public function removeSong(song:KadeForkChart) {
 		if (songs == null)
 			songs = [];
 		songs.remove(song);
@@ -106,14 +104,14 @@ class SongPlaylist {
 	public function previous() {
 		current = FlxMath.wrap(current - 1, 0, songs.length - 1);
 		curSong = songs[current];
-		songMeta = songs[current].getChartMeta();
+		songMeta = songs[current].meta;
 		return curSong;
 	}
 
 	public function next() {
 		current = FlxMath.wrap(current + 1, 0, songs.length - 1);
 		curSong = songs[current];
-		songMeta = songs[current].getChartMeta();
+		songMeta = songs[current].meta;
 		return curSong;
 	}
 
