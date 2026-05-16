@@ -48,6 +48,16 @@ class Paths {
 	static private final cacheLimit:Int = 15;
 
 	static private var avoidClearing:Array<String> = ["core:images/ui/alphabet.png"];
+
+	static public function addToAvoidClearing(key:String):Void {
+		if (!avoidClearing.contains(key))
+			avoidClearing.push(key);
+	}
+
+	static public function removeFromAvoidClearing(key:String):Void {
+		avoidClearing.remove(key);
+	}
+
 	static private var cacheTracker:Array<String> = [];
 
 	static private var textureRegistry = new AssetRegistry<FlxGraphic>((key, graphic) -> {

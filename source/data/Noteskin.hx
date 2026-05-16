@@ -15,8 +15,17 @@ import util.AnimationHelper;
 // i hate this file in specific -asmadeuxs
 // actually i rewrote it entirely and i hate it slightly less now -asmadeuxs
 class Noteskin {
-	public static function loadNoteskinFile(noteskinPath:String):Noteskin {
+	public static var noteskinCache:Map<String, Noteskin> = new Map<String, Noteskin>();
+
+	public static function loadNoteskinFile(noteskinPath:String, ?skipCache:Bool = false):Noteskin {
 		var filePath = findNoteskinFile(noteskinPath);
+		// doing this mainly so there's no unused instances of the same skin
+		if (!skipCache) {
+			if (noteskinCache.get(filePath) != null)
+				return noteskinCache.get(filePath);
+			else
+				noteskinCache.remove(filePath);
+		}
 		var skinData:NoteskinFile;
 		if (!Paths.fileExists(filePath)) {
 			trace('Noteskin "$noteskinPath" not found, using default');
@@ -25,7 +34,10 @@ class Noteskin {
 			trace('Loading noteskin from $filePath');
 			skinData = cast Json5.parse(Paths.getText(filePath));
 		}
-		return new Noteskin(skinData);
+		var skin:Noteskin = new Noteskin(skinData);
+		skin.resolvedPath = filePath;
+		noteskinCache.set(filePath, skin);
+		return noteskinCache.get(filePath);
 	}
 
 	public static final DEFAULT_SKIN_CONFIG:NoteskinFile = {
@@ -67,6 +79,10 @@ class Noteskin {
 		}
 	};
 
+	public var resolvedPath:String = null;
+
+	private var graphicKeys:Array<String> = [];
+
 	private var atlasMap:Map<String, FlxAtlasFrames> = [];
 	private var defaultFramerate:Int;
 	private var keyCount:Int;
@@ -95,6 +111,16 @@ class Noteskin {
 		preload();
 	}
 
+	public function destroy():Void {
+		for (key in graphicKeys)
+			Paths.removeFromAvoidClearing(key);
+		graphicKeys.resize(0);
+		atlasMap.clear();
+		if (resolvedPath != null)
+			noteskinCache.remove(resolvedPath);
+		file = null;
+	}
+
 	public function loadNoteskinTextures(conf:NoteskinFile, ?type:String) {
 		var key:String = type;
 		var texConf:TextureConfig = switch type {
@@ -115,9 +141,14 @@ class Noteskin {
 				case 'packer': Paths.getPackerAtlas(texPath);
 				case _: Paths.getSparrowAtlas(texPath);
 			}
-			if (atlas != null)
+			if (atlas != null) {
 				atlasMap.set(key, atlas);
-			else
+				var graphic:FlxGraphic = atlas.parent;
+				if (graphic != null && graphic.key != null && !graphicKeys.contains(graphic.key)) {
+					graphicKeys.push(graphic.key);
+					Paths.addToAvoidClearing(graphic.key);
+				}
+			} else
 				trace('Cannot load noteskin atlas for $key (path: ${Paths.resolveAssetPath('images/$texPath', mod)}');
 		}
 		return atlasMap.get(key);

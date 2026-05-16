@@ -45,11 +45,9 @@ class ChartEditor extends MusicBeatState {
 		super.create();
 		Conductor.setTime(0.0);
 		FlxG.mouse.visible = true;
-		if (PlayState.current != null) {
-			songName = PlayState.songTitle;
-			rawSongName = PlayState.songName;
-			difficultyName = PlayState.difficulty;
-		}
+		songName = PlayState.songTitle;
+		rawSongName = PlayState.songName;
+		difficultyName = PlayState.difficulty;
 		chart = new KFCHandler().fromFormat(PlayState.playlist.getCurrent());
 		chartMeta = chart.getChartMeta();
 		Conductor.mapTimingPoints(chart);
@@ -150,7 +148,7 @@ class ChartEditor extends MusicBeatState {
 		}
 
 		if (FlxG.keys.justPressed.ESCAPE) {
-			if (songName == PlayState.songName)
+			if (rawSongName == PlayState.songName)
 				FlxG.switchState(new gameplay.PlayState());
 			else
 				FlxG.switchState(new menus.TitleState());
@@ -372,6 +370,7 @@ class ChartEditor extends MusicBeatState {
 					var lp = gridGroup.members[gridGroup.members.length - 1];
 					playerGrid.setPosition(lp.x + lp.width + gap, lp.y);
 				}
+				trace('rows $rows - grid height: ${playerGrid.height}');
 				gridGroup.add(playerGrid);
 			}
 			var p1 = gridGroup.members[0];

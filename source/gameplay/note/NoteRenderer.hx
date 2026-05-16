@@ -104,7 +104,8 @@ class NoteRenderer extends FlxBasic {
 				if (slScrollSpeed != null && Math.abs(scrollSpeed - slScrollSpeed) > 0.00000001)
 					scrollSpeed = slScrollSpeed;
 			}
-			if (curStrum != null) {
+
+			if (curStrum != null && !note.isLocked) {
 				var difference:Float = (time - note.strumTime);
 				var noteScroll:Float = difference * ((0.45 * scrollSpeed) * downscroll);
 				note.y = curStrum.y - noteScroll;
@@ -139,14 +140,18 @@ class NoteRenderer extends FlxBasic {
 
 	override function draw():Void {
 		for (note in activeNotes)
-			if (note.visible && note.exists && note.active) {
+			if (note.exists && note.active) {
 				if (note.isSustain) {
-					if (note.holdBody != null)
+					if (note.holdBody != null && note.holdBody.visible)
 						note.holdBody.draw();
-					if (note.holdEnd != null)
+					if (note.holdEnd != null && note.holdEnd.visible) {
+						if (note.holdEnd.alpha != note.holdBody.alpha)
+							note.holdEnd.alpha = note.holdBody.alpha;
 						note.holdEnd.draw();
+					}
 				}
-				note.draw();
+				if (note.visible)
+					note.draw();
 			}
 	}
 

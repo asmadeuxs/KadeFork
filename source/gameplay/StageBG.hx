@@ -5,6 +5,7 @@ import data.hscript.Script;
 import data.hscript.ScriptLoader;
 import flixel.FlxBasic;
 import flixel.FlxG;
+import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.util.FlxColor;
 import flixel.util.FlxSort;
@@ -21,14 +22,31 @@ class StageBG extends FlxBasic {
 	public var cameraZoom:Float = 1.0;
 
 	var objects:Array<FlxBasic> = [];
+	var objectsByName:Map<String, FlxBasic> = [];
+
 	var stageFile(default, set):String;
 	var _loadedFiles:Map<String, StageFile> = [];
+	var lockedGraphicKeys:Array<String> = [];
 
 	var stageScript:Script;
 
 	public function new(stageFile:String):Void {
 		super();
 		this.stageFile = stageFile;
+	}
+
+	// for caching
+	private function unlockAllGraphics():Void {
+		for (key in lockedGraphicKeys)
+			Paths.removeFromAvoidClearing(key);
+		lockedGraphicKeys.resize(0);
+	}
+
+	private function lockGraphic(graphic:FlxGraphic):Void {
+		if (graphic != null && graphic.key != null && !lockedGraphicKeys.contains(graphic.key)) {
+			lockedGraphicKeys.push(graphic.key);
+			Paths.addToAvoidClearing(graphic.key);
+		}
 	}
 
 	override function update(elapsed:Float):Void {
@@ -50,6 +68,7 @@ class StageBG extends FlxBasic {
 			if (o != null)
 				o.destroy();
 		objects.resize(0);
+		unlockAllGraphics();
 	}
 
 	public function clearCache():Void {
@@ -85,8 +104,22 @@ class StageBG extends FlxBasic {
 	private function loadStageScript(stageName:String):Script {
 		var scriptPath:String = Paths.getPath('data/stages/$stageName');
 		stageScript = ScriptLoader.findScript(ScriptLoader.getScriptFile(scriptPath, stageName));
+		scriptSetVar("add", this.add);
+		scriptSetVar("remove", this.remove);
+		scriptSetVar("addByName", this.addByName);
+		scriptSetVar("moveByName", this.moveByName);
+		scriptSetVar("removeByName", this.removeByName);
+		scriptSetVar("getByName", this.getByName);
+		scriptSetVar("removeByID", this.removeByID);
+		scriptSetVar("moveByID", this.moveByID);
 		scriptFuncCall('onLoad', [this]);
 		return stageScript;
+	}
+
+	public function scriptSetVar(varName:String, value:Dynamic):HScriptFunction {
+		if (stageScript == null)
+			return null;
+		return stageScript.setVar(varName, value);
 	}
 
 	public function scriptFuncCall(funcName:String, ?args:Array<Dynamic>):HScriptFunction {
@@ -182,10 +215,14 @@ class StageBG extends FlxBasic {
 					case 'packer': Paths.getPackerAtlas(path);
 					case _: Paths.image(path);
 				}
-				if (tex is FlxAtlasFrames)
+				if (tex is FlxAtlasFrames) {
 					sprite.frames = cast tex;
-				else
-					sprite.loadGraphic(cast tex);
+					lockGraphic(sprite.frames.parent);
+				} else {
+					var g:FlxGraphic = cast tex;
+					sprite.loadGraphic(g);
+					lockGraphic(g);
+				}
 				if (data.animations != null) {
 					sprite.addFromJson(data.animations, data.defaultFramerate ?? 24);
 					if (data.defaultAnimation != null && sprite.animation.getByName(data.defaultAnimation) != null)
@@ -221,6 +258,7 @@ class StageBG extends FlxBasic {
 						sprite.color = FlxColor.fromString(data.color);
 				}
 				// trace('array index $id - sprite index ${sprite.ID}');
+				objectsByName.set(data.name, sprite);
 				objects.push(sprite);
 			}
 			objects.sort((a, b) -> return FlxSort.byValues(FlxSort.ASCENDING, a.ID, b.ID));
@@ -247,6 +285,40 @@ class StageBG extends FlxBasic {
 	public function remove(basic:FlxBasic):FlxBasic {
 		objects.remove(basic);
 		return basic;
+	}
+
+	public function addByName(name:String):FlxBasic {
+		var o:FlxBasic = objectsByName.get(name);
+		if (o == null)
+			trace('[StageBG.addByName] Stage object "$name" not found!');
+		else
+			add(o);
+		return o;
+	}
+
+	public function moveByName(name:String, newPos:Int):FlxBasic {
+		var o:FlxBasic = objectsByName.get(name);
+		if (o == null)
+			trace('[StageBG.moveByName] Stage object "$name" not found!');
+		else
+			moveByID(o.ID, newPos);
+		return o;
+	}
+
+	public function removeByName(name:String):FlxBasic {
+		var o:FlxBasic = objectsByName.get(name);
+		if (o == null)
+			trace('[StageBG.removeByName] Stage object "$name" not found!');
+		else
+			remove(o);
+		return o;
+	}
+
+	public function getByName(name:String):FlxBasic {
+		var o:FlxBasic = objectsByName.get(name);
+		if (o == null)
+			trace('Stage object "$name" not found!');
+		return o;
 	}
 
 	public function removeByID(id:Int):FlxBasic {

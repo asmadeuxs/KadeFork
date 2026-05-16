@@ -69,6 +69,14 @@ class Note extends gameplay.FunkinSprite {
 	public var holdBody:FlxSprite;
 	public var holdEnd:FlxSprite;
 
+	public var baseHoldScaleY:Float = 1.0;
+	public var baseHoldAlpha:Float = 0.6;
+
+	// for hold inputs
+	public var holdTimer:Float = 0.0;
+	public var isLocked:Bool = false;
+	public var holdReleased:Bool = false;
+
 	public var isMine:Bool = false;
 	public var isFake:Bool = false;
 
@@ -104,10 +112,15 @@ class Note extends gameplay.FunkinSprite {
 
 		// reset gameplay values
 		this.judgement = null;
-		this.hitDifference = 0.0;
 		this.wasGoodHit = false;
+		this.holdReleased = false;
+		this.isLocked = false;
 		this.tooLate = false;
 		this.missed = false;
+
+		this;baseHoldScaleY = 1.0;
+		this.hitDifference = 0.0;
+		this.holdTimer = 0.0;
 
 		noteScript?.callFunc("noteRegenerated", [this, strumTime, noteData, sustainLength]);
 		return this;
@@ -130,33 +143,47 @@ class Note extends gameplay.FunkinSprite {
 	}
 
 	public function updateSustain(time:Float, scrollSpeed:Float):Void {
-		if (debugMode || !isSustain || strumline == null)
+		if (!isSustain)
 			return;
+
 		if (holdEnd != null)
 			holdEnd.objectCenter(this, X);
-		if (holdBody != null) {
+		if (holdBody != null)
 			holdBody.objectCenter(this, X);
-			var startY:Float = y;
-			var curStrum = strumline.getStrum(noteData);
-			var downscroll:Int = strumline.getDownscrollMult(noteData);
-			var sustainScroll:Float = 0.45 * scrollSpeed;
-			var endTime:Float = strumTime + sustainProgress;
-			var endY:Float = curStrum.y - (time - endTime) * sustainScroll * downscroll;
-			var totalHeight:Float = (endY - startY) * downscroll;
-			if (totalHeight < 0)
-				totalHeight = -totalHeight;
-			var endHeight:Float = holdEnd != null ? holdEnd.height : height;
-			var sustainHeight:Float = Math.max(0, totalHeight - endHeight);
-			if (holdBody.height > 0) {
-				holdBody.scale.y = sustainHeight / holdBody.frameHeight;
-				holdBody.updateHitbox();
-			}
-			holdBody.y = startY + endHeight * downscroll;
-			if (holdEnd != null) {
-				holdEnd.y = holdBody.y + holdBody.height;
-				holdEnd.updateHitbox();
-			}
-		} else if (holdEnd != null)
-			holdEnd.y = y + height;
+		if (isLocked && wasGoodHit && holdBody != null) {
+			holdBody.scale.y = Math.max(0, (sustainProgress / sustainLength) * baseHoldScaleY);
+			holdBody.updateHitbox();
+		} else
+			growSustainToBaseSize(time, scrollSpeed);
+
+		if (holdBody != null && holdEnd != null) {
+			holdEnd.y = holdBody.y + holdBody.height;
+			holdEnd.updateHitbox();
+		}
+	}
+
+	// making this a separate function for use in the chart editor -asmadeuxs
+	public function growSustainToBaseSize(time:Float, scrollSpeed:Float) {
+		if (holdBody == null)
+			return;
+
+		var startY:Float = y;
+		var downscroll:Int = strumline?.getDownscrollMult(noteData) ?? 1;
+		var endTime:Float = strumTime + sustainProgress;
+		var sustainScroll:Float = 0.45 * scrollSpeed;
+		var strumY:Float = (strumline?.getStrum(noteData)?.y) ?? (y + (strumTime - time) * sustainScroll);
+		var endY:Float = strumY - (time - endTime) * sustainScroll * downscroll;
+
+		var totalHeight:Float = (endY - startY) * downscroll;
+		if (totalHeight < 0)
+			totalHeight = -totalHeight;
+
+		var endHeight:Float = (holdEnd != null) ? holdEnd.height : height;
+		var sustainHeight:Float = Math.max(0, totalHeight - endHeight);
+
+		holdBody.scale.y = sustainHeight / holdBody.frameHeight;
+		baseHoldScaleY = holdBody.scale.y;
+		holdBody.updateHitbox();
+		holdBody.y = startY + endHeight * downscroll;
 	}
 }

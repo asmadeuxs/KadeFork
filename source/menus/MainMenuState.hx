@@ -115,11 +115,7 @@ class MainMenuState extends GenericMenuState {
 			if (FlxG.sound.music != null)
 				FlxG.sound.music.stop();
 			FlxG.resetState();
-		}
-		if (FlxG.keys.justPressed.SEVEN) {
-			FlxG.sound.music.stop();
-			FlxG.switchState(new gameplay.DummyPlayState());
-			canInput = false;
+			return;
 		}
 		menuItems.forEach(function(spr:FlxSprite) spr.screenCenter(X));
 	}
