@@ -135,7 +135,8 @@ class Paths {
 
 	static public function getPath(file:String, ?type:AssetType, ?mod:String = null):Dynamic {
 		var origin:String = getAssetOrigin(mod);
-		var cacheKey:String = origin + file;
+		var normalisedFile:String = file.toLowerCase();
+		var cacheKey:String = (origin + normalisedFile).toLowerCase();
 		switch type {
 			case IMAGE:
 				var assetPath = resolveAssetPath(file, mod);
@@ -214,7 +215,7 @@ class Paths {
 				if (basePath == null)
 					return null;
 				var input = Path.withoutExtension(basePath);
-				var ext = Path.extension(basePath);
+				var ext = Path.extension(basePath).toLowerCase();
 				if (ext == null || !jsonExtensions.contains(ext)) {
 					for (e in jsonExtensions) {
 						if (Paths.fileExists('$input.$e')) {
@@ -238,8 +239,48 @@ class Paths {
 	static public function getText(fromPath:String)
 		return sys.io.File.getContent(fromPath);
 
-	static public function fileExists(file:String)
-		return sys.FileSystem.exists(file);
+	static public function fileExists(path:String) {
+		#if windows
+		// forcing Windows paths to be case-sensitive
+		if (!sys.FileSystem.exists(path))
+			return false;
+		var dir = Path.directory(path);
+		var name = Path.withoutDirectory(path);
+		if (dir == "" || dir == null)
+			dir = ".";
+		try {
+			for (entry in sys.FileSystem.readDirectory(dir))
+				if (entry == name)
+					return true;
+			return false;
+		} catch (_)
+			return false;
+		#else
+		return sys.FileSystem.exists(path);
+		#end
+	}
+
+	static private function getRealPath(path:String):String {
+		#if windows
+		if (!sys.FileSystem.exists(path))
+			return null;
+		var dir = Path.directory(path);
+		var name = Path.withoutDirectory(path);
+		if (dir == "" || dir == null)
+			dir = ".";
+		try {
+			for (entry in sys.FileSystem.readDirectory(dir)) {
+				if (entry == name)
+					return Path.join([dir, entry]);
+			}
+			return null;
+		} catch (_) {
+			return null;
+		}
+		#else
+		return sys.FileSystem.exists(path) ? path : null;
+		#end
+	}
 
 	static public function listFiles(dir:String)
 		return sys.FileSystem.readDirectory(dir);
@@ -340,7 +381,7 @@ class Paths {
 		return getPath(path, MUSIC, mod);
 	}
 
-	inline static public function songaudio(file:String, song:String, difficulty:String, ?mod:String):Sound {
+	inline static public function songAudio(file:String, song:String, difficulty:String, ?mod:String):Sound {
 		var path:String = resolveSongPath(file, song, difficulty, mod);
 		return getPath(path, MUSIC, mod);
 	}

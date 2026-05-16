@@ -26,8 +26,8 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 		super(0, 0);
 		this.keyCount = keyCount;
 		noteskin = Noteskin.loadNoteskinFile(skin);
-		splashPool = new ObjectPool(16, (_) -> return add(noteskin.generateNoteSplashSprite()));
 		generateStrums();
+		splashPool = new ObjectPool(16, (_) -> return add(noteskin.generateNoteSplashSprite()));
 	}
 
 	public function spawnSplash(noteData:Int, ?note:Note, ?x:Float = 0, ?y:Float = 0):Bool {

@@ -80,7 +80,7 @@ class Mods {
 				continue;
 			}
 			// TODO: API version validation
-			allMods.set(modId, {name: modData[0], version: apiVer, description: modData[2] ?? defaultDesc});
+			allMods.set(modId, {name: modData[0], description: modData[1] ?? defaultDesc, version: modData[2] ?? apiVer});
 			if (!activeMods.contains(modId))
 				activeMods.push(modId);
 			trace('Loaded mod folder $modId');

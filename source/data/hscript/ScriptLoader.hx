@@ -56,7 +56,7 @@ class ScriptLoader {
 	 */
 	public static function clearDestroyed(scripts:Array<Script>):Array<Script> {
 		for (s in scripts) {
-			if (s.interp == null) {
+			if (s == null || s.interp == null) {
 				if (s.code != null || s.codeString.length != 0)
 					s.destroy(); // just ensure its dead
 				scripts.remove(s);
@@ -64,6 +64,10 @@ class ScriptLoader {
 		}
 		scripts.sort(ScriptLoader.sortByPriority);
 		return scripts;
+	}
+
+	public static function isValid(script:Script):Bool {
+		return script != null && script.interp != null && script.codeString.length > 0;
 	}
 
 	/**
@@ -80,7 +84,7 @@ class ScriptLoader {
 	 */
 	public static function getScriptFile(dir:String, scriptName:String):String {
 		var file:String = Path.addTrailingSlash(dir) + scriptName;
-		if (!Paths.scriptExtensions.contains(Path.extension(file))) {
+		if (!Paths.scriptExtensions.contains(Path.extension(file).toLowerCase())) {
 			for (ext in Paths.scriptExtensions)
 				if (Paths.fileExists('$file.$ext')) {
 					file += '.$ext';
@@ -93,7 +97,7 @@ class ScriptLoader {
 	public static function loadScript(filepath:String):Script {
 		var script:Script = null;
 		#if FEATURE_HSCRIPT
-		if (Paths.fileExists(filepath) && Paths.scriptExtensions.contains(Path.extension(filepath))) {
+		if (Paths.fileExists(filepath) && Paths.scriptExtensions.contains(Path.extension(filepath).toLowerCase())) {
 			var origin:String = Paths.getAssetOrigin(filepath);
 			script = parseScript(Paths.getText(filepath), null, filepath, origin.substr(0, -1));
 			script.fileName = Path.withoutExtension(Path.withoutDirectory(filepath));
@@ -114,7 +118,7 @@ class ScriptLoader {
 		var files:Array<String> = Paths.listFiles(directory);
 		for (i in 0...files.length) {
 			var path:String = Path.addTrailingSlash(directory) + files[i];
-			if (Paths.scriptExtensions.contains(Path.extension(path))) {
+			if (Paths.scriptExtensions.contains(Path.extension(path).toLowerCase())) {
 				if (scripts == null)
 					scripts = [];
 				var origin:String = Paths.getAssetOrigin(path);
@@ -122,7 +126,10 @@ class ScriptLoader {
 				p.fileName = Path.withoutExtension(files[i]);
 				p.filePath = path;
 				p.interp.execute(p.code);
-				p.priority = p.getVar("_priority") ?? 0;
+				var position:Int = p.getVar("_priority");
+				if (position < 0)
+					position = scripts.length;
+				p.priority = position;
 				scripts.push(p);
 			}
 		}

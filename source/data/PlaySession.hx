@@ -32,7 +32,7 @@ class PlaySession {
 		if (daNote.judgement == null) {
 			var diff:Float = Math.abs(daNote.strumTime - Conductor.time);
 			daNote.judgement = judgeMan.judgeTime(diff);
-			daNote.hitDifference = diff;
+			daNote.hitDifference = daNote.strumTime - Conductor.time;
 		}
 		totalNotesHit += daNote.judgement.accuracy;
 		score += Math.round(daNote.judgement.score);

@@ -59,6 +59,7 @@ class NoteRenderer extends FlxBasic {
 				if (note.isSustain) {
 					note.holdBody = note.skin.generateSustain(note.noteData, false);
 					note.holdEnd = note.skin.generateSustain(note.noteData, true);
+					note.baseHoldAlpha = note.holdBody.alpha;
 					note.holdBody.cameras = note.cameras;
 					note.holdEnd.cameras = note.cameras;
 				}
@@ -128,10 +129,6 @@ class NoteRenderer extends FlxBasic {
 
 	function killNote(note:Note, index:Int):Void {
 		note.kill();
-		if (note.holdBody != null)
-			note.holdBody.kill();
-		if (note.holdEnd != null)
-			note.holdEnd.kill();
 		notePool.release(note);
 		activeNotes.splice(index, 1);
 		if (noteKilled != null)
@@ -142,11 +139,12 @@ class NoteRenderer extends FlxBasic {
 		for (note in activeNotes)
 			if (note.exists && note.active) {
 				if (note.isSustain) {
-					if (note.holdBody != null && note.holdBody.visible)
+					if (note.holdBody != null && note.holdBody.visible) {
+						note.holdBody.alpha = note.alpha;
 						note.holdBody.draw();
+					}
 					if (note.holdEnd != null && note.holdEnd.visible) {
-						if (note.holdEnd.alpha != note.holdBody.alpha)
-							note.holdEnd.alpha = note.holdBody.alpha;
+						note.holdEnd.alpha = note.holdBody.alpha;
 						note.holdEnd.draw();
 					}
 				}
@@ -187,10 +185,6 @@ class NoteRenderer extends FlxBasic {
 	public function clearAll():Void {
 		for (note in activeNotes) {
 			note.kill();
-			if (note.holdBody != null)
-				note.holdBody.kill();
-			if (note.holdEnd != null)
-				note.holdEnd.kill();
 			notePool.release(note);
 		}
 		activeNotes.resize(0);

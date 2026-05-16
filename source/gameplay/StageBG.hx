@@ -93,7 +93,7 @@ class StageBG extends FlxBasic {
 			if (!Paths.fileExists(stagesPath))
 				continue;
 			for (i in Paths.listFiles(stagesPath)) {
-				if (!Paths.jsonExtensions.contains(haxe.io.Path.extension(i)))
+				if (!Paths.jsonExtensions.contains(haxe.io.Path.extension(i).toLowerCase()))
 					continue;
 				stages.push('$modId:$i');
 			}

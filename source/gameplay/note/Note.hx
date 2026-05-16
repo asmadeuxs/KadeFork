@@ -70,7 +70,7 @@ class Note extends gameplay.FunkinSprite {
 	public var holdEnd:FlxSprite;
 
 	public var baseHoldScaleY:Float = 1.0;
-	public var baseHoldAlpha:Float = 0.6;
+	public var baseHoldAlpha:Float = 1.0;
 
 	// for hold inputs
 	public var holdTimer:Float = 0.0;
@@ -79,6 +79,9 @@ class Note extends gameplay.FunkinSprite {
 
 	public var isMine:Bool = false;
 	public var isFake:Bool = false;
+
+	// in case you wanna change this for notetypes
+	public var holdGracePeriod:Float = 0.15;
 
 	/**
 	 * Left is *Early Window*, Right is *Late Window*.
@@ -99,8 +102,14 @@ class Note extends gameplay.FunkinSprite {
 		this.isFake = false;
 		this.rawNoteData = data;
 		this.isSustain = data.length > 0.0;
-		this.sustainProgress = data.length;
-		this.sustainLength = data.length;
+		if (this.isSustain) {
+			this.sustainProgress = data.length;
+			this.sustainLength = data.length;
+		} else {
+			// making sure its not set
+			this.sustainProgress = 0.0;
+			this.sustainLength = 0.0;
+		}
 		this.strumTime = data.time;
 		if (this.strumTime < 0)
 			this.strumTime = 0;
@@ -118,7 +127,15 @@ class Note extends gameplay.FunkinSprite {
 		this.tooLate = false;
 		this.missed = false;
 
-		this;baseHoldScaleY = 1.0;
+		// just in case
+		this.alpha = 1.0;
+		this.visible = true;
+		if (holdBody != null)
+			holdBody.visible = false;
+		if (holdEnd != null)
+			holdEnd.visible = false;
+
+		this.baseHoldScaleY = 1.0;
 		this.hitDifference = 0.0;
 		this.holdTimer = 0.0;
 
@@ -136,22 +153,35 @@ class Note extends gameplay.FunkinSprite {
 		if (debugMode)
 			return;
 		noteScript?.callFunc("update", [elapsed, this]);
-		if (tooLate) {
-			if (alpha > 0.3)
-				alpha = 0.3;
-		}
+	}
+
+	override public function kill():Void {
+		super.kill();
+		if (holdBody != null)
+			holdBody.kill();
+		if (holdEnd != null)
+			holdEnd.kill();
 	}
 
 	public function updateSustain(time:Float, scrollSpeed:Float):Void {
 		if (!isSustain)
 			return;
 
-		if (holdEnd != null)
+		var scaleY:Float = (sustainProgress / sustainLength) * baseHoldScaleY;
+
+		if (holdEnd != null) {
 			holdEnd.objectCenter(this, X);
-		if (holdBody != null)
+			holdBody.visible = scaleY > 0.0;
+		}
+		if (holdBody != null) {
 			holdBody.objectCenter(this, X);
+			holdBody.visible = scaleY > 0.0;
+		}
+
 		if (isLocked && wasGoodHit && holdBody != null) {
-			holdBody.scale.y = Math.max(0, (sustainProgress / sustainLength) * baseHoldScaleY);
+			if (!debugMode)
+				visible = false;
+			holdBody.scale.y = Math.max(0, scaleY);
 			holdBody.updateHitbox();
 		} else
 			growSustainToBaseSize(time, scrollSpeed);

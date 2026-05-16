@@ -66,7 +66,7 @@ class KFCHandler extends BasicFormat<KFCFormat, KFCMeta> {
 			this.meta = meta;
 		} else {
 			var metaPath = path.substr(0, path.length - 5) + "_meta.json";
-			if (sys.FileSystem.exists(metaPath)) {
+			if (Paths.fileExists(metaPath)) {
 				var meta:KFCMeta = haxe.Json.parse(sys.io.File.getContent(meta));
 				this.meta = meta;
 			}

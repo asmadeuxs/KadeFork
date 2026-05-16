@@ -110,7 +110,7 @@ class JudgementManager {
 			{
 				name: "Miss",
 				image: "miss",
-				healthBonus: (health:Float) -> return health > 0.05 ? -0.04 : 0.0,
+				healthBonus: (health:Float) -> return health > 0.05 ? -0.06 : 0.0,
 				color: 0xFFFF0000,
 				hitWindow: -200.0,
 				hittable: false,

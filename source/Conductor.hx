@@ -75,6 +75,8 @@ class Conductor extends flixel.FlxBasic {
 	public static function setTime(newTime:Float):Void {
 		Conductor.time = newTime;
 		Conductor.lastTime = newTime;
+		if (Conductor.current.music != null)
+			Conductor.current.music.time = newTime;
 		Conductor.current.update(1.0);
 	}
 
@@ -122,15 +124,19 @@ class Conductor extends flixel.FlxBasic {
 	}
 
 	public function togglePauseTracks(pause:Bool):Void {
-		for (i in tracks)
-			if (pause)
+		if (pause) {
+			for (i in tracks)
 				i.pause();
-			else
-				i.play(false, i.time);
-		if (pause)
 			music.pause();
-		else
-			music.play(false, music.time);
+		} else {
+			var masterTime = music.time;
+			music.play(false, masterTime);
+			for (i in tracks) {
+				i.pause();
+				i.play(false, masterTime);
+			}
+			Conductor.setTime(time);
+		}
 	}
 
 	public function pauseMusic():Void
@@ -145,20 +151,25 @@ class Conductor extends flixel.FlxBasic {
 		music.stop();
 	}
 
-	public function snapTime(to:Float):Void {
-		Conductor.setTime(to);
-		music.time = to;
+	public function setTracksTime(time:Float):Void {
 		for (i in tracks)
-			i.time = to;
+			i.stop();
+		music.stop();
+		music.play(false, time);
+		for (i in tracks)
+			i.play(false, time);
+		Conductor.setTime(time);
 	}
 
 	public function resyncTracks():Void {
+		var masterTime:Float = music.time;
 		for (i in tracks)
-			i.pause();
-		music.play(false, music.time);
-		Conductor.time = music.time;
+			i.stop();
+		music.stop();
+		music.play(false, masterTime);
 		for (i in tracks)
-			i.play(false, Conductor.time);
+			i.play(false, masterTime);
+		Conductor.time = masterTime;
 	}
 
 	override function update(elapsed:Float):Void {
@@ -244,9 +255,11 @@ class Conductor extends flixel.FlxBasic {
 			i.barHit(bar);
 	}
 
+	var resyncTime:Float = 10.0;
+
 	public function checkNeedResync():Void {
 		if (music != null && music.playing && tracks.length != 0)
-			if (music.time > Conductor.time + 20 || music.time < Conductor.time - 20)
+			if (Math.abs(music.time - Conductor.time) > resyncTime)
 				resyncTracks();
 	}
 
