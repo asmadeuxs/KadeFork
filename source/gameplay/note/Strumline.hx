@@ -45,7 +45,8 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 			if (note != null && note.noteScript != null) {
 				var scriptCall = note.noteScript?.callFunc('generateNoteSplash', [splash, noteData, note]);
 				played = scriptCall.value != null;
-			} else
+			}
+			else
 				played = noteskin.playSplashAnimation(splash, noteData);
 
 			if (played) {
@@ -55,7 +56,8 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 					splashPool.release(splash);
 					splash.animation.finishCallback = null;
 				};
-			} else
+			}
+			else
 				splash.kill();
 		}
 		return splash != null;

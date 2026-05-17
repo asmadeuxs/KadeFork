@@ -165,7 +165,8 @@ class StageBG extends FlxBasic {
 				if (newStage == null) {
 					loadDummy();
 					return stageFile = 'dummy';
-				} else {
+				}
+				else {
 					loadStageScript(stage);
 					loadStageObjects(newStage);
 					scriptFuncCall('onStageLoaded', [this, stage]);
@@ -184,7 +185,8 @@ class StageBG extends FlxBasic {
 			}
 			newStage = cast Json5.parse(Paths.getText(file));
 			_loadedFiles.set(stage, newStage);
-		} else
+		}
+		else
 			newStage = _loadedFiles.get(stage);
 		return newStage;
 	}
@@ -218,7 +220,8 @@ class StageBG extends FlxBasic {
 				if (tex is FlxAtlasFrames) {
 					sprite.frames = cast tex;
 					lockGraphic(sprite.frames.parent);
-				} else {
+				}
+				else {
 					var g:FlxGraphic = cast tex;
 					sprite.loadGraphic(g);
 					lockGraphic(g);
@@ -232,14 +235,16 @@ class StageBG extends FlxBasic {
 					if (data.scrollFactor is Array) {
 						var scrollX:Float = data.scrollFactor[0] ?? 0.0;
 						sprite.scrollFactor.set(scrollX, data.scrollFactor[1] ?? scrollX);
-					} else if (data.scrollFactor is Float)
+					}
+					else if (data.scrollFactor is Float)
 						sprite.scrollFactor.set(data.scrollFactor ?? 0.0, data.scrollFactor ?? 0.0);
 				}
 				if (data.scale != null) {
 					if (data.scale is Array) {
 						var scaleX:Float = data.scale[0] ?? 0.0;
 						sprite.scale.set(scaleX, data.scale[1] ?? scaleX);
-					} else if (data.scale is Float)
+					}
+					else if (data.scale is Float)
 						sprite.scale.set(data.scale ?? 0.0, data.scale ?? 0.0);
 					sprite.updateHitbox();
 				}
@@ -254,7 +259,8 @@ class StageBG extends FlxBasic {
 					if (data.color is Array) {
 						var red:Int = data.color[0] ?? 255;
 						sprite.color = FlxColor.fromRGB(red, data.color[1] ?? red, data.color[2] ?? red);
-					} else if (data.color is String)
+					}
+					else if (data.color is String)
 						sprite.color = FlxColor.fromString(data.color);
 				}
 				// trace('array index $id - sprite index ${sprite.ID}');

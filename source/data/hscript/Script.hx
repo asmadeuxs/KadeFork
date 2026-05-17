@@ -49,7 +49,8 @@ typedef InterpType = #if FEATURE_HSCRIPT hscript.Interp #else Any #end;
 					var exprError:hscript.Expr.Error = cast e;
 					if (exprError != null)
 						lineText = 'at line ' + exprError.line;
-				} else if (priorPos != null)
+				}
+				else if (priorPos != null)
 					lineText = 'at line ' + priorPos.lineNumber + ' (call site)';
 
 				Sys.println('Script Error (${this.filePath} $lineText) - $e');

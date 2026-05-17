@@ -43,7 +43,8 @@ class AlphabetMenu extends FlxTypedSpriteGroup<Alphabet> {
 				if (i.y < -30 || i.y > FlxG.height + 30) {
 					i.active = false;
 					i.visible = false;
-				} else {
+				}
+				else {
 					i.active = true;
 					i.visible = true;
 				}

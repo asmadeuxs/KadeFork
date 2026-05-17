@@ -134,7 +134,8 @@ class MainMenuState extends GenericMenuState {
 					onComplete: function(twn:FlxTween) spr.kill(),
 					ease: FlxEase.quadOut
 				});
-			} else {
+			}
+			else {
 				FlxFlicker.flicker(spr, 1, 0.06, true, false, function(flick:FlxFlicker) {
 					if (optionShit[v] != null && optionShit[v].func != null)
 						optionShit[v].func();

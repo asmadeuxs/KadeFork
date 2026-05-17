@@ -151,7 +151,8 @@ class OptionsMenu extends MusicBeatSubstate {
 					var left:Bool = leftp || lefth;
 					changeOption(left ? -inc : inc);
 				}
-			} else if (controls.LEFT_R || controls.RIGHT_R)
+			}
+			else if (controls.LEFT_R || controls.RIGHT_R)
 				keyTimer = 0.0;
 		}
 		// rest of the controls
@@ -171,7 +172,8 @@ class OptionsMenu extends MusicBeatSubstate {
 					menu.tweenItemsBackIn();
 					menu.canInput = true;
 					menu = null;
-				} else if (FlxG.state is gameplay.PlayState) {
+				}
+				else if (FlxG.state is gameplay.PlayState) {
 					var play:gameplay.PlayState = cast FlxG.state;
 					play.onSettingsChanged();
 					play = null;

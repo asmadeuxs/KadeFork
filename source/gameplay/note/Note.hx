@@ -105,7 +105,8 @@ class Note extends gameplay.FunkinSprite {
 		if (this.isSustain) {
 			this.sustainProgress = data.length;
 			this.sustainLength = data.length;
-		} else {
+		}
+		else {
 			// making sure its not set
 			this.sustainProgress = 0.0;
 			this.sustainLength = 0.0;
@@ -183,7 +184,8 @@ class Note extends gameplay.FunkinSprite {
 				visible = false;
 			holdBody.scale.y = Math.max(0, scaleY);
 			holdBody.updateHitbox();
-		} else
+		}
+		else
 			growSustainToBaseSize(time, scrollSpeed);
 
 		if (holdBody != null && holdEnd != null) {

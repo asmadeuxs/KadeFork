@@ -128,7 +128,8 @@ class Conductor extends flixel.FlxBasic {
 			for (i in tracks)
 				i.pause();
 			music.pause();
-		} else {
+		}
+		else {
 			var masterTime = music.time;
 			music.play(false, masterTime);
 			for (i in tracks) {
@@ -238,6 +239,7 @@ class Conductor extends flixel.FlxBasic {
 
 	public function onStep(step:Int):Void {
 		checkNeedResync();
+
 		for (i in synchedObjects)
 			i.stepHit(step);
 		stepHit.dispatch(step);
@@ -265,14 +267,17 @@ class Conductor extends flixel.FlxBasic {
 
 	public static function mapTimingPoints(song:DynamicFormat) {
 		timingPoints = [
+
 			for (bpm in song.getChartMeta().bpmChanges) {
 				{
 					time: bpm.time,
 					bpm: bpm.bpm,
+
 					denominator: bpm.stepsPerBeat ?? 4,
 					numerator: bpm.beatsPerMeasure ?? 4
 				}
 			}
+
 		];
 		Conductor.bpm = timingPoints[0].bpm;
 		trace("new Timing Points BUDDY " + timingPoints);
@@ -281,9 +286,9 @@ class Conductor extends flixel.FlxBasic {
 	public static function set_bpm(newBpm:Float) {
 		if (bpm == newBpm)
 			return bpm;
-
 		bpm = newBpm;
 		crotchet = ((60 / bpm) * 1000);
+
 		semiquaver = crotchet / denominator;
 		return newBpm;
 	}

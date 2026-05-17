@@ -77,7 +77,8 @@ class LevelRegistry extends BaseRegistry<LevelData> {
 				if (level != null) {
 					register(regKey, level, true);
 					ordered[mod].push(level);
-				} else {
+				}
+				else {
 					trace('Level "$filePath" is not valid JSON5 (check spelling?)');
 				}
 			}

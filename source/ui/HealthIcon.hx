@@ -75,7 +75,8 @@ class HealthIcon extends FunkinSprite {
 					animation.addByPrefix("idle", "idle", 24, false);
 					animation.addByPrefix("winning", "winning", 24, false);
 					animation.addByPrefix("losing", "losing", 24, false);
-				} else {
+				}
+				else {
 					var tex = Paths.image(Path.withoutExtension(iconPath));
 					// simple icon
 					// if there's 1 frame on the image then its only that one frmae
@@ -128,7 +129,8 @@ class HealthIcon extends FunkinSprite {
 
 		if (iconScript != null) {
 			iconScript.callFunc("loadIconGrid", [character]);
-		} else {
+		}
+		else {
 			animation.add('bf', [0, 1], 0, false);
 			animation.add('bf-car', [0, 1], 0, false);
 			animation.add('bf-christmas', [0, 1], 0, false);

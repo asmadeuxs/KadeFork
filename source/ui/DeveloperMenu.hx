@@ -88,7 +88,8 @@ class DeveloperMenu extends MusicBeatSubstate {
 							colorTween.cancel();
 						items.members[selected].color = FlxColor.LIME;
 						colorTween = FlxTween.color(items.members[selected], 0.5, items.members[selected].color, FlxColor.WHITE, {ease: FlxEase.sineOut});
-					} else {
+					}
+					else {
 						FlxG.sound.play(util.Mods.menuSound("cancelMenu"));
 						if (descTimer != null)
 							descTimer.cancel();

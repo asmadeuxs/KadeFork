@@ -30,7 +30,8 @@ class Noteskin {
 		if (!Paths.fileExists(filePath)) {
 			trace('Noteskin "$noteskinPath" not found, using default');
 			skinData = DEFAULT_SKIN_CONFIG;
-		} else {
+		}
+		else {
 			trace('Loading noteskin from $filePath');
 			skinData = cast Json5.parse(Paths.getText(filePath));
 		}
@@ -43,7 +44,10 @@ class Noteskin {
 	public static final DEFAULT_SKIN_CONFIG:NoteskinFile = {
 		name: "Classic",
 		author: "PhantomArcade",
-		defaultAtlas: {path: "gameplay/noteskins/NOTE_assets", atlasType: "sparrow"},
+		defaultAtlas: {
+			path: "gameplay/noteskins/NOTE_assets",
+			atlasType: "sparrow"
+		},
 		defaultFramerate: 24,
 		keyCount: 4,
 		strums: {
@@ -148,7 +152,8 @@ class Noteskin {
 					graphicKeys.push(graphic.key);
 					Paths.addToAvoidClearing(graphic.key);
 				}
-			} else
+			}
+			else
 				trace('Cannot load noteskin atlas for $key (path: ${Paths.resolveAssetPath('images/$texPath', mod)}');
 		}
 		return atlasMap.get(key);
@@ -175,7 +180,8 @@ class Noteskin {
 		if (holdAnims != null && holdAnims.length >= 2 * keyCount) {
 			holdBodyAnimNames = loadAnimArray(holdAnims.slice(0, keyCount));
 			holdEndAnimNames = loadAnimArray(holdAnims.slice(keyCount, 2 * keyCount));
-		} else {
+		}
+		else {
 			holdBodyAnimNames = [for (i in 0...keyCount) ""];
 			holdEndAnimNames = [for (i in 0...keyCount) ""];
 		}
@@ -190,7 +196,8 @@ class Noteskin {
 					variantAnims.push(_animMapper(splashAnims[variant * keyCount + dir]));
 				splashAnimNames.push(variantAnims);
 			}
-		} else
+		}
+		else
 			splashAnimNames = [];
 
 		strumScale = conf.strums.scale ?? DEFAULT_SKIN_CONFIG.strums.scale;

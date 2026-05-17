@@ -46,7 +46,8 @@ class Alphabet extends FlxSpriteGroup {
 		if (text != "") {
 			if (typed) {
 				startTypedText();
-			} else {
+			}
+			else {
 				addText();
 			}
 		}
@@ -134,7 +135,8 @@ class Alphabet extends FlxSpriteGroup {
 					xPos += lastSprite.width + 3;
 					// if (isBold)
 					// xPos -= 80;
-				} else {
+				}
+				else {
 					xPosResetted = false;
 				}
 
@@ -149,12 +151,15 @@ class Alphabet extends FlxSpriteGroup {
 				letter.row = curRow;
 				if (isBold) {
 					letter.createBold(splitWords[loopNum]);
-				} else {
+				}
+				else {
 					if (isNumber) {
 						letter.createNumber(splitWords[loopNum]);
-					} else if (isSymbol) {
+					}
+					else if (isSymbol) {
 						letter.createSymbol(splitWords[loopNum]);
-					} else {
+					}
+					else {
 						letter.createLetter(splitWords[loopNum]);
 					}
 

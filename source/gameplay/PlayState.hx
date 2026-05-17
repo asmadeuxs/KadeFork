@@ -350,7 +350,8 @@ class PlayState extends MusicBeatState {
 				uiDimBackground.scale.x = playerStrums.width; // fill strumline region
 				uiDimBackground.objectCenter(playerStrums, X); // move to last strum
 				insert(members.indexOf(currentHUD), uiDimBackground);
-			} else if (Preferences.user.strumUnderlayType == 1) {
+			}
+			else if (Preferences.user.strumUnderlayType == 1) {
 				uiDimBackground.scale.x = FlxG.width;
 				insert(members.indexOf(stage), uiDimBackground);
 				uiDimBackground.screenCenter(X);
@@ -416,12 +417,14 @@ class PlayState extends MusicBeatState {
 				for (i in 0...sl.strums.length)
 					sl.changeScrollDirection(i, scrollType);
 			}
-		} else if (strumlines.members[strumlineID] != null) {
+		}
+		else if (strumlines.members[strumlineID] != null) {
 			var sl:Strumline = strumlines.members[strumlineID];
 			sl.x = 0;
 			for (i in 0...sl.strums.length)
 				sl.changeScrollDirection(i, scrollType);
-		} else
+		}
+		else
 			trace('Error positioning strumlines - Strumline $strumlineID not found.');
 		positionStrumlines();
 	}
@@ -798,7 +801,8 @@ class PlayState extends MusicBeatState {
 					if (strumline != null)
 						trace('(ChangeNoteVelocity) Strumline $strumline not found, changing speed for both strumlines');
 					scrollSpeed = speed;
-				} else
+				}
+				else
 					strumlines.members[strumline].scrollSpeed = speed;
 			case ChangeNoteScrollType(scrollType, strumline):
 				changeScrollDirection(scrollType, strumline);
@@ -860,7 +864,8 @@ class PlayState extends MusicBeatState {
 					if (daNote.sustainProgress <= 0) {
 						daNote.strumline.playAnim(daNote.noteData, "pressed");
 						noteKill = true;
-					} else {
+					}
+					else {
 						var sustainScroll:Float = NoteRenderer.getScrollSpeedMod(scrollSpeed);
 						var curStrum = daNote.strumline.getStrum(daNote.noteData);
 						if (Preferences.user.scrollSpeedType < 2) {
@@ -870,7 +875,8 @@ class PlayState extends MusicBeatState {
 						}
 						daNote.updateSustain(time, scrollSpeed);
 					}
-				} else {
+				}
+				else {
 					// not holding, miss if you didn't hold it for too long
 					var grace:Float = daNote.holdGracePeriod;
 					if (!daNote.holdReleased) {
@@ -885,7 +891,8 @@ class PlayState extends MusicBeatState {
 						noteKill = true;
 					}
 				}
-			} else if (daNote.mustPress && !daNote.wasGoodHit && !daNote.missed) {
+			}
+			else if (daNote.mustPress && !daNote.wasGoodHit && !daNote.missed) {
 				// normal note miss
 				var missLimit:Int = 150;
 				var safeZone:Float = session.judgeMan.maxHitWindow ?? 180.0;
@@ -956,7 +963,8 @@ class PlayState extends MusicBeatState {
 				next.holdTimer = 1.0;
 			goodNoteHit(next);
 			playerStrums.playAnim(key, "confirm");
-		} else {
+		}
+		else {
 			// in case you're regrabbing a hold
 			var sustainNote:Note = null;
 			for (note in notes.getActiveNotes()) {
@@ -969,7 +977,8 @@ class PlayState extends MusicBeatState {
 				sustainNote.holdTimer = 0;
 				sustainNote.holdReleased = false;
 				playerStrums.playAnim(key, "confirm");
-			} else {
+			}
+			else {
 				playerStrums.playAnim(key, "pressed");
 				if (!Preferences.user.ghostTapping)
 					noteMiss(lane);
@@ -1179,7 +1188,8 @@ class PlayState extends MusicBeatState {
 			if (daNote != null) {
 				daNote.judgement = missJudge;
 				session.scoreNote(daNote);
-			} else
+			}
+			else
 				missJudge.hits++;
 			if (Preferences.user.showMissPopups) {
 				popUpRating(missJudge.image);
@@ -1227,7 +1237,8 @@ class PlayState extends MusicBeatState {
 		if (!note.isSustain) {
 			scoreNote();
 			notes.removeNote(note);
-		} else {
+		}
+		else {
 			note.isLocked = true;
 			note.holdReleased = false;
 			note.sustainProgress = note.sustainLength;

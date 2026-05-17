@@ -53,7 +53,8 @@ class ConfigTypes {
 			for (item in arr) {
 				if (Std.isOfType(item, Int)) {
 					result.push(item);
-				} else if (Std.isOfType(item, String)) {
+				}
+				else if (Std.isOfType(item, String)) {
 					var parts:Array<String> = Std.string(item).split("...");
 					var start:Int = Std.parseInt(parts[0]);
 					var end:Int = Std.parseInt(parts[1]);

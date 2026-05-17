@@ -105,7 +105,6 @@ class ChartEditor extends MusicBeatState {
 				}
 			}
 		}
-
 		if (gridGroup != null && gridGroup.members.length != 0) {
 			for (id in 0...players) {
 				var grid:ChartingGrid = gridGroup.members[id];
@@ -129,7 +128,6 @@ class ChartEditor extends MusicBeatState {
 				}
 			}
 		}
-
 		var scrollDelta:Float = 0.0;
 		if (FlxG.mouse.wheel != 0)
 			scrollDelta = -Std.int(FlxG.mouse.wheel);
@@ -137,7 +135,6 @@ class ChartEditor extends MusicBeatState {
 			scrollDelta = -1;
 		if (FlxG.keys.justPressed.DOWN)
 			scrollDelta = 1;
-
 		if (scrollDelta != 0.0) {
 			var newOffset:Float = scrollOffset + scrollDelta;
 			if (newOffset >= 0 && newOffset + visibleRows <= maxRows) {
@@ -146,7 +143,6 @@ class ChartEditor extends MusicBeatState {
 				refreshGrid();
 			}
 		}
-
 		if (FlxG.keys.justPressed.ESCAPE) {
 			if (rawSongName == PlayState.songName)
 				FlxG.switchState(new gameplay.PlayState());
@@ -178,25 +174,28 @@ class ChartEditor extends MusicBeatState {
 		var time:Float = getTimeFromStep(row);
 		var noteData:NoteData = {
 			time: time,
+
 			lane: lane,
 			type: null,
 			length: 0,
 			owner: owner
 		};
 		var strumline = chart.data.strumlines[owner];
+
 		if (strumline == null) {
 			chart.data.strumlines[owner] = {skin: "default", keyCount: 4};
 			strumline = chart.data.strumlines[owner];
 		}
 		chart.data.notes.push(noteData);
 		placedNotes[owner].push(noteData);
-		placedNotes[owner].sort(PlayState.sortByShit);
 
+		placedNotes[owner].sort(PlayState.sortByShit);
 		var daNote = new Note().setup(null, noteData);
 		daNote.setSkin(Noteskin.loadNoteskinFile(strumline.skin));
 		if (daNote.skin != null)
 			daNote.skin.generateArrow(noteData.lane, daNote);
 		daNote.setGraphicSize(GRID_SIZE, GRID_SIZE);
+
 		daNote.updateHitbox();
 		daNote.x = getNoteX(owner, noteData.lane);
 		daNote.y = getNoteY(row);
@@ -244,29 +243,33 @@ class ChartEditor extends MusicBeatState {
 			removeEventAtRow(row);
 			return;
 		}
-
 		var targetTime:Float = getTimeFromStep(row);
+
 		var defaultEvent:PlaySongEvent = ChangeBPM(Conductor.bpm);
 		eventList.push({time: targetTime, timeline: [defaultEvent]});
 		sortEvents();
 
 		var markerX = eventGrid.x;
 		var markerY = eventGrid.y + row * GRID_SIZE;
+
 		var marker = new EventMarker(markerX, markerY, 'Change BPM', row, targetTime);
 		eventMarkers.add(marker);
 	}
 
 	function getEventAtRow(row:Int):ChartEventArray {
 		var targetTime:Float = getTimeFromStep(row);
+
 		for (e in eventList)
 			if (Math.abs(e.time - targetTime) < 0.1)
 				return e;
+
 		return null;
 	}
 
 	function removeEventAtRow(row:Int):Void {
 		var targetTime:Float = getTimeFromStep(row);
 		eventList = eventList.filter(e -> Math.abs(e.time - targetTime) >= 0.1);
+
 		var toRemove = [for (m in eventMarkers.members) if (m.eventRow == row) m];
 		for (m in toRemove) {
 			eventMarkers.remove(m);
@@ -283,10 +286,8 @@ class ChartEditor extends MusicBeatState {
 			return 0.0;
 		var points = Conductor.timingPoints.copy();
 		points.sort((a, b) -> Std.int(a.time - b.time));
-
 		var currentTime:Float = 0.0;
 		var currentStep:Int = 0;
-
 		for (i in 0...points.length) {
 			var tp = points[i];
 			var stepAtChange = Math.round(tp.time / Conductor.getStepDuration(tp));
@@ -294,7 +295,8 @@ class ChartEditor extends MusicBeatState {
 				var stepsInSection = stepAtChange - currentStep;
 				currentTime += stepsInSection * Conductor.getStepDuration(tp);
 				currentStep = stepAtChange;
-			} else
+			}
+			else
 				break;
 		}
 		var lastTp = points[points.length - 1];
@@ -307,7 +309,6 @@ class ChartEditor extends MusicBeatState {
 			return 0;
 		var points = Conductor.timingPoints.copy();
 		points.sort((a, b) -> Std.int(a.time - b.time));
-
 		var curStep:Int = 0;
 		var curTime:Float = 0.0;
 		for (i in 0...points.length) {
@@ -334,6 +335,7 @@ class ChartEditor extends MusicBeatState {
 		var lastNote = notes[notes.length - 1];
 		var lastEvent = eventList[eventList.length - 1];
 		var lastTime:Float = 0.0;
+
 		if (lastNote.time > lastTime)
 			lastTime = lastNote.time;
 		if (lastEvent.time > lastTime)
@@ -360,27 +362,29 @@ class ChartEditor extends MusicBeatState {
 		var rows:Int = Math.floor(endRow - startRow);
 		var totalHeight:Float = rows * GRID_SIZE;
 		var gap:Float = 10;
-
 		if (gridGroup.members.length <= 0) {
 			for (i in 0...players) {
 				var playerGrid = new ChartingGrid(0, 0, 4, rows, GRID_SIZE);
 				if (i == 0) {
 					playerGrid.y = (FlxG.height - totalHeight) * 0.5;
-				} else {
+				}
+				else {
 					var lp = gridGroup.members[gridGroup.members.length - 1];
+
 					playerGrid.setPosition(lp.x + lp.width + gap, lp.y);
 				}
 				trace('rows $rows - grid height: ${playerGrid.height}');
 				gridGroup.add(playerGrid);
 			}
+
 			var p1 = gridGroup.members[0];
 			eventGrid = new ChartingGrid(0, p1.y, 1, rows, GRID_SIZE);
 			eventGrid.changeCheckerColor(0xFFAAAAAA, 0xFFDDDDDD);
 			eventGrid.x = p1.x - GRID_SIZE - gap;
 			gridGroup.add(eventGrid);
+
 			gridGroup.screenCenter(X);
 		}
-
 		refreshEvents();
 		refreshNotes();
 	}
@@ -388,15 +392,15 @@ class ChartEditor extends MusicBeatState {
 	public function refreshEvents() {
 		eventMarkers.forEachAlive((m) -> m.destroy());
 		eventMarkers.clear();
-
 		var startRow:Float = scrollOffset;
+
 		var endRow:Float = Math.min(scrollOffset + visibleRows, maxRows);
 		var rows:Int = Math.floor(endRow - startRow);
-
 		for (event in eventList) {
 			var row:Int = getStepFromTime(event.time);
 			if (row >= startRow && row < endRow) {
 				var markerY:Float = eventGrid.y + (row - startRow) * GRID_SIZE;
+
 				var eventName:String = KFCHandler.eventToString(event.timeline[0]);
 				var marker = new EventMarker(eventGrid.x, markerY, eventName, row, event.time);
 				eventMarkers.add(marker);
@@ -407,7 +411,6 @@ class ChartEditor extends MusicBeatState {
 	function refreshNotes():Void {
 		noteGroup.forEachAlive(n -> n.destroy());
 		noteGroup.clear();
-
 		var startRow = scrollOffset;
 		var endRow = scrollOffset + visibleRows;
 		for (owner in 0...players) {
@@ -421,12 +424,14 @@ class ChartEditor extends MusicBeatState {
 				if (row >= startRow && row < endRow) {
 					var daNote = new Note().setup(null, note);
 					daNote.setSkin(Noteskin.loadNoteskinFile(strumline.skin));
+
 					if (daNote.skin != null)
 						daNote.skin.generateArrow(note.lane, daNote);
 					daNote.setGraphicSize(GRID_SIZE, GRID_SIZE);
 					daNote.updateHitbox();
 					daNote.x = getNoteX(owner, note.lane);
 					daNote.y = getNoteY(row);
+
 					daNote.debugMode = true;
 					noteGroup.add(daNote);
 				}
@@ -439,18 +444,16 @@ class ChartEditor extends MusicBeatState {
 			chart.data.notes = [];
 			return;
 		}
-
 		while (placedNotes.length < players)
 			placedNotes.push([]);
 		for (i in 0...players)
 			placedNotes[i] = [];
-
 		for (note in chart.data.notes) {
 			if (note.owner >= players)
 				continue;
+
 			placedNotes[note.owner].push(note);
 		}
-
 		for (owner in 0...players)
 			placedNotes[owner].sort((a, b) -> Std.int(a.time - b.time));
 	}

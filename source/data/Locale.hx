@@ -103,7 +103,8 @@ class Locale {
 						for (key => value in map)
 							existing.pathOverrides[cat].set(key, value);
 					}
-				} else
+				}
+				else
 					locales.set(localeDir, lang);
 			}
 		}

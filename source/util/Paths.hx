@@ -223,7 +223,8 @@ class Paths {
 							break;
 						}
 					}
-				} else
+				}
+				else
 					input += '.' + jsonExtensions[0];
 				if (!Paths.fileExists(input))
 					return null;
@@ -253,7 +254,8 @@ class Paths {
 				if (entry == name)
 					return true;
 			return false;
-		} catch (_)
+		}
+		catch (_)
 			return false;
 		#else
 		return sys.FileSystem.exists(path);
@@ -274,7 +276,8 @@ class Paths {
 					return Path.join([dir, entry]);
 			}
 			return null;
-		} catch (_) {
+		}
+		catch (_) {
 			return null;
 		}
 		#else

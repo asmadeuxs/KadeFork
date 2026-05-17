@@ -152,7 +152,8 @@ class TitleState extends MusicBeatState {
 				if (spamming >= 3) {
 					transitionTmr.cancel();
 					util.StateOverride.switchState("menus.MainMenuState");
-				} else
+				}
+				else
 					spamming++;
 			}
 		}

@@ -64,7 +64,8 @@ class KFCHandler extends BasicFormat<KFCFormat, KFCMeta> {
 		if (meta != null) {
 			var meta:KFCMeta = haxe.Json.parse(sys.io.File.getContent(meta));
 			this.meta = meta;
-		} else {
+		}
+		else {
 			var metaPath = path.substr(0, path.length - 5) + "_meta.json";
 			if (Paths.fileExists(metaPath)) {
 				var meta:KFCMeta = haxe.Json.parse(sys.io.File.getContent(meta));
@@ -147,7 +148,6 @@ class KFCHandler extends BasicFormat<KFCFormat, KFCMeta> {
 				data.strumlines[owner] = {skin: "default", keyCount: keyCounts[owner] ?? 4};
 			data.notes.push(daNoteData);
 		}
-		trace(data.notes.length);
 		data.notes.sort((a, b) -> Std.int(a.time - b.time));
 
 		if (data.events == null)

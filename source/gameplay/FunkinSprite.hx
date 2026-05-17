@@ -25,7 +25,8 @@ class FunkinSprite extends FlxSprite {
 			if (checkFlipY())
 				daOffsetY = -daOffsetY;
 			offset.set(daOffsetX, daOffsetY);
-		} else {
+		}
+		else {
 			offset.set(0, 0);
 		}
 	}

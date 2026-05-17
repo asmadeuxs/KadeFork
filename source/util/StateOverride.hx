@@ -52,7 +52,8 @@ class StateOverride {
 				full = Paths.getScriptPath(prefix + simpleName, Mods.getMenuPriorityMod());
 				if (full != null)
 					return full;
-			} else
+			}
+			else
 				return full;
 		}
 		return null;

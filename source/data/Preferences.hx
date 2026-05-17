@@ -158,7 +158,8 @@ class Preferences {
 		if (newFramerate > FlxG.drawFramerate) {
 			FlxG.updateFramerate = newFramerate;
 			FlxG.drawFramerate = newFramerate;
-		} else {
+		}
+		else {
 			FlxG.drawFramerate = newFramerate;
 			FlxG.updateFramerate = newFramerate;
 		}

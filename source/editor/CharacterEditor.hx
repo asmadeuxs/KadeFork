@@ -132,40 +132,39 @@ class CharacterEditor extends MusicBeatState {
 		var minZoom:Float = 0.3;
 		var maxZoom:Float = 5.0;
 		var q:Bool = FlxG.keys.justPressed.Q;
+
 		if (q || FlxG.keys.justPressed.E)
 			FlxG.camera.zoom = Math.max(minZoom, FlxG.camera.zoom + (q ? -0.1 : 0.1));
 		var mausWheel:Float = FlxG.mouse.wheel;
 		if (mausWheel != 0)
 			FlxG.camera.zoom = Math.max(minZoom, Math.min(maxZoom, FlxG.camera.zoom + mausWheel * 0.05));
-
 		if (FlxG.keys.justPressed.ESCAPE) {
 			if (_prevState == 'PlayState') {
 				Paths.skipNextClear = true;
 				FlxG.switchState(new gameplay.PlayState());
-			} else
+			}
+			else
 				FlxG.switchState(new menus.MainMenuState());
 		}
+
 		updateInfoText();
 	}
 
 	public function changeEditing(next:Int = 0):Void {
 		if (chars[0].length == 0)
 			return;
-
 		if (character != null)
 			character.alpha = 0.1;
 		if (reference != null)
 			reference.alpha = 0.1;
-
 		editingChar = (editingChar + next) % chars[0].length;
+
 		if (editingChar < 0)
 			editingChar += chars[0].length;
-
 		reference = chars[1][editingChar];
 		character = chars[2][editingChar];
 		if (reference != null)
 			reference.visible = showReference;
-
 		if (character != null) {
 			character.alpha = 1.0;
 			reference.alpha = 1.0;
@@ -176,10 +175,10 @@ class CharacterEditor extends MusicBeatState {
 
 	public function resetCameraPosition():Void {
 		camFollow.setPosition(0, 0);
+
 		if (character != null) {
 			var mid = character.getMidpoint();
 			var off = character.cameraOffset;
-
 			var camPos:FlxPoint = new FlxPoint(mid.x + off.x, mid.y + off.y);
 			camFollow.setPosition(camPos.x, camPos.y);
 			FlxG.camera.follow(camFollow, LOCKON, 0.04);
@@ -189,19 +188,17 @@ class CharacterEditor extends MusicBeatState {
 	public function changeAnimation(next:Int = 0):Void {
 		if (character == null || animList == null || animList.length < 1)
 			return;
-
 		var curAnim:FlxAnimation = character.animation.curAnim;
 		var curIdx:Int = (curAnim != null) ? animList.indexOf(curAnim) : -1;
-
 		if (next == 0) {
 			if (curAnim != null)
 				character.playAnim(curAnim.name, true);
 			return;
 		}
-
 		var newIdx:Int = (curIdx + next) % animList.length;
 		if (newIdx < 0)
 			newIdx += animList.length;
+
 		character.playAnim(animList[newIdx].name, true);
 	}
 
@@ -217,16 +214,13 @@ class CharacterEditor extends MusicBeatState {
 	function saveOffsets():Void {
 		if (character == null)
 			return;
-
 		var jsonPath:String = character.filePath;
 		if (!Paths.fileExists(jsonPath)) {
 			trace('Character JSON not found at $jsonPath, cannot save offsets');
 			return;
 		}
-
 		var jsonContent:String = Paths.getText(jsonPath);
 		var config:CharacterConfig = haxe.Json5.parse(jsonContent);
-
 		if (config.offsets == null)
 			config.offsets = {};
 
@@ -248,11 +242,9 @@ class CharacterEditor extends MusicBeatState {
 			infoText.text = "No character loaded";
 			return;
 		}
-
 		var animName:String = character.animation.curAnim != null ? character.animation.curAnim.name : "none";
 		var off:Array<Float> = character.getOffset(animName);
 		var totalChars:Int = chars[0].length;
-
 		infoText.text = 'Character: ${chars[0][editingChar]} ($editingChar+1/$totalChars)
 			[W/S] Animation: $animName (SPACE to Replay)
 			[Arrow Keys] X=${off[0]}  Y=${off[1]}  (Arrow SHIFT to move 10 pixels faster)

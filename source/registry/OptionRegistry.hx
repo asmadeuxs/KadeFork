@@ -56,9 +56,11 @@ class OptionRegistry extends BaseRegistry<OptionCategory> {
 			if (cat != null && cat.length > 0) {
 				var modName:String = Mods.getConfig(mod).name;
 				register(modName, {name: modName, options: cat});
-			} else
+			}
+			else
 				throw 'No options found in JSON';
-		} catch (e:haxe.Exception)
+		}
+		catch (e:haxe.Exception)
 			Sys.println('Cannot register modded options - ${e.details()}');
 	}
 

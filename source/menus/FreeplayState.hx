@@ -208,7 +208,8 @@ class FreeplayState extends GenericMenuState {
 			curSong = selectedSongs[0];
 			for (song in selectedSongs)
 				PlayState.playlist.addSongFromMetadata(song, song.curDifficulty);
-		} else {
+		}
+		else {
 			curSong.curDifficulty = lastDifficultyArray[curHorizontal].toLowerCase();
 			PlayState.playlist.addSongFromMetadata(curSong, curSong.curDifficulty);
 		}

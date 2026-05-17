@@ -42,7 +42,8 @@ class Mods {
 			activeMods = saved.filter(modId -> available.contains(modId));
 			if (activeMods.length != saved.length)
 				saveMods();
-		} else {
+		}
+		else {
 			activeMods = getAvailableMods();
 			saveMods();
 		}
@@ -124,7 +125,8 @@ class Mods {
 			if (data.length > 1) {
 				if (data[1] == "true")
 					activeMods.push(data[0]);
-			} else {
+			}
+			else {
 				trace('Mod folder ${data[0]} is not properly set on the mods list (not enough data.)');
 				trace('It usually looks like this:\n');
 				trace('mod_folder|true (or false)\n');

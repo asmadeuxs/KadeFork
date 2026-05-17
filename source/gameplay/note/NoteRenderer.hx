@@ -46,9 +46,11 @@ class NoteRenderer extends FlxBasic {
 			var timeToNote:Float = noteData.time - time;
 			if (timeToNote > spawnDelay)
 				break;
+
 			var note:Note = notePool.get();
 			if (note == null)
 				note = new Note();
+
 			var strumline:Strumline = strumlines[noteData.owner];
 			if (strumline != null) {
 				note.setup(strumline, noteData);
@@ -67,7 +69,8 @@ class NoteRenderer extends FlxBasic {
 				activeNotes.push(note);
 				if (noteSpawned != null)
 					noteSpawned.dispatch(note);
-			} else {
+			}
+			else {
 				note.kill();
 				notePool.release(note);
 			}
@@ -168,7 +171,8 @@ class NoteRenderer extends FlxBasic {
 			if (unspawnNotes[mid].time >= newTime) {
 				newIndex = mid;
 				right = mid - 1;
-			} else
+			}
+			else
 				left = mid + 1;
 		}
 		spawnIndex = newIndex;

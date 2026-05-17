@@ -1,17 +1,4 @@
 {
-	"lineEnds": {
-		"leftCurly": "after",
-		"rightCurly": "both",
-		"emptyCurly": "noBreak",
-		"objectLiteralCurly": {
-			"leftCurly": "after"
-		},
-		"typedefCurly": {
-			"emptyCurly": "noBreak",
-			"leftCurly": "after",
-			"rightCurly": "both"
-		}
-	},
 	"indentation": {
 		"character": "tab",
 		"tabWidth": 2,
@@ -21,10 +8,47 @@
 		"indentCaseLabels": true,
 		"indentComplexValueExpressions": false
 	},
+	"whitespace": {
+		"formatStringInterpolation": true,
+		"compressSuccessiveParenthesis": true,
+		"typeHintColonPolicy": "none",
+		"arrowFunctionsPolicy": "around",
+		"ternaryPolicy": "around",
+		"typeExtensionPolicy": "after",
+		"ifPolicy": "around"
+	},
+	"lineEnds": {
+		"leftCurly": "after",
+		"rightCurly": "before",
+		"emptyCurly": "break",
+		"objectLiteralCurly": {
+			"leftCurly": "none"
+		},
+		"caseColon": "after",
+		"blockCurly": {
+			"leftCurly": "after",
+			"emptyCurly": "noBreak",
+			"rightCurly": "both"
+		},
+		"typedefCurly": {
+			"leftCurly": "after",
+			"rightCurly": "before",
+			"emptyCurly": "noBreak"
+		},
+		"anonFunctionCurly": {
+			"leftCurly": "after",
+			"rightCurly": "before",
+			"emptyCurly": "noBreak"
+		},
+		"lineEndCharacter": "CRLF"
+	},
 	"sameLine": {
-		"ifElse": "same",
-		"doWhile": "next",
-		"tryBody": "next",
-		"tryCatch": "keep"
+		"ifElse": "next",
+		"doWhile": "same",
+		"tryBody": "same",
+		"tryCatch": "next",
+		"forBody": "next",
+		"caseBody": "next",
+		"functionBody": "next"
 	}
 }

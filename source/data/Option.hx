@@ -79,7 +79,8 @@ using StringTools;
 						case _: defaultValue;
 					}
 			}
-		} else
+		}
+		else
 			value = Reflect.field(Preferences.user, this.variable);
 		return value;
 	}
@@ -107,7 +108,8 @@ using StringTools;
 						Preferences.setModOption(this.fromMod, this.variable, newValue);
 					else
 						Reflect.setField(Preferences.user, this.variable, newValue);
-				} else {
+				}
+				else {
 					var index:Int = 0;
 					for (i in 0...choices.length)
 						if (choices[i] == value) {

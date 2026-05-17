@@ -130,7 +130,8 @@ class FlxTransitionableState extends FlxState {
 			openSubState(_trans);
 			_trans.finishCallback = finishTransOut;
 			_trans.start(IN);
-		} else {
+		}
+		else {
 			_onExit();
 		}
 	}

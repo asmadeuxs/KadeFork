@@ -144,10 +144,12 @@ class Classic extends BaseHUD {
 			if (healthBar.percent < 20) {
 				iconP1.switchState("losing");
 				iconP2.switchState("winning");
-			} else if (healthBar.percent > 80) {
+			}
+			else if (healthBar.percent > 80) {
 				iconP1.switchState("winning");
 				iconP2.switchState("losing");
-			} else {
+			}
+			else {
 				iconP1.switchState("idle");
 				iconP2.switchState("idle");
 			}
