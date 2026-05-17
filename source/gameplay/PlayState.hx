@@ -439,7 +439,7 @@ class PlayState extends MusicBeatState {
 			inCutscene = false;
 			startedCountdown = true;
 			Conductor.current.active = true;
-			Conductor.setTime(-Conductor.crotchet * 7);
+			Conductor.setTime(-Conductor.crotchet * 5);
 		}
 
 		var scriptHUD:ScriptHUD = null;

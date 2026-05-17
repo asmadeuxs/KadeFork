@@ -33,38 +33,29 @@ class ConfigTypes {
 		return Std.isOfType(raw, String) ? raw : raw.prefix;
 
 	public static function getAnimationIndices(raw:Dynamic):Array<Int> {
-		if (Std.isOfType(raw, String))
-			return null;
+		var indices:Array<Int> = [];
 
-		var indices:Dynamic = raw.indices;
-		if (indices == null)
-			return null;
-
-		if (Std.isOfType(indices, String)) {
-			var parts:Array<String> = Std.string(indices).split("...");
+		function parseStringIndices(str:String) {
+			var parts:Array<String> = Std.string(str).split("...");
 			var start:Int = Std.parseInt(parts[0]);
 			var end:Int = Std.parseInt(parts[1]);
 			return [for (i in start...end + 1) i];
 		}
 
-		if (Std.isOfType(indices, Array)) {
-			var arr:Array<Dynamic> = indices;
-			var result:Array<Int> = [];
+		if (Std.isOfType(raw, Array)) {
+			var arr:Array<Dynamic> = raw;
 			for (item in arr) {
 				if (Std.isOfType(item, Int)) {
-					result.push(item);
+					indices.push(item);
 				}
 				else if (Std.isOfType(item, String)) {
-					var parts:Array<String> = Std.string(item).split("...");
-					var start:Int = Std.parseInt(parts[0]);
-					var end:Int = Std.parseInt(parts[1]);
-					for (i in start...end + 1)
-						result.push(i);
+					for (i in parseStringIndices(item))
+						indices.push(i);
 				}
 			}
-			return result;
 		}
-
+		else if (Std.isOfType(raw, String))
+			indices = parseStringIndices(Std.string(raw));
 		return indices;
 	}
 

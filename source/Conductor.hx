@@ -77,7 +77,7 @@ class Conductor extends flixel.FlxBasic {
 		Conductor.lastTime = newTime;
 		if (Conductor.current.music != null)
 			Conductor.current.music.time = newTime;
-		Conductor.current.update(1.0);
+		Conductor.current.recalculate();
 	}
 
 	public static function toggleActive(active:Bool)
@@ -123,20 +123,22 @@ class Conductor extends flixel.FlxBasic {
 		tracks.resize(0);
 	}
 
+	var _lastMusicTime:Float = 0.0;
+
 	public function togglePauseTracks(pause:Bool):Void {
 		if (pause) {
+			_lastMusicTime = Conductor.time;
 			for (i in tracks)
 				i.pause();
 			music.pause();
 		}
 		else {
-			var masterTime = music.time;
-			music.play(false, masterTime);
+			music.play(false, _lastMusicTime);
 			for (i in tracks) {
 				i.pause();
-				i.play(false, masterTime);
+				i.play(false, _lastMusicTime);
 			}
-			Conductor.setTime(time);
+			Conductor.setTime(_lastMusicTime);
 		}
 	}
 
@@ -157,9 +159,10 @@ class Conductor extends flixel.FlxBasic {
 			i.stop();
 		music.stop();
 		music.play(false, time);
+		var masterTime:Float = music.time;
 		for (i in tracks)
-			i.play(false, time);
-		Conductor.setTime(time);
+			i.play(false, masterTime);
+		Conductor.setTime(masterTime);
 	}
 
 	public function resyncTracks():Void {
@@ -176,19 +179,18 @@ class Conductor extends flixel.FlxBasic {
 	override function update(elapsed:Float):Void {
 		if (current == null || !active)
 			return;
-		// if (lastTime > time)
-		//	time = lastTime;
 		time += elapsed * 1000;
+		lastTime = time;
 
-		var lastBeat = Math.floor(currentBeat);
-		var lastStep = Math.floor(currentStep);
-		var lastBar = Math.floor(currentBar);
+		var lastBeat:Int = Math.floor(currentBeat);
+		var lastStep:Int = Math.floor(currentStep);
+		var lastBar:Int = Math.floor(currentBar);
 
-		var curPoint = timingPoints[0];
-		var pointStep = 0.0;
-		var pointBeat = 0.0;
-		var pointBar = 0.0;
-		final sixtyDiv = 1 / 60;
+		var curPoint:TimingPoint = timingPoints[0];
+		var pointStep:Float = 0.0;
+		var pointBeat:Float = 0.0;
+		var pointBar:Float = 0.0;
+		final sixtyDiv:Float = 1 / 60;
 		for (i in 1...timingPoints.length) {
 			if (time < timingPoints[i].time)
 				break;
@@ -207,15 +209,44 @@ class Conductor extends flixel.FlxBasic {
 		currentBeat = pointBeat + beatDist;
 		currentBar = pointBar + (beatDist / numerator);
 
-		var newBeat = Math.floor(currentBeat);
-		var newStep = Math.floor(currentStep);
-		var newBar = Math.floor(currentBar);
+		var newBeat:Int = Math.floor(currentBeat);
+		var newStep:Int = Math.floor(currentStep);
+		var newBar:Int = Math.floor(currentBar);
 		// @formatter:off
 		for (step in (lastStep + 1)...(newStep + 1)) onStep(step);
 		for (beat in (lastBeat + 1)...(newBeat + 1)) onBeat(beat);
 		for (bar in (lastBar + 1)...(newBar + 1)) onBar(bar);
 		// @formatter:on
-		lastTime = time;
+	}
+
+	private function recalculate():Void {
+		var curPoint:TimingPoint = timingPoints[0];
+		var pointStep:Float = 0.0;
+		var pointBeat:Float = 0.0;
+		var pointBar:Float = 0.0;
+		final sixtyDiv:Float = 1 / 60;
+
+		for (i in 1...timingPoints.length) {
+			if (time < timingPoints[i].time)
+				break;
+			final beatDist:Float = (timingPoints[i].time - curPoint.time) * 0.001 * (curPoint.bpm * sixtyDiv);
+			pointBeat += beatDist;
+			pointStep += beatDist * curPoint.denominator;
+			pointBar += beatDist / curPoint.numerator;
+			curPoint = timingPoints[i];
+		}
+
+		denominator = curPoint.denominator;
+		numerator = curPoint.numerator;
+		bpm = curPoint.bpm;
+
+		final beatDist:Float = (time - curPoint.time) * 0.001 * (curPoint.bpm * sixtyDiv);
+		currentStep = pointStep + (beatDist * denominator);
+		currentBeat = pointBeat + beatDist;
+		currentBar = pointBar + (beatDist / numerator);
+
+		crotchet = (60 / bpm) * 1000;
+		semiquaver = crotchet / denominator;
 	}
 
 	public static function getStepDuration(tp:TimingPoint):Float {
@@ -257,7 +288,7 @@ class Conductor extends flixel.FlxBasic {
 			i.barHit(bar);
 	}
 
-	var resyncTime:Float = 10.0;
+	var resyncTime:Float = 15.0;
 
 	public function checkNeedResync():Void {
 		if (music != null && music.playing && tracks.length != 0)
