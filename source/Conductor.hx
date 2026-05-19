@@ -75,9 +75,10 @@ class Conductor extends flixel.FlxBasic {
 	public static function setTime(newTime:Float):Void {
 		Conductor.time = newTime;
 		Conductor.lastTime = newTime;
-		if (Conductor.current.music != null)
-			Conductor.current.music.time = newTime;
-		Conductor.current.recalculate();
+		current._lastMusicTime = 0.0;
+		if (current.music != null)
+			current.music.time = newTime;
+		current.recalculate();
 	}
 
 	public static function toggleActive(active:Bool)
