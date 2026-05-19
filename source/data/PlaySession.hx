@@ -1,5 +1,7 @@
 package data;
 
+import data.AccuracyAlgorithm.Simple;
+import data.AccuracyAlgorithm.Wife3;
 import data.JudgementManager;
 import gameplay.note.Note;
 
@@ -10,19 +12,27 @@ class PlaySession {
 	public var invalid:Bool = false;
 	public var combo:Int = 0;
 
-	public var totalNotesHit:Float = 0.0;
-	public var totalPlayed:Int = 0;
+	public var accuracy:AccuracyAlgorithm;
 	public var judgeMan:JudgementManager;
 
 	public function new():Void {
-		judgeMan = new JudgementManager();
+		reset();
 	}
 
 	public function reset():Void {
 		judgeMan = new JudgementManager();
-		totalNotesHit = 0.0;
+		if (accuracy == null) {
+			// made it a string in case I ever added new systems in the future
+			// also its a bit nice to be explicit i feel like
+			accuracy = switch Preferences.user.accuracySystem.toLowerCase() {
+				case "wife3": new Wife3();
+				case _: new Simple();
+			}
+			trace('Using $accuracy');
+		}
+		else
+			accuracy.reset();
 		comboBreaks = 0;
-		totalPlayed = 0;
 		misses = 0;
 		score = 0;
 		combo = 0;
@@ -34,9 +44,9 @@ class PlaySession {
 			daNote.judgement = judgeMan.judgeTime(diff);
 			daNote.hitDifference = daNote.strumTime - Conductor.time;
 		}
-		totalNotesHit += daNote.judgement.accuracy;
-		score += Math.round(daNote.judgement.score);
 		daNote.judgement.hits++;
+		score += Math.round(daNote.judgement.score);
+		accuracy?.registerHit(daNote);
 		if (daNote.judgement.comboBreak == true)
 			breakCombo();
 	}
@@ -56,6 +66,7 @@ class PlaySession {
 			combo--;
 	}
 
-	public function calculateAccuracy():Float
-		return totalNotesHit < 1 ? 0.00 : Math.max(0, totalNotesHit / totalPlayed * 100);
+	public function calculateAccuracy():Float {
+		return accuracy.get();
+	}
 }

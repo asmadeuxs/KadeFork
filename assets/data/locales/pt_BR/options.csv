@@ -17,7 +17,7 @@ option_frameRate,Taxa de Quadros
 option_scrollType,Tipo de Scroll
 option_centerStrums,Centralizar Notas
 option_ghostTapping,Ghost Tapping
-option_etternaMode,Precisão Avançada
+option_accuracyMode,Calculadora de Precisão
 option_fifthJudgement,Classificação Kino
 option_judgeDifficulty,Dificuldade de Avaliação
 option_scrollSpeed,Velocidade das Notas
@@ -53,7 +53,7 @@ optiondesc_centerStrums,Centraliza suas notas e esconde as do seu oponente
 optiondesc_ghostTapping,Deixa tu apertar teclas quando não há notas pra se acertar, sem penalidade.
 optiondesc_fifthJudgement,Ativa uma classificação acima de "Sick!"\nSignifica algo como "Cinema!" em Português
 optiondesc_judgeDifficulty,Altera a precisão necessária para atingir altas avaliações\n4 é a base, ajustar pode tornar o jogo mais fácil ou mais difícil
-optiondesc_etternaMode,Muda a calculadora de precisão pra usar o sistema do Etterna\nTe encoraja a jogar bem, mas é meio maldoso com novos jogadores
+optiondesc_accuracySystem,Muda a calculadora de precisão\nWife3 = mais complexo a favor de te incentivar a jogar quase perfeitamente
 optiondesc_scrollSpeed,Substitui a velocidade das notas com sua própria\n(Desde que mude o tipo na opção abaixo)
 optiondesc_scrollSpeedType,O que a opção de Velocidade das Notas deverá fazer?
 

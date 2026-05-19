@@ -99,11 +99,13 @@ class OptionRegistry extends BaseRegistry<OptionCategory> {
 					description: "Lets you mash without penalty",
 					variable: "ghostTapping"
 				},
-				/*{
-					name: "Wife3 Accuracy",
-					description: "Changes the accuracy system to use Wife3\nIt's way more complex (math-wise) for the sake of encouraging super accurate hits\nBut may feel mean to newer players",
-					variable: "etternaMode"
-				},*/
+				{
+					name: "Accuracy System",
+					description: "Changes the accuracy system\nWife3 = more complex for the sake of encouraging you to play almost perfectly",
+					variable: "accuracySystem",
+					choices: ["Simple", "Wife3"],
+					type: "choice",
+				},
 				{
 					name: "Kino Judgement",
 					description: 'Enables a fifth judgement above "Sick!"',

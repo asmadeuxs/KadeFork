@@ -9,6 +9,9 @@ class InputManager {
 	public var onKeyPress:Int->Void;
 	public var onKeyRelease:Int->Void;
 
+	public var keyPressedRepeat:Bool = false;
+	public var keyReleasedRepeat:Bool = false;
+
 	var _keyMap:Map<Int, Int> = new Map<Int, Null<Int>>();
 
 	public function new(keyPressFunc:Int->Void, keyReleaseFunc:Int->Void):Void {
@@ -40,8 +43,9 @@ class InputManager {
 
 	public function onKeyDown(e:KeyboardEvent):Void {
 		var key:Int = getRemappedKeyCode(e.keyCode);
+		var wasAlreadyHeld:Bool = held.get(key) == true;
 		held.set(key, true);
-		if (onKeyPress != null)
+		if (!wasAlreadyHeld && onKeyPress != null)
 			onKeyPress(key);
 	}
 

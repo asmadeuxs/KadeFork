@@ -17,7 +17,7 @@ import util.Mods;
 	var scrollSpeedType:Int = 0; // What should the scroll speed setting do?
 
 	var fifthJudgement:Bool = true; // Enables a fifth judgement above "Sick!"
-	var etternaMode:Bool = true; // Changes the accuracy system to use Wife3
+	var accuracySystem:String = "Simple"; // ...
 	var judgeDifficulty:Int = 4; // Changes the difficulty of the judgement windows
 
 	// TODO: add custom judge windows

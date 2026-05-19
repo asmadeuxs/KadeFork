@@ -152,6 +152,9 @@ class PlayState extends MusicBeatState {
 		FlxG.cameras.add(camOver, false);
 		transCam = camOver;
 
+		Conductor.current.active = false;
+		Conductor.setTime(-Conductor.crotchet * 16);
+
 		super.create();
 		current = this;
 		Conductor.current.active = false;
@@ -748,6 +751,9 @@ class PlayState extends MusicBeatState {
 			camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, 0.95);
 		}
 
+		if (controls.RESET_P)
+			health = 0;
+
 		if (health <= 0) {
 			pause(true);
 			boyfriend.stunned = true;
@@ -774,12 +780,12 @@ class PlayState extends MusicBeatState {
 		if (events == null || events.length == 0)
 			return;
 		var scheduled = events[eventPosition];
-		if (scheduled.time - time > 10)
-			return;
 		if (scheduled == null) {
 			eventPosition++;
 			return;
 		}
+		if (scheduled.time - time > 0.00001)
+			return;
 		for (event in scheduled.timeline)
 			processEvent(event);
 		eventPosition++;
@@ -885,7 +891,7 @@ class PlayState extends MusicBeatState {
 					}
 					daNote.holdTimer -= elapsed;
 					daNote.alpha = Math.max(0, daNote.holdTimer / grace);
-					if (daNote.holdTimer <= 0) {
+					if (daNote.holdTimer <= 0 && !daNote.wasGoodHit && !daNote.missed) {
 						noteMiss(daNote.noteData, daNote);
 						daNote.missed = true;
 						noteKill = true;
@@ -898,7 +904,8 @@ class PlayState extends MusicBeatState {
 				var safeZone:Float = session.judgeMan.maxHitWindow ?? 180.0;
 				if (daNote.strumTime < Conductor.time - safeZone)
 					daNote.tooLate = true;
-				if (daNote.strumTime - Conductor.time < -(missLimit + daNote.sustainLength)) {
+				var timedOut:Bool = daNote.strumTime - Conductor.time < -(missLimit + daNote.sustainLength);
+				if (timedOut && !daNote.wasGoodHit && !daNote.missed) {
 					noteMiss(daNote.noteData, daNote);
 					daNote.missed = true;
 					noteKill = true;
@@ -1184,14 +1191,18 @@ class PlayState extends MusicBeatState {
 
 		var missJudge = session.judgeMan.getMiss();
 		if (missJudge != null) {
+			var prevHitCount:Int = missJudge.hits;
 			health += session.judgeMan.getHealthBonus(missJudge, health);
 			if (daNote != null) {
 				daNote.judgement = missJudge;
 				session.scoreNote(daNote);
 			}
-			else
+			else {
 				missJudge.hits++;
-			if (Preferences.user.showMissPopups) {
+				if (session.accuracy != null)
+					session.accuracy.ghostMiss(session);
+			}
+			if (missJudge.hits > prevHitCount && Preferences.user.showMissPopups) {
 				popUpRating(missJudge.image);
 				popUpCombo(session.combo, missJudge);
 			}
@@ -1231,7 +1242,6 @@ class PlayState extends MusicBeatState {
 			if (Preferences.user.noteSplashes && note.judgement.splash)
 				playerStrums.spawnSplash(note.noteData);
 			notesHitArray.push(Date.now());
-			session.totalPlayed += 1;
 			popUpScore(note);
 		}
 		if (!note.isSustain) {

@@ -10,6 +10,7 @@ import lime.utils.Assets;
 
 using StringTools;
 
+@:keep
 class CoolUtil {
 	public static var stringFormatters:Map<String, (Dynamic) -> String> = [
 		"moneyEN" => (v:Float) -> FlxStringUtil.formatMoney(v, true, true),

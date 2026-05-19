@@ -125,36 +125,23 @@ class OptionsMenu extends MusicBeatSubstate {
 			return;
 		}
 
+		Controls.current.update(elapsed);
 		var leftp:Bool = controls.LEFT_P;
 		var rightp:Bool = controls.RIGHT_P;
-		// choice options
-		if (curOption.type != "keybind") {
-			if ((leftp || rightp) && curOption.type != "number")
-				changeOption(leftp ? -1 : 1);
-			// number options
+		if (curOption.type == "number") {
 			var lefth:Bool = controls.LEFT;
 			var righth:Bool = controls.RIGHT;
-			if ((leftp || rightp || lefth || righth) && curOption.type == "number") {
-				var change:Bool = false;
-				if (leftp || rightp)
-					change = true;
-				else if (lefth || righth) {
-					// TODO: implement keyRepeat in Controls so I don't have to do this shit manually -asmadeuxs
-					keyTimer += 0.1;
-					if (keyTimer >= 1.0) {
-						change = true;
-						keyTimer = 0.0;
-					}
-				}
-				if (change) {
-					var inc:Int = FlxG.keys.pressed.SHIFT ? 4 : 1;
-					var left:Bool = leftp || lefth;
-					changeOption(left ? -inc : inc);
-				}
+			if (leftp || rightp || lefth || righth) {
+				var inc:Int = FlxG.keys.pressed.SHIFT ? 4 : 1;
+				var left:Bool = leftp || lefth;
+				changeOption(left ? -inc : inc);
 			}
-			else if (controls.LEFT_R || controls.RIGHT_R)
-				keyTimer = 0.0;
 		}
+		else {
+			if (leftp || rightp)
+				changeOption(leftp ? -1 : 1);
+		}
+
 		// rest of the controls
 		var leftCat:Bool = FlxG.keys.justPressed.Q;
 		if (leftCat || FlxG.keys.justPressed.E) {
