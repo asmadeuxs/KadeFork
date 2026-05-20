@@ -4,6 +4,15 @@ Simply put, every mod folder has the same exact structure as the assets folder
 
 You can add your own files or override existing ones
 
+## Folder naming
+
+- Mods folder **cannot** contain forward slashes in their names
+	- Internally, this is used to distinguish a mod name from a path
+		If your mod folder has a forward slash in its name, the assets system gets confused
+		and will likely think its a path and not a mod, that's why it may fail to get the asset from your mod.
+
+Other than that there's not much restriction when it comes to mod folder names
+
 ## NOTE (for Windows users)
 
 Due to the nature of non-Windows systems, This modding system purposefully *disables* Windows' case-insensitive paths

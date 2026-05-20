@@ -71,8 +71,14 @@ class Paths {
 
 	static public function getAssetOrigin(?mod:String = null):String {
 		#if FEATURE_MODS
-		if (mod.startsWith(Mods.modRoot + '/')) // this is a path so we need to extract the mod id
-			mod = mod.split("/")[1];
+		if (mod.contains("/")) {
+			// this is a path so we need to extract the mod id
+			mod = mod.split("/")[0];
+			if (mod.contains("/"))
+				mod = "core";
+		}
+		if (mod == Paths.root)
+			mod = "core";
 		return (mod != null && mod != "core") ? '$mod:' : "core:";
 		#else
 		return "core:";
@@ -198,8 +204,12 @@ class Paths {
 				return FlxAtlasFrames.fromSparrow(graphic, txtString);
 			case ANIMATE_ATLAS:
 				var assetPath = resolveAssetPath(file, mod);
-				var atlas = FlxAnimateFrames.fromAnimate(assetPath, null, null, null, true);
+				var atlas = FlxAnimateFrames.fromAnimate(assetPath, null, null, cacheKey, true, null);
 				if (atlas != null) {
+					var graphic:FlxGraphic = atlas.parent;
+					graphic.persist = true;
+					graphic.destroyOnNoUse = false;
+					textureRegistry.register(cacheKey, graphic);
 					trackAsset(cacheKey);
 					return atlas;
 				}

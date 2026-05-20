@@ -1,7 +1,5 @@
 package data;
 
-import animate.FlxAnimateFrames;
-import gameplay.FunkinSprite;
 import data.ConfigTypes;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -89,7 +87,7 @@ class Noteskin {
 
 	private var graphicKeys:Array<String> = [];
 
-	private var atlasMap:Map<String, Dynamic> = [];
+	private var atlasMap:Map<String, FlxAtlasFrames> = [];
 	private var defaultFramerate:Int;
 	private var keyCount:Int;
 
@@ -143,16 +141,17 @@ class Noteskin {
 			var texPath:String = ConfigTypes.getTexturePath(texConf);
 			var mod:String = Paths.getAssetOrigin(texPath);
 			var atlas = switch atlasType {
-				case 'spritesheet': Paths.image(texPath);
+				// case 'spritesheet':Paths.image(texPath);
 				case 'animate': Paths.getAnimateAtlas(texPath);
 				case 'packer': Paths.getPackerAtlas(texPath);
 				case _: Paths.getSparrowAtlas(texPath);
 			}
 			if (atlas != null) {
 				atlasMap.set(key, atlas);
-				if (texPath != null && !graphicKeys.contains(texPath)) {
-					graphicKeys.push(texPath);
-					Paths.addToAvoidClearing(texPath);
+				var graphic:FlxGraphic = atlas.parent;
+				if (graphic != null && graphic.key != null && !graphicKeys.contains(graphic.key)) {
+					graphicKeys.push(graphic.key);
+					Paths.addToAvoidClearing(graphic.key);
 				}
 			}
 			else
@@ -235,9 +234,9 @@ class Noteskin {
 		var pressedName = getFromArray(pressedAnimNames, noteData);
 		var confirmName = getFromArray(confirmAnimNames, noteData);
 
-		strum.anim.addByPrefix("static", staticName, defaultFramerate, false);
-		strum.anim.addByPrefix("pressed", pressedName, defaultFramerate, false);
-		strum.anim.addByPrefix("confirm", confirmName, defaultFramerate, false);
+		strum.animation.addByPrefix("static", staticName, defaultFramerate, false);
+		strum.animation.addByPrefix("pressed", pressedName, defaultFramerate, false);
+		strum.animation.addByPrefix("confirm", confirmName, defaultFramerate, false);
 		strum.setGraphicSize(Std.int(strum.width * strumScale));
 		strum.antialiasing = strumAA;
 		strum.playAnim('static', true);
@@ -255,14 +254,14 @@ class Noteskin {
 		arrow.frames = frames;
 		arrow.setGraphicSize(Std.int(arrow.width * arrowScale));
 		var scrollName = getFromArray(scrollAnimNames, noteData);
-		arrow.anim.addByPrefix('${noteData}Scroll', scrollName, defaultFramerate, false);
+		arrow.animation.addByPrefix('${noteData}Scroll', scrollName, defaultFramerate, false);
 		arrow.playAnim('${noteData}Scroll', true);
 		arrow.antialiasing = arrowAA;
 		return arrow;
 	}
 
-	public function generateSustain(noteData:Int, isEnd:Bool = false):FunkinSprite {
-		var sustain:FunkinSprite = new FunkinSprite(0, 0);
+	public function generateSustain(noteData:Int, isEnd:Bool = false):FlxSprite {
+		var sustain:FlxSprite = new FlxSprite();
 		noteData = FlxMath.wrap(noteData, 0, keyCount - 1);
 		var frames = getAtlas("arrows");
 		if (frames == null) {
@@ -271,10 +270,10 @@ class Noteskin {
 		}
 		sustain.frames = frames;
 		var animName = isEnd ? getFromArray(holdEndAnimNames, noteData) : getFromArray(holdBodyAnimNames, noteData);
-		sustain.anim.addByPrefix('hold', animName, defaultFramerate, false);
+		sustain.animation.addByPrefix('hold', animName, defaultFramerate, false);
 		sustain.setGraphicSize(Std.int(sustain.width * arrowScale));
 		sustain.antialiasing = arrowAA;
-		sustain.anim.play('hold');
+		sustain.animation.play('hold');
 		return sustain;
 	}
 
@@ -286,7 +285,7 @@ class Noteskin {
 		splash.frames = frames;
 		for (i in 0...splashAnimNames.length)
 			for (j in 0...splashAnimNames[i].length)
-				splash.anim.addByPrefix('splash$j-$i', splashAnimNames[i][j], defaultFramerate, false);
+				splash.animation.addByPrefix('splash$j-$i', splashAnimNames[i][j], defaultFramerate, false);
 		splash.setGraphicSize(Std.int(splash.width * splashScale));
 		splash.antialiasing = splashAA;
 		splash.updateHitbox();
@@ -298,9 +297,9 @@ class Noteskin {
 		var randomInt:Int = Std.random(splashAnimNames.length); // FlxG.random.int wasn't working properly
 		var playThis:String = 'splash$noteData-$randomInt';
 		var played:Bool = false;
-		if (splash.anim.getByName(playThis) != null) {
+		if (splash.animation.getByName(playThis) != null) {
 			splash.playAnim(playThis, true);
-			// splash.anim.curAnim.frameRate += Std.int(defaultFramerate);
+			// splash.animation.curAnim.frameRate += Std.int(defaultFramerate);
 			played = true;
 		}
 		return played;
