@@ -24,7 +24,6 @@ todo (this is more for myself @asmadeuxs than anything.):
 	- write real readme
 	- write new issue templates
 - libs:
-	- add [flixel-animate](https://github.com/MaybeMaru?tab=repositories) support
 	- add [hxvlc](https://github.com/MAJigsaw77/hxvlc) for video support
 - game:
 	- re-add replays
