@@ -4,3 +4,6 @@
 [submodule "_dependencies/hxdiscord_rpc"]
 	path = _dependencies/hxdiscord_rpc
 	url = https://github.com/MAJigsaw77/hxdiscord_rpc
+[submodule "_dependencies/flixel-animate"]
+	path = _dependencies/flixel-animate
+	url = https://github.com/MaybeMaru/flixel-animate.git

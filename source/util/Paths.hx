@@ -1,5 +1,6 @@
 package util;
 
+import animate.FlxAnimateFrames;
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -29,6 +30,7 @@ enum abstract AssetType(String) {
 	public var IMAGE = "IMAGE";
 	public var SPARROW_ATLAS = "SPARROW_ATLAS";
 	public var PACKER_ATLAS = "PACKER_ATLAS";
+	public var ANIMATE_ATLAS = "ANIMATE_ATLAS";
 	public var MOVIE_CLIP = "MOVIE_CLIP"; // might change to VIDEO for hxvlc stuff
 }
 
@@ -164,7 +166,7 @@ class Paths {
 				var pngPath = resolveAssetPath(file + '.png', mod);
 				var xmlPath = resolveAssetPath(file + '.xml', mod);
 				if (pngPath == null || xmlPath == null) {
-					FlxG.log.warn('Missing sparrow atlas files for $file');
+					FlxG.log.warn('Missing atlas files for $file');
 					return null;
 				}
 				var graphic = getGraphic(cacheKey, pngPath);
@@ -181,7 +183,7 @@ class Paths {
 				var pngPath = resolveAssetPath(file + '.png', mod);
 				var txtPath = resolveAssetPath(file + '.txt', mod);
 				if (pngPath == null || txtPath == null) {
-					FlxG.log.warn('Missing sparrow atlas files for $file');
+					FlxG.log.warn('Missing atlas files for $file');
 					return null;
 				}
 				var graphic = getGraphic(cacheKey, pngPath);
@@ -194,6 +196,15 @@ class Paths {
 				}
 				trackAsset(cacheKey);
 				return FlxAtlasFrames.fromSparrow(graphic, txtString);
+			case ANIMATE_ATLAS:
+				var assetPath = resolveAssetPath(file, mod);
+				var atlas = FlxAnimateFrames.fromAnimate(assetPath, null, null, null, true);
+				if (atlas != null) {
+					trackAsset(cacheKey);
+					return atlas;
+				}
+				FlxG.log.warn('Missing atlas for $file');
+				return null;
 			case MUSIC, SOUND:
 				var assetPath = resolveAssetPath(file, mod);
 				if (assetPath == null) {
@@ -397,6 +408,9 @@ class Paths {
 
 	inline static public function getPackerAtlas(key:String, ?mod:String):FlxAtlasFrames
 		return getPath('images/$key', PACKER_ATLAS, mod);
+
+	inline static public function getAnimateAtlas(key:String, ?mod:String):FlxAtlasFrames
+		return getPath('images/$key', ANIMATE_ATLAS, mod);
 
 	inline static public function font(key:String, ?mod:String):String
 		return getPath('fonts/$key', FONT, mod);

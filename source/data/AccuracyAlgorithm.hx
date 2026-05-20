@@ -22,6 +22,10 @@ class AccuracyAlgorithm {
 		var tp:Int = getTotalPlayed();
 		var tnh:Float = getTotalNotesHit();
 		var acc:Float = tnh < 1 ? 0.0 : Math.max(0, tnh / tp * 100);
+		if (acc > 100)
+			acc = 100.0;
+		if (acc < 0)
+			acc = 0.0;
 		return acc;
 	}
 
@@ -57,7 +61,7 @@ class Wife3 extends AccuracyAlgorithm {
 			totalNotesHit += Wife3.MISS_WEIGHT;
 		else
 			totalNotesHit += getWifePoints(Math.abs(daNote.hitDifference));
-		totalPlayed += 1;
+		totalPlayed += 2;
 	}
 
 	override public function ghostMiss(_:PlaySession):Void {

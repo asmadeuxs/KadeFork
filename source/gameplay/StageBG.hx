@@ -214,6 +214,7 @@ class StageBG extends FlxBasic {
 				var path:String = ConfigTypes.getTexturePath(data.texture);
 				var tex = switch atlasType {
 					case 'sparrow': Paths.getSparrowAtlas(path);
+					case 'animate': Paths.getAnimateAtlas(path);
 					case 'packer': Paths.getPackerAtlas(path);
 					case _: Paths.image(path);
 				}

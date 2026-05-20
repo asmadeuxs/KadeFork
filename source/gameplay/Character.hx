@@ -250,6 +250,7 @@ class Character extends gameplay.FunkinSprite {
 					}
 					var tex = switch atlasType {
 						case 'spritesheet': Paths.image(path);
+						case 'animate': Paths.getAnimateAtlas(path);
 						case 'packer': Paths.getPackerAtlas(path);
 						case _: Paths.getSparrowAtlas(path);
 					}

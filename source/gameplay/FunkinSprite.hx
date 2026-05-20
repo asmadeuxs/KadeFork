@@ -1,17 +1,33 @@
 package gameplay;
 
+import animate.FlxAnimate;
 import flixel.FlxG;
 import flixel.FlxSprite;
 
 using StringTools;
 
-class FunkinSprite extends FlxSprite {
+class FunkinSprite extends FlxAnimate {
 	public var pivot:SpritePivot = SpritePivot.TOP_LEFT;
 	public var animOffsets:Map<String, Array<Float>>;
 
 	public function new(x:Float, y:Float):Void {
 		super(x, y);
 		animOffsets = new Map<String, Array<Float>>();
+	}
+
+	public function addAnimByPrefix(name:String, prefix:String, frameRate = 30.0, looped = true, flipX = false, flipY = false) {
+		if (isAnimate)
+			return anim.addBySymbol(name, prefix, frameRate, looped, flipX, flipY);
+		else
+			return animation.addByPrefix(name, prefix, frameRate, looped, flipX, flipY);
+	}
+
+	public function addAnimByIndices(name:String, prefix:String, indices:Array<Int>, frameRate:Float = 30, looped:Bool = true, flipX:Bool = false,
+			flipY:Bool = false) {
+		if (isAnimate)
+			return anim.addBySymbolIndices(name, prefix, indices, frameRate, looped, flipX, flipY);
+		else
+			return animation.addByIndices(name, prefix, indices, "", frameRate, looped);
 	}
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void {

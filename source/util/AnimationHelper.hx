@@ -45,14 +45,20 @@ class AnimationHelper {
 			if (prefix == null)
 				continue;
 
-			if (indices != null && indices.length > 0)
-				sprite.animation.addByIndices(animName, prefix, indices, "", frameRate, looped);
-			else
-				sprite.animation.addByPrefix(animName, prefix, frameRate, looped);
-
-			if (offset != null && Std.isOfType(sprite, FunkinSprite)) {
+			if (Std.isOfType(sprite, FunkinSprite)) {
 				var fs:FunkinSprite = cast sprite;
-				fs.addOffset(animName, offset.x, offset.y);
+				if (indices != null && indices.length > 0)
+					fs.addAnimByIndices(animName, prefix, indices, frameRate, looped);
+				else
+					fs.addAnimByPrefix(animName, prefix, frameRate, looped);
+				if (offset != null)
+					fs.addOffset(animName, offset.x, offset.y);
+			}
+			else {
+				if (indices != null && indices.length > 0)
+					sprite.animation.addByIndices(animName, prefix, indices, "", frameRate, looped);
+				else
+					sprite.animation.addByPrefix(animName, prefix, frameRate, looped);
 			}
 			if (onAddAnim != null)
 				onAddAnim(animName);
