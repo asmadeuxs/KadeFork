@@ -3,11 +3,11 @@ function beatHit(curBeat) {
 	switch (curBeat) {
 		case 16:
 			game.camZooming = true;
-			game.gf.danceSpeed = 2;
+			game.gf.danceSpeed = 0.5;
 		case 48:
 			game.gf.danceSpeed = 1;
 		case 80:
-			game.gf.danceSpeed = 2;
+			game.gf.danceSpeed = 0.5;
 		case 112:
 			game.gf.danceSpeed = 1;
 	}
