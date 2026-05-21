@@ -2,6 +2,7 @@ package util;
 
 import flixel.FlxObject;
 import flixel.FlxSprite;
+import flixel.addons.transition.FlxTransitionableState;
 import flixel.math.FlxMath;
 import flixel.util.FlxAxes;
 import flixel.util.FlxColor;
@@ -20,6 +21,11 @@ class CoolUtil {
 		"bytes" => (v:Float) -> FlxStringUtil.formatBytes(v, 2),
 		"percent" => (v:Float) -> return '${FlxMath.roundDecimal(v * 100, 1)}%'
 	];
+
+	public static function skipNextTransition(?skipIn:Bool = false, ?skipOut:Bool = false) {
+		FlxTransitionableState.skipNextTransIn = skipIn;
+		FlxTransitionableState.skipNextTransOut = skipOut;
+	}
 
 	public static function formatValue(value:Float, format:String):String {
 		if (stringFormatters.exists(format))

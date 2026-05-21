@@ -17,7 +17,7 @@ option_frameRate,Taxa de Quadros
 option_scrollType,Tipo de Scroll
 option_centerStrums,Centralizar Notas
 option_ghostTapping,Ghost Tapping
-option_accuracyMode,Calculadora de Precisão
+option_accuracySystem,Calculadora de Precisão
 option_fifthJudgement,Classificação Kino
 option_judgeDifficulty,Dificuldade de Avaliação
 option_scrollSpeed,Velocidade das Notas

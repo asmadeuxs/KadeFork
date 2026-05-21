@@ -30,17 +30,10 @@ class Controls {
 	// instance stuff
 	public var actions:ActionMap;
 
-	public var repeatDelay:Float = 0.5;
-	public var repeatInterval:Float = 0.1;
+	public var repeatDelay:Float = 0.25;
+	public var repeatInterval:Float = 0.05;
 
 	private var _time:Float = 0.0;
-
-	// gonna use these for keyRepeat
-	private var _prevPressed:Map<String, Bool> = new Map<String, Bool>();
-
-	private var _repeatStart:Map<String, Float> = new Map<String, Float>();
-	private var _repeatLast:Map<String, Float> = new Map<String, Float>();
-	private var _justRepeated:Map<String, Bool> = new Map<String, Bool>();
 
 	// TODO: controller support
 
@@ -51,35 +44,41 @@ class Controls {
 		this.actions = actions;
 	}
 
+	// key repetition code
+	// so your actions trigger several times when you hold down a key
+	private var _jPressedQueue:Map<String, Bool> = new Map<String, Bool>();
+	private var _justRepeated:Map<String, Bool> = new Map<String, Bool>();
+
+	private var _lastRepeats:Map<String, Float> = new Map<String, Float>();
+	private var _repeatTimers:Map<String, Float> = new Map<String, Float>();
+
 	public function update(elapsed:Float):Void {
-		_time += elapsed;
 		for (key in _justRepeated.keys())
 			_justRepeated[key] = false;
 
+		_time += elapsed;
+
 		for (action in actions.keys()) {
 			var isPressedNow:Bool = pressed(action);
-			var wasPressed:Bool = _prevPressed.exists(action) ? _prevPressed[action] : false;
-
-			if (isPressedNow && !wasPressed) {
-				_repeatStart[action] = _time;
-				_repeatLast[action] = null;
-			}
-			else if (isPressedNow && wasPressed) {
-				var startTime:Null<Float> = _repeatStart[action];
-				if (startTime != null && _time - startTime >= repeatDelay) {
-					var lastRepeat:Null<Float> = _repeatLast[action];
-					if (lastRepeat == null || _time - lastRepeat >= repeatInterval) {
+			if (isPressedNow) {
+				if (_repeatTimers[action] == null) {
+					_repeatTimers[action] = _time;
+					_lastRepeats[action] = null;
+				}
+				var holdTime:Float = _time - _repeatTimers[action];
+				if (holdTime >= repeatDelay) {
+					var lastRepeatTime:Null<Float> = _lastRepeats[action];
+					if (lastRepeatTime == null || (_time - lastRepeatTime) >= repeatInterval) {
 						_justRepeated[action] = true;
-						_repeatLast[action] = _time;
+						_lastRepeats[action] = _time;
 					}
 				}
 			}
-			else if (!isPressedNow && wasPressed) {
-				_repeatStart.remove(action);
-				_repeatLast.remove(action);
-				_justRepeated.remove(action);
+			else {
+				_repeatTimers.remove(action);
+				_lastRepeats.remove(action);
+				_jPressedQueue.remove(action);
 			}
-			_prevPressed[action] = isPressedNow;
 		}
 	}
 
@@ -89,6 +88,7 @@ class Controls {
 			var actions:Array<FlxKey> = actions[action];
 			for (i => key in actions) {
 				if (FlxG.keys.checkStatus(key, JUST_PRESSED)) {
+					_jPressedQueue[action] = true;
 					state = true;
 					break;
 				}
@@ -96,9 +96,6 @@ class Controls {
 		}
 		return state;
 	}
-
-	public function justRepeated(action:String):Bool
-		return _justRepeated.exists(action) && _justRepeated[action];
 
 	public function pressed(action:String):Bool {
 		var state:Bool = false;
@@ -114,12 +111,16 @@ class Controls {
 		return state;
 	}
 
+	public function justRepeated(action:String):Bool
+		return _justRepeated[action] == true;
+
 	public function justReleased(action:String):Bool {
 		var state:Bool = false;
 		if (actions.exists(action)) {
 			var actions:Array<FlxKey> = actions[action];
 			for (i => key in actions) {
 				if (FlxG.keys.checkStatus(key, JUST_RELEASED)) {
+					_jPressedQueue[action] = false;
 					state = true;
 					break;
 				}

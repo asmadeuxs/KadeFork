@@ -25,7 +25,6 @@ class BootState extends flixel.FlxState {
 	// Preferably only mess with it if you need to do some save-file related stuff
 	override function create() {
 		setupTransition();
-		FlxTransitionableState.skipNextTransIn = true;
 		FlxTransitionableState.skipNextTransOut = true;
 
 		/*\#if sys

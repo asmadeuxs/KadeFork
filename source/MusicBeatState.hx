@@ -8,6 +8,7 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import openfl.Lib;
+import util.CoolUtil;
 
 class MusicBeatState extends flixel.addons.transition.FlxTransitionableState implements IBeatSynched {
 	private var controls(get, never):Controls;
@@ -25,6 +26,8 @@ class MusicBeatState extends flixel.addons.transition.FlxTransitionableState imp
 		return Controls.current;
 
 	override function create() {
+		if (Preferences.user.skipTransitions)
+			CoolUtil.skipNextTransition(true, true);
 		super.create();
 		Conductor.connectSynched(this);
 	}

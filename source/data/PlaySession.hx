@@ -40,13 +40,11 @@ class PlaySession {
 
 	public function scoreNote(daNote:Note):Void {
 		if (daNote.judgement == null) {
-			var diff:Float = Math.abs(daNote.strumTime - Conductor.time);
-			daNote.judgement = judgeMan.judgeTime(diff);
 			daNote.hitDifference = daNote.strumTime - Conductor.time;
+			daNote.judgement = judgeMan.judgeTime(Math.abs(daNote.hitDifference));
+			daNote.judgement.hits++;
 		}
-		daNote.judgement.hits++;
 		score += Math.round(daNote.judgement.score);
-		accuracy?.registerHit(daNote);
 		switch (daNote.judgement.comboBehavior) {
 			case INCREASE:
 				increaseCombo(1);
@@ -54,6 +52,7 @@ class PlaySession {
 				breakCombo();
 			case NONE:
 		}
+		accuracy?.registerHit(daNote);
 	}
 
 	public function increaseCombo(by:Int = 1):Int {

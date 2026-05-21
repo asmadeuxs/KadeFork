@@ -30,6 +30,9 @@ class GenericMenuState extends MusicBeatState {
 	public var minHorizontals:Int = 0;
 	public var maxHorizontals:Int = 1;
 
+	public var verticalKeyRepeat:Bool = true;
+	public var horizontalKeyRepeat:Bool = true;
+
 	/**
 	 * Changes the item by this much when pressing up/down
 	**/
@@ -42,8 +45,11 @@ class GenericMenuState extends MusicBeatState {
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
-		if (canInput)
+		if (canInput) {
+			if (verticalKeyRepeat || horizontalKeyRepeat)
+				Controls.current.update(elapsed);
 			handleInput();
+		}
 	}
 
 	public function handleInput():Void {
@@ -54,13 +60,25 @@ class GenericMenuState extends MusicBeatState {
 
 		if (menuScrollType == VERTICAL || menuScrollType == BOTH) {
 			var up:Bool = controls.UP_P;
-			if (up || controls.DOWN_P)
-				changeVertical(up ? -verticalFactor : verticalFactor);
+			var vf:Int = verticalFactor;
+			if (verticalKeyRepeat) {
+				var uprpt:Bool = controls.UP_RPT;
+				if (up || uprpt || controls.DOWN_P || controls.DOWN_RPT)
+					changeVertical(((up || uprpt) ? -vf : vf));
+			}
+			else
+				changeVertical(up ? -vf : vf);
 		}
 		if (menuScrollType == HORIZONTAL || menuScrollType == BOTH) {
 			var left:Bool = controls.LEFT_P;
-			if (left || controls.RIGHT_P)
-				changeHorizontal(left ? -horizontalFactor : horizontalFactor);
+			var hf:Int = horizontalFactor;
+			if (horizontalKeyRepeat) {
+				var leftrpt:Bool = controls.LEFT_RPT;
+				if (left || leftrpt || controls.RIGHT_P || controls.RIGHT_RPT)
+					changeHorizontal((left || leftrpt) ? -hf : hf);
+			}
+			else
+				changeHorizontal(left ? -hf : hf);
 		}
 	}
 

@@ -28,8 +28,6 @@ class JudgementManager {
 	public var maxHitWindow:Float = 200.0;
 	public var activeList:Array<Judgement>;
 
-	public static final defaultHitWindows:Array<Float> = [22.5, 45.0, 90.0, 135.0, 180.0];
-
 	public static final difficultyScales:Array<Float> = [
 		// lol https://github.com/troll-slaiyers/FNF-Troll-Engine/blob/bc3bdb226a6d785f6d1747ed869b8dde854aecda/source/funkin/data/JudgmentManager.hx#L369
 		1.50,
@@ -100,7 +98,7 @@ class JudgementManager {
 			{
 				name: "Bad",
 				image: "bad",
-				comboBehavior: BREAK,
+				comboBehavior: fifthJudge ? BREAK : INCREASE,
 				healthBonus: (health:Float) -> return health > 0.01 ? -0.06 : 0.0,
 				color: 0xFFDC7487,
 				hitWindow: 135.0,
@@ -121,7 +119,7 @@ class JudgementManager {
 				name: "Miss",
 				image: "miss",
 				comboBehavior: BREAK,
-				healthBonus: (health:Float) -> return health > 0.05 ? -0.06 : 0.0,
+				healthBonus: (health:Float) -> return -0.06,
 				hitWindow: maxHitWindow + 5,
 				color: 0xFFFF0000,
 				hittable: false,
@@ -158,9 +156,11 @@ class JudgementManager {
 
 	public function judgeTime(noteDiff:Float):Null<Judgement> {
 		var scale:Float = getJudgeDifficultyScale();
-		for (judgement in activeList)
-			if (judgement.hittable && noteDiff <= (judgement.hitWindow * scale))
+		for (judgement in activeList) {
+			var ts:Float = (judgement.comboBehavior == BREAK && scale < 1) ? 1.0 : scale;
+			if (judgement.hittable && noteDiff <= (judgement.hitWindow * ts))
 				return judgement;
+		}
 		return getWorst();
 	}
 }

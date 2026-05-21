@@ -113,10 +113,14 @@ class OptionsMenu extends MusicBeatSubstate {
 			bindTimer -= 0.1;
 		if (binding)
 			return;
+		Controls.current.update(elapsed);
 		var up:Bool = controls.UP_P;
-		if (up || controls.DOWN_P)
-			changeSelection((up ? -1 : 1) * (FlxG.keys.pressed.SHIFT ? 5 : 1));
-		// I genuinely hate this entire block of code and I'll probably change it later on -asmadeuxs
+		var uprpt:Bool = controls.UP_RPT;
+		if (up || uprpt || controls.DOWN_P || controls.DOWN_RPT) {
+			var inc:Int = (up || uprpt) ? -1 : 1;
+			changeSelection(inc * (FlxG.keys.pressed.SHIFT ? 5 : 1));
+		}
+
 		var curOption:Option = curCatOptions[curSelected];
 		if (controls.ACCEPT_P && curOption.type == 'keybind') {
 			catOptions.members[curSelected * 2 + 1].text = '(PRESS ANY KEY)';
@@ -125,21 +129,14 @@ class OptionsMenu extends MusicBeatSubstate {
 			return;
 		}
 
-		Controls.current.update(elapsed);
 		var leftp:Bool = controls.LEFT_P;
 		var rightp:Bool = controls.RIGHT_P;
-		if (curOption.type == "number") {
-			var lefth:Bool = controls.LEFT;
-			var righth:Bool = controls.RIGHT;
-			if (leftp || rightp || lefth || righth) {
-				var inc:Int = FlxG.keys.pressed.SHIFT ? 4 : 1;
-				var left:Bool = leftp || lefth;
-				changeOption(left ? -inc : inc);
-			}
-		}
-		else {
-			if (leftp || rightp)
-				changeOption(leftp ? -1 : 1);
+		var leftrpt:Bool = controls.LEFT_RPT;
+		var rightrpt:Bool = controls.RIGHT_RPT;
+		if ((curOption.type == "number" || curOption.type == "choice") && (leftp || rightp || leftrpt || rightrpt)) {
+			var inc:Int = FlxG.keys.pressed.SHIFT ? 4 : 1;
+			var left:Bool = leftp || leftrpt;
+			changeOption(left ? -inc : inc);
 		}
 
 		// rest of the controls

@@ -21,10 +21,10 @@ class AccuracyAlgorithm {
 	public function get():Float {
 		var tp:Int = getTotalPlayed();
 		var tnh:Float = getTotalNotesHit();
-		var acc:Float = Math.max(0, tnh / tp * 100);
+		var acc:Float = tnh < 1 ? 0.00 : Math.min(1, Math.max(0, tnh / tp));
 		if (Math.isNaN(acc))
 			acc = 0.00;
-		return acc;
+		return acc * 100;
 	}
 
 	public function ghostMiss(_:PlaySession):Void {}
@@ -38,16 +38,19 @@ class AccuracyAlgorithm {
 
 class Simple extends AccuracyAlgorithm {
 	override public function registerHit(daNote:Note):Void {
-		totalNotesHit += daNote.judgement.accuracy;
-		totalPlayed += switch (daNote.judgement.comboBehavior) {
-			case INCREASE: 1;
-			case BREAK: -1;
+		var accInc:Float = 0.0;
+		var comboInc:Int = switch (daNote.judgement.comboBehavior) {
+			case INCREASE, BREAK: 1;
+			// case BREAK: -1;
 			case NONE: 0;
-		};
+		}
+		if (daNote.judgement.comboBehavior == INCREASE)
+			totalNotesHit += daNote.judgement.accuracy;
+		totalPlayed += comboInc;
 	}
 
 	override public function ghostMiss(_:PlaySession):Void {
-		totalNotesHit -= 1;
+		totalNotesHit++;
 	}
 
 	public function toString():String
@@ -61,17 +64,17 @@ class Wife3 extends AccuracyAlgorithm {
 			totalNotesHit += Wife3.MINE_WEIGHT;
 		else if (daNote.missed)
 			totalNotesHit += Wife3.MISS_WEIGHT;
-		else
+		else if (daNote.judgement.comboBehavior == INCREASE)
 			totalNotesHit += getWifePoints(Math.abs(daNote.hitDifference));
 		totalPlayed += switch (daNote.judgement.comboBehavior) {
-			case INCREASE: 2;
-			case BREAK: -2;
+			case INCREASE, BREAK: 2;
+			// case BREAK: -2;
 			case NONE: 0;
 		};
 	}
 
 	override public function ghostMiss(_:PlaySession):Void {
-		totalNotesHit -= 1;
+		totalNotesHit += 1;
 	}
 
 	public function toString():String
