@@ -122,8 +122,8 @@ class JudgementManager {
 				image: "miss",
 				comboBehavior: BREAK,
 				healthBonus: (health:Float) -> return health > 0.05 ? -0.06 : 0.0,
+				hitWindow: maxHitWindow + 5,
 				color: 0xFFFF0000,
-				hitWindow: -200.0,
 				hittable: false,
 				accuracy: -0.5,
 				score: -350,
@@ -161,6 +161,6 @@ class JudgementManager {
 		for (judgement in activeList)
 			if (judgement.hittable && noteDiff <= (judgement.hitWindow * scale))
 				return judgement;
-		return activeList[activeList.length - 1];
+		return getWorst();
 	}
 }

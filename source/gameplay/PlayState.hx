@@ -590,7 +590,7 @@ class PlayState extends MusicBeatState {
 			}
 			var prev = uniqueNotes[uniqueNotes.length - 1];
 			var curr = unspawnNotes[i];
-			if (Math.abs(prev.time - curr.time) < 0.00001 && prev.lane == curr.lane && prev.owner == curr.owner)
+			if (Math.abs(curr.time - prev.time) < 0.00001 && prev.lane == curr.lane && prev.owner == curr.owner)
 				continue;
 			uniqueNotes.push(curr);
 		}
