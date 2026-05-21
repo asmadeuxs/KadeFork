@@ -41,7 +41,11 @@ class AccuracyAlgorithm {
 class Simple extends AccuracyAlgorithm {
 	override public function registerHit(daNote:Note):Void {
 		totalNotesHit += daNote.judgement.accuracy;
-		totalPlayed += daNote.judgement.comboBreak ? -1 : 1;
+		totalPlayed += switch (daNote.judgement.comboBehavior) {
+			case INCREASE: 1;
+			case BREAK: -1;
+			case NONE: 0;
+		};
 	}
 
 	override public function ghostMiss(_:PlaySession):Void {
@@ -61,7 +65,11 @@ class Wife3 extends AccuracyAlgorithm {
 			totalNotesHit += Wife3.MISS_WEIGHT;
 		else
 			totalNotesHit += getWifePoints(Math.abs(daNote.hitDifference));
-		totalPlayed += 2;
+		totalPlayed += switch (daNote.judgement.comboBehavior) {
+			case INCREASE: 2;
+			case BREAK: -2;
+			case NONE: 0;
+		};
 	}
 
 	override public function ghostMiss(_:PlaySession):Void {

@@ -2,6 +2,13 @@ package data;
 
 import flixel.util.FlxColor;
 
+// stole this from troll engine -asmadeuxs
+enum ComboBehavior {
+	INCREASE;
+	BREAK;
+	NONE;
+}
+
 @:structInit class Judgement {
 	public var name:String = "Unknown";
 	public var image:String = "combo";
@@ -9,7 +16,7 @@ import flixel.util.FlxColor;
 
 	@:optional public var hittable:Bool = true;
 	@:optional public var healthBonus:Float->Float = null;
-	@:optional public var comboBreak:Bool = false;
+	@:optional public var comboBehavior:ComboBehavior = ComboBehavior.INCREASE;
 	@:optional public var color:FlxColor = 0xFFFFFFFF;
 	@:optional public var accuracy:Float = 0.0;
 	@:optional public var splash:Bool = false;
@@ -62,6 +69,7 @@ class JudgementManager {
 				image: "kino",
 				splash: true,
 				color: 0xFF97FFFF,
+				comboBehavior: INCREASE,
 				healthBonus: (health:Float) -> return health < 2 ? 0.15 : 0.0,
 				hittable: fifthJudge,
 				hitWindow: 22.5,
@@ -72,6 +80,7 @@ class JudgementManager {
 				name: "Sick",
 				image: "sick",
 				splash: true,
+				comboBehavior: INCREASE,
 				healthBonus: (health:Float) -> return health < 2 ? 0.1 : 0.0,
 				accuracy: fifthJudge ? 0.95 : 1.0,
 				color: 0xFFEAFF74,
@@ -81,6 +90,7 @@ class JudgementManager {
 			{
 				name: "Good",
 				image: "good",
+				comboBehavior: INCREASE,
 				healthBonus: (health:Float) -> return health < 2 ? 0.04 : 0.0,
 				color: 0xFF97FF9F,
 				hitWindow: 90.0,
@@ -90,7 +100,7 @@ class JudgementManager {
 			{
 				name: "Bad",
 				image: "bad",
-				comboBreak: true,
+				comboBehavior: BREAK,
 				healthBonus: (health:Float) -> return health > 0.01 ? -0.06 : 0.0,
 				color: 0xFFDC7487,
 				hitWindow: 135.0,
@@ -100,7 +110,7 @@ class JudgementManager {
 			{
 				name: "Shit",
 				image: "shit",
-				comboBreak: true,
+				comboBehavior: BREAK,
 				healthBonus: (health:Float) -> return health > 0.1 ? -0.2 : 0.0,
 				color: 0xFFE02447,
 				hitWindow: 180.0,

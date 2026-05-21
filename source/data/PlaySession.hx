@@ -47,8 +47,13 @@ class PlaySession {
 		daNote.judgement.hits++;
 		score += Math.round(daNote.judgement.score);
 		accuracy?.registerHit(daNote);
-		if (daNote.judgement.comboBreak == true)
-			breakCombo();
+		switch (daNote.judgement.comboBehavior) {
+			case INCREASE:
+				increaseCombo(1);
+			case BREAK:
+				breakCombo();
+			case NONE:
+		}
 	}
 
 	public function increaseCombo(by:Int = 1):Int {

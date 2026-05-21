@@ -1237,7 +1237,6 @@ class PlayState extends MusicBeatState {
 		note.wasGoodHit = true;
 		function scoreNote() {
 			session.scoreNote(note);
-			session.increaseCombo(1);
 			health += session.judgeMan.getHealthBonus(note.judgement, health);
 			if (Preferences.user.noteSplashes && note.judgement.splash)
 				playerStrums.spawnSplash(note.noteData);
