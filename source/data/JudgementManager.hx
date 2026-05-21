@@ -120,6 +120,7 @@ class JudgementManager {
 			{
 				name: "Miss",
 				image: "miss",
+				comboBehavior: BREAK,
 				healthBonus: (health:Float) -> return health > 0.05 ? -0.06 : 0.0,
 				color: 0xFFFF0000,
 				hitWindow: -200.0,

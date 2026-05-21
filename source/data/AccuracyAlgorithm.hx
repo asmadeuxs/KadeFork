@@ -21,11 +21,9 @@ class AccuracyAlgorithm {
 	public function get():Float {
 		var tp:Int = getTotalPlayed();
 		var tnh:Float = getTotalNotesHit();
-		var acc:Float = tnh < 1 ? 0.0 : Math.max(0, tnh / tp * 100);
-		if (acc > 100)
-			acc = 100.0;
-		if (acc < 0)
-			acc = 0.0;
+		var acc:Float = Math.max(0, tnh / tp * 100);
+		if (Math.isNaN(acc))
+			acc = 0.00;
 		return acc;
 	}
 
