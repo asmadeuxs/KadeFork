@@ -16,7 +16,7 @@ import moonchart.formats.BasicFormat;
 using StringTools;
 using util.CoolUtil;
 
-class Note extends gameplay.FunkinSprite {
+class Note extends ui.FunkinSprite {
 	public var strumline:Strumline = null;
 
 	// mainly for chart editor

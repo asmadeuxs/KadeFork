@@ -1,5 +1,6 @@
 package data;
 
+import data.song.SongMetadata;
 import flixel.math.FlxPoint;
 import flixel.util.typeLimit.OneOfTwo;
 import haxe.DynamicAccess;
@@ -90,6 +91,10 @@ typedef AnimationDef = OneOfTwo<String, JsonAnimation>;
 
 typedef LevelLabel = {
 	texture:TextureConfig,
+	?antialiasing:Bool,
+	?defaultFramerate:Int,
+	?flipX:Bool,
+	?flipY:Bool,
 	?animations:AnimationDef,
 	?offsets:JsonOffsetField
 }
@@ -106,7 +111,9 @@ typedef LevelData = {
 	tagline:String,
 	difficulties:Array<String>,
 	labelObject:LevelLabel,
-	songs:Array<LevelSong>
+	songs:Array<LevelSong>,
+	?fileName:String,
+	?mod:String
 }
 
 // --- Character Data ---

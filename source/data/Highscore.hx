@@ -19,6 +19,14 @@ class Highscore {
 			setSongHighscore(daSong, score);
 	}
 
+	public static function saveLevelScore(levelID:String, diff:String = 'normal', score:Int = 0):Void {
+		var daLevel:String = formatSong('level-$levelID', diff);
+		if (!levelScores.exists(daLevel))
+			setLevelHighscore(daLevel, score);
+		else if (levelScores.get(daLevel) < score)
+			setLevelHighscore(daLevel, score);
+	}
+
 	public static function getScore(song:String, diff:String):Int {
 		var daSong:String = formatSong(song, diff);
 		if (!songScores.exists(daSong))

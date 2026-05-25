@@ -68,7 +68,9 @@ class FreeplayState extends GenericMenuState {
 						if (foldersPushed.contains(song.folder))
 							continue;
 						var diffs:Array<String> = song.difficulties ?? level.difficulties;
-						songs.push(new SongMetadata(song.name, song.folder, song.icon ?? "face", modId, diffs));
+						if (song.difficulties == null)
+							song.difficulties = level.difficulties;
+						songs.push(SongMetadata.fromLevelSong(song, modId));
 						if (!foldersPushed.contains(song.folder))
 							foldersPushed.push(song.folder);
 					}
@@ -141,7 +143,7 @@ class FreeplayState extends GenericMenuState {
 
 	function refreshPlaylistDisplay() {
 		playlistGroup.visible = playlistVisible;
-		while (playlistGroup.members.length != 0)
+		while (playlistGroup.members.length > 0)
 			playlistGroup.members.pop().destroy();
 		if (!playlistVisible) {
 			infoText.text = "Press CTRL to view playlist";
@@ -155,7 +157,7 @@ class FreeplayState extends GenericMenuState {
 		if (selectedSongs != null && selectedSongs.length > 0)
 			text = "=== PLAYLIST ===";
 		infoText.text = text;
-		while (playlistGroup.members.length != 0)
+		while (playlistGroup.members.length > 0)
 			playlistGroup.members.pop().destroy();
 		var yPos:Float = infoText.y + 50;
 		var xPos:Float = infoText.x;
@@ -234,7 +236,8 @@ class FreeplayState extends GenericMenuState {
 	override function onVerticalChanged(index:Int) {
 		if (songs[curVertical].mod != Mods.currentMod)
 			Mods.currentMod = songs[curVertical].mod;
-		FlxG.sound.play(Mods.menuSound("scrollMenu"));
+		if (curVertical != index)
+			FlxG.sound.play(Mods.menuSound("scrollMenu"));
 		refreshDifficulties();
 		var bullShit:Int = 0;
 		for (i in 0...iconArray.length)

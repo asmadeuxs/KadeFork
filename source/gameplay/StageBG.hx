@@ -10,7 +10,7 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.util.FlxColor;
 import flixel.util.FlxSort;
 import flixel.util.typeLimit.OneOfTwo;
-import gameplay.FunkinSprite;
+import ui.FunkinSprite;
 import haxe.Json5;
 
 using util.AnimationHelper;

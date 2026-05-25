@@ -1,4 +1,4 @@
-package gameplay;
+package ui;
 
 import animate.FlxAnimate;
 import flixel.FlxG;
@@ -10,7 +10,7 @@ class FunkinSprite extends FlxAnimate {
 	public var pivot:SpritePivot = SpritePivot.TOP_LEFT;
 	public var animOffsets:Map<String, Array<Float>>;
 
-	public function new(x:Float, y:Float):Void {
+	public function new(x:Float = 0, y:Float = 0):Void {
 		super(x, y);
 		animOffsets = new Map<String, Array<Float>>();
 	}

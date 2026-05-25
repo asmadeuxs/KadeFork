@@ -16,8 +16,8 @@ class FunkinCamera extends flixel.FlxCamera {
 	 * @param   Zoom     The initial zoom level of the camera.
 	 *                   A zoom level of 2 will make all pixels display at 2x resolution.
 	 */
-	public function new(x:Float = 0, y:Float = 0, width:Int = 0, height:Int = 0, zoom:Float = 0) {
-		super(0, 0, width, height, zoom);
+	public function new(x:Float = 0, y:Float = 0, width:Float = 0, height:Float = 0, zoom:Float = 0) {
+		super(0, 0, Std.int(width), Std.int(height), zoom);
 		// these parameters are ints in FlxCamera (even though this.x and this.y are floats)
 		// so I had to override it -asmadeuxs
 		this.x = x;

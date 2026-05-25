@@ -1,5 +1,8 @@
 Currently the following files can be created to override menus:
 
 - MainMenuState.hxs
+- StoryMenuState.hxs
 - FreeplayState.hxs
 - PauseSubstate.hxs
+
+".hxs" can be replaced with any of the other compatible hscript extensions

@@ -311,7 +311,11 @@ class PlayState extends MusicBeatState {
 		Conductor.current.stopMusic();
 		Conductor.current.clearTracks();
 		inputMgr.destroy();
-		session.judgeMan = null;
+		if (!playlist.isStory()) {
+			session.judgeMan = null;
+			session.accuracy = null;
+			session = null;
+		}
 		current = null;
 		super.destroy();
 	}
@@ -901,7 +905,7 @@ class PlayState extends MusicBeatState {
 			else if (daNote.mustPress && !daNote.wasGoodHit && !daNote.missed) {
 				// normal note miss
 				var missLimit:Int = 150;
-				var safeZone:Float = session.judgeMan.maxHitWindow ?? 180.0;
+				var safeZone:Float = session.judgeMan?.maxHitWindow ?? 180.0;
 				if (daNote.strumTime < Conductor.time - safeZone)
 					daNote.tooLate = true;
 				var timedOut:Bool = daNote.strumTime - Conductor.time < -(missLimit + daNote.sustainLength);
@@ -1031,7 +1035,6 @@ class PlayState extends MusicBeatState {
 		if (playlist.getNext() != null) {
 			playlist.next();
 			playlist.updateSong();
-			// campaignScore += Math.round(session.score);
 			Conductor.current.active = false;
 			Conductor.current.stopMusic();
 			trace('LOADING NEXT SONG ($songTitle)');
@@ -1040,18 +1043,18 @@ class PlayState extends MusicBeatState {
 			prevCamFollow = camFollow;
 			FlxG.switchState(new gameplay.PlayState());
 		}
-		/*else if (playlist.isStory()) {
+		else if (playlist.isStory()) {
 			Conductor.current.clearTracks();
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 			transIn = FlxTransitionableState.defaultTransIn;
 			transOut = FlxTransitionableState.defaultTransOut;
 			util.StateOverride.switchState("menus.StoryMenuState");
-			StoryMenuState.weekUnlocked[Std.int(Math.min(storyWeek + 1, StoryMenuState.weekUnlocked.length - 1))] = true;
-			if (!session.invalid)
-				Highscore.saveWeekScore(storyWeek, campaignScore, difficulty);
-			FlxG.save.data.weekUnlocked = StoryMenuState.weekUnlocked;
-			FlxG.save.flush();
-		}*/
+			var level = playlist.getLevel();
+			if (!session.invalid && level != null) {
+				// TODO: level unlocking
+				Highscore.saveLevelScore(level.fileName, difficulty, session.score);
+			}
+		}
 		else
 			goBackToFreeplay();
 	}

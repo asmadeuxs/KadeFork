@@ -72,7 +72,10 @@ class PauseSubstate extends MusicBeatSubstate {
 						FlxG.sound.music.time = FlxG.random.int(0, Std.int(FlxG.sound.music.length * 0.5));
 						FlxG.sound.music.fadeIn(4, 0, 0.7);
 					}
-					util.StateOverride.switchState("menus.FreeplayState");
+					if (PlayState.playlist != null && PlayState.playlist.isStory())
+						util.StateOverride.switchState("menus.StoryMenuState");
+					else
+						util.StateOverride.switchState("menus.FreeplayState");
 				}
 			}
 		];

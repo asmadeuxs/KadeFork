@@ -95,6 +95,18 @@ class CoolUtil {
 		return o1;
 	}
 
+	public static function objectCenterBetween(o1:FlxObject, o2:FlxObject, o3:FlxObject, centerType:FlxAxes = FlxAxes.XY) {
+		if (centerType == X || centerType == XY) {
+			var midX:Float = (o2.x + o2.width * 0.5 + o3.x + o3.width * 0.5) * 0.5;
+			o1.x = midX - o1.width * 0.5;
+		}
+		if (centerType == Y || centerType == XY) {
+			var midY:Float = (o2.y + o2.height * 0.5 + o3.y + o3.height * 0.5) * 0.5;
+			o1.y = midY - o1.height * 0.5;
+		}
+		return o1;
+	}
+
 	// i stole this from neb thanks neb NebulaZorua -asmadeuxs
 	public static function dominantColor(sprite:FlxSprite, ?ignoreColors:Array<FlxColor>):Int {
 		if (sprite.pixels == null)

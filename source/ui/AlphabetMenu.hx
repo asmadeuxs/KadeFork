@@ -38,7 +38,7 @@ class AlphabetMenu extends FlxTypedSpriteGroup<Alphabet> {
 
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
-		if (members.length != 0) {
+		if (members.length > 0) {
 			for (i in members) {
 				if (i.y < -30 || i.y > FlxG.height + 30) {
 					i.active = false;

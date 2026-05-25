@@ -105,7 +105,7 @@ class ChartEditor extends MusicBeatState {
 				}
 			}
 		}
-		if (gridGroup != null && gridGroup.members.length != 0) {
+		if (gridGroup != null && gridGroup.members.length > 0) {
 			for (id in 0...players) {
 				var grid:ChartingGrid = gridGroup.members[id];
 				if (grid == null || !FlxG.mouse.overlaps(grid))

@@ -32,14 +32,17 @@ class MainMenuState extends GenericMenuState {
 		Mods.currentMod = null;
 		persistentUpdate = persistentDraw = true;
 		optionShit = [
-			// {name: 'story mode', func: () -> util.StateOverride.switchState("menus.StoryMenuState")},
+			{name: 'story mode', func: () -> util.StateOverride.switchState("menus.StoryMenuState")},
 			{name: 'freeplay', func: () -> util.StateOverride.switchState("menus.FreeplayState")},
 			{
 				name: 'options',
 				func: () -> {
 					this.active = false;
 					tweenItemsBackIn();
-					openSubState(new menus.OptionsMenu());
+					if (FlxG.keys.pressed.SHIFT)
+						openSubState(new menus.OptionsMenuNew());
+					else
+						openSubState(new menus.OptionsMenu());
 				}
 			}
 		];
@@ -84,7 +87,7 @@ class MainMenuState extends GenericMenuState {
 	function createMenuItems():Void {
 		menuItems = new FlxTypedGroup<FlxSprite>();
 		for (i in 0...optionShit.length) {
-			var menuItem:FlxSprite = new FlxSprite(0, 130 + (i * 180));
+			var menuItem:FlxSprite = new FlxSprite(0, 100 + (i * 180));
 			menuItem.frames = Mods.menuSparrowAtlas('ui/FNF_main_menu_assets');
 			menuItem.animation.addByPrefix('idle', optionShit[i].name + " basic", 24);
 			menuItem.animation.addByPrefix('selected', optionShit[i].name + " white", 24);

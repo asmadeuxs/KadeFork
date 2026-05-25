@@ -1,5 +1,6 @@
 package data.song;
 
+import data.ConfigTypes.LevelData;
 import data.song.KadeForkChart;
 import data.song.SongMetadata;
 import flixel.FlxG;
@@ -11,6 +12,18 @@ class SongPlaylist {
 	public function new():Void {}
 
 	var storyMode:Bool = false;
+
+	var curLevel:LevelData = null;
+
+	public function getLevel():LevelData
+		return curLevel;
+
+	public function setLevel(daLevel:LevelData) {
+		curLevel = daLevel;
+		if (curLevel != null)
+			trace('New level set: ${daLevel.fileName}, Saves will be stored as level-${daLevel.fileName}');
+		return curLevel;
+	}
 
 	var songs:Array<KadeForkChart> = [];
 	var current:Int = 0;

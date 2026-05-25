@@ -1,3 +1,10 @@
+category_preferences,Preferences
+category_visuals,Visuals
+category_controls,Controls
+category_other_controls,Other Controls
+category_miscellaneous,Miscellaneous
+category_mods,Mods
+
 optionval_ON,ON
 optionval_OFF,OFF
 optionval_Up,Up

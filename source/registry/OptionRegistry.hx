@@ -10,8 +10,6 @@ typedef OptionCategory = {
 }
 
 class OptionRegistry extends BaseRegistry<OptionCategory> {
-	public static var current:OptionRegistry;
-
 	public function new(?withDefaults:Bool = true, ?loadMods:Bool = true):Void {
 		super("OptionsRegistry");
 		if (withDefaults)

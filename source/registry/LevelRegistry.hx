@@ -1,13 +1,14 @@
 package registry;
 
+import data.ConfigTypes.LevelData;
 import data.ConfigTypes.LevelLabel;
 import data.ConfigTypes.LevelSong;
-import data.ConfigTypes.LevelData;
+import data.song.SongMetadata;
 import util.CoolUtil;
 import util.Mods;
 
-using haxe.io.Path;
 using StringTools;
+using haxe.io.Path;
 
 class LevelRegistry extends BaseRegistry<LevelData> {
 	public static var current:LevelRegistry = null;
@@ -75,6 +76,8 @@ class LevelRegistry extends BaseRegistry<LevelData> {
 				var regKey = '$origin$name';
 				var level:LevelData = cast haxe.Json5.parse(Paths.getText(filePath));
 				if (level != null) {
+					level.mod = mod;
+					level.fileName = name;
 					register(regKey, level, true);
 					ordered[mod].push(level);
 				}

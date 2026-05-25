@@ -1,7 +1,6 @@
 {
   tagline: "Daddy Dearest",
   difficulties: [ "Easy", "Normal", "Hard"],
-  labelObject: {},
   songs: [
     {
       name: "Bopeebo",

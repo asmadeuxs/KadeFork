@@ -1,6 +1,12 @@
 package data.song;
 
+import data.ConfigTypes.LevelSong;
+
 @:structInit class SongMetadata {
+	public static function fromLevelSong(item:LevelSong, modId:String = 'core') {
+		return new SongMetadata(item.name, item.folder, item.icon ?? "face", modId, item.difficulties);
+	}
+
 	public var songName:String = "";
 	public var songFolder:String = null;
 	public var songCharacter:String = "";

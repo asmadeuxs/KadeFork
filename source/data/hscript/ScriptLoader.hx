@@ -35,7 +35,7 @@ class ScriptLoader {
 		interp.variables.set("StringTools", StringTools);
 		// flixel-specific
 		interp.variables.set("FlxG", flixel.FlxG);
-		interp.variables.set("FlxSprite", gameplay.FunkinSprite);
+		interp.variables.set("FlxSprite", ui.FunkinSprite);
 		interp.variables.set("FlxColor", new data.hscript.FlxColorWrapper());
 		interp.variables.set("state", flixel.FlxG.state);
 		// game

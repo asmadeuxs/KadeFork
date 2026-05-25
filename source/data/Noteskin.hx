@@ -7,7 +7,7 @@ import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.typeLimit.OneOfTwo;
-import gameplay.FunkinSprite;
+import ui.FunkinSprite;
 import gameplay.note.Note;
 import haxe.Json5;
 import util.AnimationHelper;
@@ -220,7 +220,7 @@ class Noteskin {
 		return arr.length == 0 ? "" : arr[noteData % arr.length];
 
 	public function generateStrum(noteData:Int):FunkinSprite {
-		var strum = new FunkinSprite(0, 0);
+		var strum = new FunkinSprite();
 		noteData = FlxMath.wrap(noteData, 0, keyCount - 1);
 		var frames = getAtlas("strums");
 
@@ -278,7 +278,7 @@ class Noteskin {
 	}
 
 	public function generateNoteSplashSprite():FunkinSprite {
-		var splash = new FunkinSprite(0, 0);
+		var splash = new FunkinSprite();
 		var frames = getAtlas("splashes");
 		if (frames == null)
 			return splash;

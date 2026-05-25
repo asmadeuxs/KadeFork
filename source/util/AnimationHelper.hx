@@ -6,7 +6,7 @@ import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxPoint;
 import flixel.util.typeLimit.OneOfTwo;
-import gameplay.FunkinSprite;
+import ui.FunkinSprite;
 
 class AnimationHelper {
 	public static function addFromJson(sprite:FlxSprite, data:Dynamic, defaultFramerate:Int, ?onAddAnim:(name:String) -> Void):Void {

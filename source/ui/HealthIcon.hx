@@ -4,7 +4,7 @@ import data.hscript.Script;
 import data.hscript.ScriptLoader;
 import flixel.FlxObject;
 import flixel.system.FlxAssets.GraphicLogo;
-import gameplay.FunkinSprite;
+import ui.FunkinSprite;
 import gameplay.PlayState;
 import haxe.io.Path;
 import moonchart.formats.fnf.legacy.FNFLegacy.FNFLegacyMetaValues;

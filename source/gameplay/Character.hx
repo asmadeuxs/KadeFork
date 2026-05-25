@@ -19,7 +19,7 @@ enum abstract CharacterType(String) from String to String {
 }
 
 @:allow(editor.CharacterEditor)
-class Character extends gameplay.FunkinSprite {
+class Character extends ui.FunkinSprite {
 	public static final DEFAULT_CHARACTER:String = "bf";
 
 	public static final DEFAULT_IDLE_ANIMATIONS:Array<String> = ["idle"];

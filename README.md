@@ -26,9 +26,5 @@ todo (this is more for myself @asmadeuxs than anything.):
 - libs:
 	- add [hxvlc](https://github.com/MAJigsaw77/hxvlc) for video support
 - game:
-	- re-add replays
-	- rewrite all the menus
-		- probably change the visuals also if i can when i get to that point
-		- - it's my fork anyway the default menus can look different from other forks idc.
 	- darnell
 	- image_friend
