@@ -236,8 +236,7 @@ class FreeplayState extends GenericMenuState {
 	override function onVerticalChanged(index:Int) {
 		if (songs[curVertical].mod != Mods.currentMod)
 			Mods.currentMod = songs[curVertical].mod;
-		if (curVertical != index)
-			FlxG.sound.play(Mods.menuSound("scrollMenu"));
+		FlxG.sound.play(Mods.menuSound("scrollMenu"));
 		refreshDifficulties();
 		var bullShit:Int = 0;
 		for (i in 0...iconArray.length)

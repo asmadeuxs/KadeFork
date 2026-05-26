@@ -1,0 +1,52 @@
+import flixel.FlxBasic;
+
+// GLOBALS //
+// you don't need to declare these, this is just here to show what type these are
+
+// these functions are from FlxGroup
+
+function add(basic:FlxBasic):FlxBasic {}
+function remove(basic:FlxBasic):FlxBasic {}
+function replace(oldObject:FlxBasic, newObject:FlxBasic):FlxBasic {}
+function insert(position:Int, object:FlxBasic):FlxBasic {}
+
+function preCreate():Void {
+	// called before the transition happens
+	// override this to stop the transition (or make your own)
+}
+
+function create():Void {
+	// called after the transition
+}
+
+function preUpdate(elapsed:Float):Void {
+	// called before the state updates its objects
+}
+
+function update(elapsed:Float):Void {
+	// did you understand the pattern? cool
+}
+
+function preDraw():Void {
+	// before the state draws its objects
+}
+
+function draw():Void {
+	// yeah
+}
+
+function onFocus() {
+	// when the window gains focus
+}
+
+function onFocusLost() {
+	// when the window loses focus
+}
+
+function onResize(w:Int, h:Int) {
+	// when the window gets resized
+}
+
+function destroy():Void {
+	// one call before the state gets completely destroyed
+}

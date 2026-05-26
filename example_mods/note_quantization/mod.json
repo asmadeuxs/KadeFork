@@ -1,0 +1,5 @@
+{
+	"name": "Note Quantization",
+	"description": "Adds a setting to make the note colours be based on their placement in a chart.",
+	"version": "1.0.0"
+}

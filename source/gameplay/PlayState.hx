@@ -104,7 +104,9 @@ class PlayState extends MusicBeatState {
 	var events:Array<ChartEventArray> = [];
 	var eventPosition:Int = 0;
 
-	var camZooming:Bool = false;
+	public var camZooming:Bool = true;
+	public var hudZooming:Bool = true;
+
 	var health(default, set):Float = 1;
 
 	function set_health(newHealth:Float):Float
@@ -204,7 +206,7 @@ class PlayState extends MusicBeatState {
 		persistentDraw = true;
 
 		// initialise array
-		gameplayScripts = ScriptLoader.runScriptsAtDir(Paths.resolveAssetPath('scripts', util.Mods.currentMod), false);
+		gameplayScripts = ScriptLoader.runScriptsAtDir(Paths.resolveAssetPath('scripts/songs', util.Mods.currentMod), false);
 
 		generateSong();
 
@@ -516,6 +518,9 @@ class PlayState extends MusicBeatState {
 	}
 
 	public function startSong():Void {
+		var ret = callFirstFuncInScripts("songStart");
+		if (ret != null && ret.value == ScriptLoader.STOP_FUNC)
+			return;
 		canPause = true;
 		startingSong = false;
 		Conductor.current.playMusic();
@@ -750,10 +755,10 @@ class PlayState extends MusicBeatState {
 		if (startingSong && startedCountdown && Conductor.time >= 0)
 			startSong();
 
-		if (camZooming) {
+		if (camZooming)
 			camGame.zoom = FlxMath.lerp(defaultCamZoom, camGame.zoom, 0.95);
+		if (hudZooming)
 			camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, 0.95);
-		}
 
 		if (controls.RESET_P)
 			health = 0;
@@ -776,7 +781,7 @@ class PlayState extends MusicBeatState {
 			var actualSpeed:Float = NoteRenderer.getScrollSpeedMod(scrollSpeed);
 			notes.updateNotes(Conductor.time, strumlines.members, actualSpeed);
 			noteUpdate(Conductor.time, elapsed);
-			callFuncInScripts("update song", [elapsed]);
+			callFuncInScripts("updateSong", [elapsed]);
 		}
 	}
 
@@ -1286,7 +1291,7 @@ class PlayState extends MusicBeatState {
 	override function beatHit(curBeat:Int) {
 		if (camZooming && camGame.zoom < 1.35 && curBeat % cameraBumpFrequency == 0)
 			camGame.zoom += 0.015;
-		if (camZooming && camHUD.zoom < 1.35 && curBeat % hudBumpFrequency == 0)
+		if (hudZooming && camHUD.zoom < 1.35 && curBeat % hudBumpFrequency == 0)
 			camHUD.zoom += 0.03;
 
 		if (stage != null)

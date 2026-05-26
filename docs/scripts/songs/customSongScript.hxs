@@ -1,0 +1,102 @@
+// before anything, please do note that this kind of script needs to be put in the correct folder
+// for example if you're gonna run a script for the song "Fresh"
+// put it in the exact folder the chart is in (i.e: mods/base_game/songs/fresh/script.hxs)
+
+// if you need a script to run on ALL songs however, then leaving it at "scripts/songs" works perfectly.
+
+import gameplay.PlayState;
+import gameplay.note.Note;
+
+// GLOBALS //
+
+var game:PlayState;
+var song:String = PlayState.songName;
+var songTitle:String = PlayState.songTitle;
+var difficulty:String = PlayState.difficulty;
+
+// this one is actually decided by you
+// setting this to a value will override the hud
+// as long as your HUD style setting is set to "default"
+var hudOverride:String = null;
+
+// you can also override the player and opponent noteskins
+// this applies a new skin to their strumline and default notes
+var playerNoteskin:String = null;
+var opponentNoteskin:String = null;
+
+function preCreate() {
+	// see the globals over there? this function is called right after they're set
+	// but before the stage and characters get created added
+}
+
+function create() {
+	// after everything is created and added (stage, characters, etc)
+}
+
+function songCutscene() {
+	// called before the countdown starts
+	// this is *extremely* useful for cutscenes and intended for them
+	return CONTINUE;
+}
+
+function countdownStart() {
+	// called when the countdown starts
+	// the HUD callback is actually done before this one
+}
+
+function countdownTick(tick:Int) {
+	// called when the countdown ticks ("three", "two", "one", "go!")
+	// once again, the HUD callback is called before this one
+	return CONTINUE;
+}
+
+function songStart() {
+	// after countdown, when the song starts
+	return CONTINUE;
+}
+
+function preUpdate(elapsed:Float) {
+	// called before PlayState.update begins its usual routine
+	// but unlike custom states, you can't prevent PlayState's objects from updating with this
+	// you can stop this function however, and break the whole game if you want, up to you
+	return CONTINUE;
+}
+
+function playerDeath() {
+	// self-explanatory
+}
+
+function updateSong() {
+	// called after the notes and events are updated
+}
+
+function goodNoteHit(note:Note) {
+	// called when the player hits a note
+	// if the note is a mine note, this isn't called, but the function below is
+}
+
+function noteMiss(direction:Int, note:Note) {
+	// called when the player misses a note
+	// beware, if you have ghost tapping off and miss without a note, `note` will be null
+}
+
+function opponentNoteHit(note:Note) {
+	// called when the opponent hits a note
+}
+
+function stepHit(curStep:Int) {
+	// called every song step
+}
+
+function beatHit(curBeat:Int) {
+	// called every song beat
+}
+
+function songEnd() {
+	// self-explanatory, runs before gameEnd
+	return CONTINUE;
+}
+
+function gameEnd() {
+	// called slightly before the script is about to be discarded
+}

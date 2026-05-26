@@ -23,8 +23,15 @@ class StateOverride {
 		if (args == null)
 			args = [];
 		var scriptPath = getScriptPathForClass(className);
-		if (scriptPath != null)
-			return new ScriptedState(scriptPath, args);
+		if (scriptPath != null) {
+			try {
+				var state = new ScriptedState(scriptPath, args);
+				if (state != null)
+					return state;
+			}
+			catch (e:haxe.Exception)
+				trace('Error opening modded state (for mod ${util.Mods.menuPriorityMod}): ${e.details()}');
+		}
 		var stateClass = Type.resolveClass(className);
 		if (stateClass == null)
 			throw 'State class not found: $className';
@@ -35,8 +42,15 @@ class StateOverride {
 		if (args == null)
 			args = [];
 		var scriptPath = getScriptPathForClass(className);
-		if (scriptPath != null)
-			return new ScriptedSubstate(scriptPath, args);
+		if (scriptPath != null) {
+			try {
+				var substate = new ScriptedSubstate(scriptPath, args);
+				if (substate != null)
+					return substate;
+			}
+			catch (e:haxe.Exception)
+				trace('Error opening modded substate (for mod ${util.Mods.menuPriorityMod}): ${e.details()}');
+		}
 		var substateClass = Type.resolveClass(className);
 		if (substateClass == null)
 			throw 'Substate class not found: $className';

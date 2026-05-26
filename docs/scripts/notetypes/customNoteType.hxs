@@ -1,0 +1,22 @@
+import gameplay.note.Note;
+
+// GLOBALS //
+// you don't need to declare these, this is just here to show what type these are
+
+// in case you need to access it outside a built-in function
+// this is set one call before generateNoteType is called
+var note:Note;
+
+function generateNoteType(note:Note) {
+	// called when the note spawns
+}
+
+function noteRegenerated(note:Note, time:Float, direction:Int, length:Float) {
+	// called when the note regenerates
+	// "regenerating" means this note existed before but its data changed and it was reused
+	// this is done AFTER generateNoteType
+}
+
+function update(elapsed:Float, note:Note) {
+	// called every frame
+}

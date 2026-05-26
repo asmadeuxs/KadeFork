@@ -1,0 +1,10 @@
+// this is exactly the same as the customMenuState example
+
+// with the addition of this global
+var close:Void->Void;
+
+// and this function
+function onClose():Void {
+	// caled when the substate is about to be closed
+	// if you wanna prevent it from being closed, do it here
+}

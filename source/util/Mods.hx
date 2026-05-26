@@ -6,11 +6,10 @@ import util.CoolUtil;
 using StringTools;
 
 private typedef ModConfig = {name:String, ?version:String, ?description:String}
+private typedef VersionDef = {major:Int, minor:Int, ?patch:Int}
 
 class Mods {
 	public static final modRoot:String = 'mods';
-	public static final apiVer:String = "1.0.0";
-	public static final defaultDesc:String = "No description provided.";
 
 	public static var currentMod:String = 'core';
 	public static var menuPriorityMod:String = null;
@@ -49,6 +48,28 @@ class Mods {
 		}
 	}
 
+	// VERSIONING CHECKS
+	public static final apiVersion:String = "1.0.0";
+
+	private static function parseVersion(v:String):VersionDef {
+		var aaa:Array<String> = v.split(".");
+		return {
+			major: aaa[0] != null ? Std.parseInt(aaa[0]) : 0,
+			minor: aaa[1] != null ? Std.parseInt(aaa[1]) : 0,
+			patch: aaa[2] != null ? Std.parseInt(aaa[2]) : 0
+		}
+	}
+
+	private static function compareVersions(a:VersionDef, b:VersionDef):Int {
+		if (a.major != b.major)
+			return a.major < b.major ? -1 : 1;
+		if (a.minor != b.minor)
+			return a.minor < b.minor ? -1 : 1;
+		if (a.patch != b.patch)
+			return a.patch < b.patch ? -1 : 1;
+		return 0;
+	}
+
 	/**
 	 * Scans for mods in the mods folder
 	 * @param enableActive Checks for active mods and enables them
@@ -67,21 +88,41 @@ class Mods {
 			if (!sys.FileSystem.isDirectory('$root/$modId'))
 				continue;
 
-			if (!Paths.fileExists('$root/$modId/mod.txt')) {
-				trace('Mod "$modId" not added (missing mod.txt file.)');
-				trace('That file must look like this:\n');
-				trace('Mod Name|Mod Version (i.e: 1.0.0)|Mod description.\n');
+			var configFile:String = null;
+			for (i in Paths.jsonExtensions) {
+				var path:String = '$modRoot/$modId/mod.$i';
+				if (Paths.fileExists(path)) {
+					try {
+						configFile = Paths.getText(path);
+						break;
+					}
+					catch (e:haxe.Exception)
+						trace('Failed to parse mod file (for $modId): ${e.details()}');
+				}
+			}
+			if (configFile == null) {
+				trace('Mod file not found (for $modId)');
 				continue;
 			}
-
-			var configFile:String = Paths.getText('$modRoot/$modId/mod.txt').trim();
-			var modData:Array<String> = configFile.split("|");
-			if (modData.length < 1) {
-				trace('Mod file too short (must have at least its name.)');
-				continue;
+			var modData:ModConfig = haxe.Json5.parse(configFile);
+			if (modData.version == null)
+				trace('Mod file does not contain a "version" field, some features in the mod may not work.');
+			else {
+				var compatible:Bool = false;
+				var modVersion:String = modData.version;
+				if (modVersion.contains("~")) {
+					var ver:Array<String> = modVersion.split("~");
+					var minVer:VersionDef = parseVersion(ver[0]);
+					var maxVer:VersionDef = parseVersion(ver[1]);
+					var api:VersionDef = parseVersion(apiVersion);
+					compatible = compareVersions(api, minVer) >= 0 && compareVersions(api, maxVer) <= 0;
+				}
+				else
+					compatible = modVersion == apiVersion;
+				if (!compatible)
+					trace('Mod file has version $modVersion, but the current api version is $apiVersion. some features in the mod may not work.');
 			}
-			// TODO: API version validation
-			allMods.set(modId, {name: modData[0], description: modData[1] ?? defaultDesc, version: modData[2] ?? apiVer});
+			allMods.set(modId, modData);
 			if (!activeMods.contains(modId))
 				activeMods.push(modId);
 			trace('Loaded mod folder $modId');

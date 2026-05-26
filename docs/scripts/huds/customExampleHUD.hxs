@@ -1,0 +1,54 @@
+import flixel.FlxSprite;
+import gameplay.note.Note;
+
+// GLOBALS //
+// you don't need to declare these, this is just here to show what type these are
+
+// in case you need to access it outside a built-in function
+// this is set one call before generateHUD is called
+var hud:ScriptHUD;
+
+// these functions are from FlxSpriteGroup
+
+function add(basic:FlxSprite):FlxSprite {}
+function remove(basic:FlxSprite):FlxSprite {}
+function replace(oldObject:FlxSprite, newObject:FlxSprite):FlxSprite {}
+function insert(position:Int, object:FlxSprite):FlxSprite {}
+
+function generateHUD():Void {
+	// when the hud is created
+}
+
+function countdownStart():Void {
+	// called when the countdown starts, before it starts ticking
+	// if you need to set something up before it, do it here or on generateHUD
+}
+
+function countdownTick(tick:Int):Void {
+	// called when the countdown ticks ("three", "two", "one", "go!")
+	// useful if you need a custom one
+	return CONTINUE;
+}
+
+function popUpScore(daNote:Note) {
+	// called when you hit a note (or miss it provided you have showMissPopups enabled)
+	// you can override this to make a custom score popup
+}
+
+function onSettingsChanged() {
+	// called when the player leaves the settings menu while its opened from the pause menu
+	// this is actually used by the hardcoded huds to reposition the UI elements
+}
+
+function update(elapsed:Float) {
+	// called every frame
+}
+
+function updateScoreText():Void {
+	// called whenever the score text needs to update
+	// usually that means when you hit/miss notes
+}
+
+function beatHit(beat:Int):Void {
+	// called every beat
+}

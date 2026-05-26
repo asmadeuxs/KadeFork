@@ -31,33 +31,39 @@ I do **not** plan on fixing this! -asmadeuxs
 
 ## Built-in files
 
-Currently, for a mod to be recognised, it must have a mod.txt file in its folder
+Currently, for a mod to be recognised, it must have a mod.json file in its folder
 
 ```
 mods/
 	myMod/
-		mod.txt
+		mod.json
 ```
 
 The contents of that file are something like this
 
-```plain
-Mod Name|Description|v.v.v
+```json
+{
+	"name": "My Mod Name",
+	"description": "Description.",
+	"version": "v.v.v"
+}
+
 ```
 
-where `v.v.v` is the API Version intended for the mod to run on
+where `v.v.v` in `version` is the API Version intended for the mod to run on
 
 for example, if you're running v1.0.0 of the engine, then you wanna set the API Version to 1.0.0
+
+You can also provide a range of versions the mod is able to run on
+```json
+{
+	// ...
+	"version": "1.0.0~1.2.0",
+	// ...
+}
+```
 
 The good news is that if you don't set the version, it just assumes its meant to work in the latest version
 
 The bad news is that if you don't set the version, it **assumes** its meant to work in the latest version
 	If your mod uses deprecated functions/files or some characteristics added in a later version, it may be buggy for the player
-
-This file can also simply have a name
-
-```plain
-Mod Name
-```
-
-The other fields are optional, but realistically, you probably *want* a description.
