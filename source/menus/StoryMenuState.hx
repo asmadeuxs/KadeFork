@@ -212,7 +212,8 @@ class StoryMenuState extends GenericMenuState {
 		}
 		// var l = lvlLabels.members[curVertical];
 		// difficultySprites.x = l.x + l.width + 20;
-		intendedScore = Highscore.getCampaignScore(levelData[curVertical].fileName, diffic);
+		var level = levelData[curVertical];
+		intendedScore = Highscore.getCampaignScore('${level.mod}:${level.fileName}', diffic);
 	}
 
 	override function onAcceptPressed(level:Int, difficulty:Int):Void {

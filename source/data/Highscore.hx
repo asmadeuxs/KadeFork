@@ -9,8 +9,6 @@ class Highscore {
 	private static function formatSong(song:String, diff:String):String
 		return '$song-$diff';
 
-	// TODO: make this mod compliant? some mods may have identically named songs and whatever
-
 	public static function saveScore(song:String, diff:String = 'normal', score:Int = 0):Void {
 		var daSong:String = formatSong(song, diff);
 		if (!songScores.exists(daSong))

@@ -266,7 +266,8 @@ class FreeplayState extends GenericMenuState {
 		refreshDifficulties();
 		var diffic:String = lastDifficultyArray[index];
 		var diffn:String = #if FEATURE_TRANSLATIONS Translator.translateString('menus', 'difficulty_${diffic.toLowerCase()}') #else diffic #end;
-		intendedScore = Highscore.getScore(songs[curVertical].songFolder, diffic);
+		var song = songs[curVertical];
+		intendedScore = Highscore.getScore('${song.mod}:${song.folder}', diffic);
 		if (lastDifficultyArray.length > 1)
 			diffText.text = '< ${diffn.toUpperCase()} >';
 		else
