@@ -44,9 +44,9 @@ class SongPlaylist {
 	var _songToFreeplayMeta:Map<KadeForkChart, SongMetadata> = new Map<KadeForkChart, SongMetadata>();
 
 	public function addSongFromMetadata(song:SongMetadata, ?difficulty:String = 'normal') {
-		if (song == null || song.songFolder == null)
+		if (song == null || song.folder == null)
 			return null;
-		var daSong = Song.loadFromFile(song.mod, song.songFolder, difficulty);
+		var daSong = Song.loadFromFile(song.mod, song.folder, difficulty);
 		_songToFreeplayMeta.set(daSong, song);
 		songs.push(daSong);
 		return daSong;
@@ -68,7 +68,7 @@ class SongPlaylist {
 
 	public function removeSongFromTitle(songTitle:String) {
 		for (song => meta in _songToFreeplayMeta) {
-			if (meta.songName == songTitle) {
+			if (meta.name == songTitle) {
 				var index:Int = songs.indexOf(song);
 				if (index != -1)
 					songs.splice(index, 1);
@@ -79,7 +79,7 @@ class SongPlaylist {
 
 	public function removeSongFromFolder(folderName:String) {
 		for (song => meta in _songToFreeplayMeta) {
-			if (meta.songFolder == folderName) {
+			if (meta.folder == folderName) {
 				var index:Int = songs.indexOf(song);
 				if (index != -1)
 					songs.splice(index, 1);
@@ -94,7 +94,7 @@ class SongPlaylist {
 	public function updateSong() {
 		var metadata = getFreeplayMeta();
 		if (metadata != null) {
-			PlayState.songName = metadata.songFolder;
+			PlayState.songName = metadata.folder;
 			PlayState.difficulty = metadata.curDifficulty;
 			Mods.currentMod = metadata.mod;
 		}

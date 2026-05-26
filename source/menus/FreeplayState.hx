@@ -98,12 +98,12 @@ class FreeplayState extends GenericMenuState {
 		var itemCreated = function(i:Int, target:Alphabet) {
 			if (songs[i].mod != Mods.currentMod)
 				Mods.currentMod = songs[i].mod;
-			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
+			var icon:HealthIcon = new HealthIcon(songs[i].character);
 			icon.sprTracker = target;
 			iconArray.push(icon);
 			add(icon);
 		}
-		add(grpSongs = new AlphabetMenu(0, 0).generateMenu([for (i in 0...songs.length) songs[i].songName], itemCreated));
+		add(grpSongs = new AlphabetMenu(0, 0).generateMenu([for (i in 0...songs.length) songs[i].name], itemCreated));
 		Mods.currentMod = null;
 		maxVerticals = songs.length - 1;
 
@@ -112,7 +112,7 @@ class FreeplayState extends GenericMenuState {
 
 		scoreBG = new FlxSprite().makeScaledGraphic(Std.int(FlxG.width * 0.35), 100, 0xFF000000);
 		diffText = new FlxText(scoreText.x, scoreText.y + 36, 0, "", 24);
-		infoText = new FlxText(scoreText.x, diffText.y + 36, scoreBG.width - 10, "", 32);
+		infoText = new FlxText(scoreText.x, diffText.y + 36, scoreBG.width - 50, "", 32);
 		diffText.font = scoreText.font;
 		infoText.font = diffText.font;
 		infoText.alignment = CENTER;
@@ -164,7 +164,7 @@ class FreeplayState extends GenericMenuState {
 		for (song in selectedSongs) {
 			var lineText:FlxText = playlistGroup.recycle(FlxText);
 			lineText.setFormat(Mods.menuFont("vcr.ttf"), 22, FlxColor.WHITE);
-			lineText.text = song.songName + ' [${song.curDifficulty.toUpperCase()}]';
+			lineText.text = song.name + ' [${song.curDifficulty.toUpperCase()}]';
 			lineText.setPosition(xPos, yPos);
 			playlistGroup.add(lineText);
 			if (yPos > FlxG.height - 40)
@@ -217,7 +217,7 @@ class FreeplayState extends GenericMenuState {
 		}
 		PlayState.playlist.getCurrent(); // set the song to the current one.
 		PlayState.playlist.updateSong();
-		var songID:String = '${curSong.mod}:${curSong.songFolder}';
+		var songID:String = '${curSong.mod}:${curSong.folder}';
 		if (prevSong == songID)
 			Paths.skipNextClear = true;
 		prevSong = songID;

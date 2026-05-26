@@ -7,17 +7,18 @@ import data.ConfigTypes.LevelSong;
 		return new SongMetadata(item.name, item.folder, item.icon ?? "face", modId, item.difficulties);
 	}
 
-	public var songName:String = "";
-	public var songFolder:String = null;
-	public var songCharacter:String = "";
-	public var difficulties:Array<String> = null;
-	public var curDifficulty:String = null; // For playlists.
+	public var name:String = "";
+	public var folder:String = null;
+	public var character:String = "";
 	public var mod:String = null;
 
-	public function new(songName:String, songFolder:String, songCharacter:String, mod:String = 'core', ?difficulties:Array<String>):Void {
-		this.songName = songName;
-		this.songCharacter = songCharacter;
-		this.songFolder = songFolder ?? songName;
+	public var difficulties:Array<String> = null;
+	public var curDifficulty:String = null; // For playlists.
+
+	public function new(name:String, folder:String, character:String, mod:String = 'core', ?difficulties:Array<String>):Void {
+		this.name = name;
+		this.character = character;
+		this.folder = folder ?? name;
 		this.difficulties = difficulties;
 		this.mod = mod;
 	}

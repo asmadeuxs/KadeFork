@@ -1013,7 +1013,7 @@ class PlayState extends MusicBeatState {
 		canPause = false;
 		Conductor.current.stopMusic();
 		if (!session.invalid)
-			Highscore.saveScore('${util.Mods.currentMod}:$songName', difficulty, session.score);
+			Highscore.saveScore('${util.Mods.currentMod}:$songName', difficulty, session.toSave());
 
 		Paths.skipNextClear = true;
 		function goBackToFreeplay() {
@@ -1052,7 +1052,7 @@ class PlayState extends MusicBeatState {
 			var level = playlist.getLevel();
 			if (!session.invalid && level != null) {
 				// TODO: level unlocking
-				Highscore.saveLevelScore('${util.Mods.currentMod}:${level.fileName}', difficulty, session.score);
+				Highscore.saveLevelScore('${util.Mods.currentMod}:${level.fileName}', difficulty, session.toSave());
 			}
 		}
 		else

@@ -2,6 +2,7 @@ package data;
 
 import data.AccuracyAlgorithm.Simple;
 import data.AccuracyAlgorithm.Wife3;
+import data.Highscore;
 import data.JudgementManager;
 import gameplay.note.Note;
 
@@ -17,6 +18,16 @@ class PlaySession {
 
 	public function new():Void {
 		reset();
+	}
+
+	public function toSave():Highscore.ScoreSave {
+		return {
+			score: this.score,
+			misses: this.misses,
+			comboBreaks: this.comboBreaks,
+			accuracy: this.calculateAccuracy(),
+			combo: this.combo,
+		}
 	}
 
 	public function reset():Void {

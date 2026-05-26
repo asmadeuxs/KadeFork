@@ -2,50 +2,64 @@ package data;
 
 import flixel.FlxG;
 
+typedef ScoreSave = {
+	score:Int,
+	misses:Int,
+	comboBreaks:Int,
+	accuracy:Float,
+	combo:Int
+}
+
 class Highscore {
-	public static var songScores:Map<String, Int> = new Map<String, Int>();
-	public static var levelScores:Map<String, Int> = new Map<String, Int>();
+	public static var songScores:Map<String, ScoreSave> = new Map<String, ScoreSave>();
+	public static var levelScores:Map<String, ScoreSave> = new Map<String, ScoreSave>();
 
 	private static function formatSong(song:String, diff:String):String
 		return '$song-$diff';
 
-	public static function saveScore(song:String, diff:String = 'normal', score:Int = 0):Void {
+	public static function saveScore(song:String, diff:String = 'normal', save:ScoreSave):Void {
 		var daSong:String = formatSong(song, diff);
-		if (!songScores.exists(daSong))
-			setSongHighscore(daSong, score);
-		else if (songScores.get(daSong) < score)
-			setSongHighscore(daSong, score);
+		var existing:ScoreSave = songScores.get(daSong);
+		if (existing == null || save.score > existing.score)
+			setSongHighscore(daSong, save);
 	}
 
-	public static function saveLevelScore(levelID:String, diff:String = 'normal', score:Int = 0):Void {
+	public static function saveLevelScore(levelID:String, diff:String = 'normal', save:ScoreSave):Void {
 		var daLevel:String = formatSong('level-$levelID', diff);
-		if (!levelScores.exists(daLevel))
-			setLevelHighscore(daLevel, score);
-		else if (levelScores.get(daLevel) < score)
-			setLevelHighscore(daLevel, score);
+		var existing:ScoreSave = levelScores.get(daLevel);
+		if (existing == null || save.score > existing.score)
+			setLevelHighscore(daLevel, save);
 	}
 
 	public static function getScore(song:String, diff:String):Int {
 		var daSong:String = formatSong(song, diff);
-		if (!songScores.exists(daSong))
-			setSongHighscore(daSong, 0);
-		return songScores.get(daSong);
+		var existing:ScoreSave = songScores.get(daSong);
+		return (existing != null) ? existing.score : 0;
 	}
 
 	public static function getCampaignScore(levelID:String, diff:String):Int {
 		var level:String = formatSong('level-$levelID', diff);
-		if (!levelScores.exists(level))
-			setLevelHighscore(level, 0);
-		return levelScores.get(level);
+		var existing:ScoreSave = levelScores.get(level);
+		return (existing != null) ? existing.score : 0;
 	}
 
-	static function setSongHighscore(song:String, score:Int):Void {
-		songScores.set(song, score);
+	public static function getFullScore(song:String, diff:String):Null<ScoreSave> {
+		var daSong:String = formatSong(song, diff);
+		return songScores.get(daSong);
+	}
+
+	public static function getFullLevelScore(levelID:String, diff:String):Null<ScoreSave> {
+		var daLevel:String = formatSong('level-$levelID', diff);
+		return levelScores.get(daLevel);
+	}
+
+	static function setSongHighscore(song:String, save:ScoreSave):Void {
+		songScores.set(song, save);
 		saveSongHighscores();
 	}
 
-	static function setLevelHighscore(levelID:String, score:Int):Void {
-		levelScores.set(levelID, score);
+	static function setLevelHighscore(levelID:String, save:ScoreSave):Void {
+		levelScores.set(levelID, save);
 		saveCampaignHighscores();
 	}
 
