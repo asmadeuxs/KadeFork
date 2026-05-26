@@ -932,6 +932,11 @@ class PlayState extends MusicBeatState {
 	function opponentNoteHit(note:Note) {
 		if (!note.wasGoodHit)
 			note.wasGoodHit = true;
+		if (note.noteScript != null) {
+			var caller = note.noteScript.callFunc('onOpponentHit', [note]).value;
+			if (caller == ScriptLoader.STOP_FUNC)
+				return;
+		}
 		var altAnim:String = "";
 		// if (curSection != null && curSection.altAnim)
 		//	altAnim = '-alt';
@@ -940,6 +945,8 @@ class PlayState extends MusicBeatState {
 		callFuncInScripts("opponentNoteHit", [note]);
 		if (playerVocals != null && !isMultiVocals)
 			playerVocals.volume = 1;
+		if (note.noteScript != null)
+			note.noteScript.callFunc('postOpponentHit', [note]);
 	}
 
 	function queueInputNote(note:Note):Void {
@@ -1221,13 +1228,16 @@ class PlayState extends MusicBeatState {
 		boyfriend.danceCooldown = 1.0;
 		if (currentHUD != null)
 			currentHUD.updateScoreText();
+
+		if (daNote != null && daNote.noteScript != null)
+			daNote.noteScript.callFunc('postNoteMiss', [daNote, direction]);
 	}
 
 	var notesHitArray:Array<Date> = [];
 	var tilNpsUpdate:Float = 1;
 
 	public function goodNoteHit(note:Note):Void {
-		if (note != null && note.noteScript != null) {
+		if (note.noteScript != null) {
 			var caller = note.noteScript.callFunc('onNoteHit', [note]).value;
 			if (caller == ScriptLoader.STOP_FUNC)
 				return;
@@ -1275,6 +1285,8 @@ class PlayState extends MusicBeatState {
 			playerVocals.volume = 1;
 		if (currentHUD != null)
 			currentHUD.updateScoreText();
+		if (note.noteScript != null)
+			note.noteScript.callFunc('postNoteHit', [note]);
 	}
 
 	override function stepHit(curStep:Int) {

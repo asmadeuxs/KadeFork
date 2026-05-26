@@ -20,3 +20,32 @@ function noteRegenerated(note:Note, time:Float, direction:Int, length:Float) {
 function update(elapsed:Float, note:Note) {
 	// called every frame
 }
+
+// called during gameplay //
+
+function onNoteHit(note:Note) {
+	// called when the player hits this note
+	return CONTINUE;
+}
+
+function onOpponentHit(note:Note) {
+	// called when the opponent hits this note
+	return CONTINUE;
+}
+
+function onNoteMiss(note:Note, direction:Int) {
+	// called when the player misses this note
+	return CONTINUE;
+}
+
+function postNoteHit(note:Note) {
+	// called when the player hits this note
+}
+
+function postOpponentHit(note:Note) {
+	// called after the opponent hits this note
+}
+
+function postNoteMiss(note:Note, direction:Int) {
+	// called after the player misses this note
+}
