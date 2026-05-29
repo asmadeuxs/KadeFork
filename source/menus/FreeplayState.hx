@@ -28,6 +28,9 @@ class FreeplayState extends GenericMenuState {
 	var songs:Array<SongMetadata> = [];
 	var iconArray:Array<HealthIcon> = [];
 
+	var menuBG:FlxSprite;
+	var bgTween:FlxTween;
+
 	var lastDifficultyArray:Array<String> = null;
 	var grpSongs:AlphabetMenu;
 
@@ -70,6 +73,8 @@ class FreeplayState extends GenericMenuState {
 						var diffs:Array<String> = song.difficulties ?? level.difficulties;
 						if (song.difficulties == null)
 							song.difficulties = level.difficulties;
+						if (song.color == null && level.color != null)
+							song.color = level.color;
 						songs.push(SongMetadata.fromLevelSong(song, modId));
 						if (!foldersPushed.contains(song.folder))
 							foldersPushed.push(song.folder);
@@ -85,7 +90,7 @@ class FreeplayState extends GenericMenuState {
 					diffs = data[3].split(",");
 				if (foldersPushed.contains(data[1]))
 					continue;
-				songs.push(new SongMetadata(data[0], data[1], data[2], modId, diffs));
+				songs.push(new SongMetadata(data[0], data[1], data[2], modId, diffs, data[4]));
 				if (!foldersPushed.contains(data[1]))
 					foldersPushed.push(data[1]);
 			}
@@ -94,11 +99,15 @@ class FreeplayState extends GenericMenuState {
 		foldersPushed.resize(0);
 		foldersPushed = null;
 
-		add(new FlxSprite().loadGraphic(Mods.menuImage('ui/backgrounds/menuBGBlue')));
+		menuBG = new FlxSprite().loadGraphic(Mods.menuImage('ui/backgrounds/menuDesat'));
+		add(menuBG);
+
 		var itemCreated = function(i:Int, target:Alphabet) {
 			if (songs[i].mod != Mods.currentMod)
 				Mods.currentMod = songs[i].mod;
 			var icon:HealthIcon = new HealthIcon(songs[i].character);
+			if (songs[i].color == null)
+				songs[i].color = CoolUtil.dominantColor(icon, [0xFF000000]);
 			icon.sprTracker = target;
 			iconArray.push(icon);
 			add(icon);
@@ -116,7 +125,7 @@ class FreeplayState extends GenericMenuState {
 		diffText.font = scoreText.font;
 		infoText.font = diffText.font;
 		infoText.alignment = CENTER;
-		infoText.size = 20;
+		infoText.size = 16;
 
 		add(scoreBG);
 		add(diffText);
@@ -236,8 +245,14 @@ class FreeplayState extends GenericMenuState {
 	override function onVerticalChanged(index:Int) {
 		if (songs[curVertical].mod != Mods.currentMod)
 			Mods.currentMod = songs[curVertical].mod;
+
 		FlxG.sound.play(Mods.menuSound("scrollMenu"));
 		refreshDifficulties();
+
+		if (bgTween != null)
+			bgTween.cancel();
+		bgTween = FlxTween.color(menuBG, 0.8, menuBG.color, songs[curVertical].color);
+
 		var bullShit:Int = 0;
 		for (i in 0...iconArray.length)
 			iconArray[i].alpha = 0.6;

@@ -60,7 +60,15 @@ class Note extends ui.FunkinSprite {
 		return strumTime >= pos - (safeZone * hitMultiplier[0]) && strumTime <= pos + (safeZone * hitMultiplier[1]);
 	}
 
-	public var mustPress:Bool = false;
+	public var mustPress(get, never):Bool;
+
+	inline function get_mustPress():Bool {
+		var state:Bool = false;
+		if (PlayState.current != null && this.strumline != null)
+			state = PlayState.current.playableStrums.contains(this.strumline);
+		return state;
+	}
+
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
 	public var missed:Bool = false;

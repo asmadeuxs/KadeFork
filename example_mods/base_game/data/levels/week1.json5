@@ -1,6 +1,7 @@
 {
   tagline: "Daddy Dearest",
   difficulties: [ "Easy", "Normal", "Hard"],
+  color: "#9271FD",
   songs: [
     {
       name: "Bopeebo",

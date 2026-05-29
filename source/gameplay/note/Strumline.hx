@@ -17,6 +17,7 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 
 	public var scrollSpeed:Null<Float> = null;
 	public var strums:Array<FunkinSprite> = [];
+	public var botplay:Bool = true;
 
 	var splashPool:ObjectPool<FunkinSprite>;
 	var speeds:Array<Null<Float>> = [];
@@ -29,6 +30,9 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 		generateStrums();
 		splashPool = new ObjectPool(16, (_) -> return add(noteskin.generateNoteSplashSprite()));
 	}
+
+	public function toggleBotplay(state:Bool):Bool
+		return this.botplay = state;
 
 	public function spawnSplash(noteData:Int, ?note:Note, ?x:Float = 0, ?y:Float = 0):Bool {
 		var splash:FunkinSprite = splashPool.get();

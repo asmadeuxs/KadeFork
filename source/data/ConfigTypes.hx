@@ -2,6 +2,7 @@ package data;
 
 import data.song.SongMetadata;
 import flixel.math.FlxPoint;
+import flixel.util.FlxColor;
 import flixel.util.typeLimit.OneOfTwo;
 import haxe.DynamicAccess;
 
@@ -104,6 +105,7 @@ typedef LevelSong = {
 	folder:String,
 	?album:String,
 	?icon:String,
+	?color:String,
 	?difficulties:Array<String>,
 }
 
@@ -112,6 +114,10 @@ typedef LevelData = {
 	difficulties:Array<String>,
 	labelObject:LevelLabel,
 	songs:Array<LevelSong>,
+	// weekend 1 isn't gonna be in the base engine
+	// this is here just for convenience if u wanna do something of that genre
+	?color:String,
+	?colorTweenInStoryMode:Null<Bool>,
 	?fileName:String,
 	?mod:String
 }

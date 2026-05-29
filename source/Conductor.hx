@@ -289,7 +289,7 @@ class Conductor extends flixel.FlxBasic {
 			i.barHit(bar);
 	}
 
-	var resyncTime:Float = 15.0;
+	var resyncTime:Float = 20.0;
 
 	public function checkNeedResync():Void {
 		if (music != null && music.playing && tracks.length != 0)

@@ -1,7 +1,7 @@
 {
   tagline: "How to Funk",
   difficulties: [ "Easy", "Normal", "Hard" ],
-  labelObject: {},
+  color: "#9271FD",
   songs: [
     {
       name: "Tutorial",

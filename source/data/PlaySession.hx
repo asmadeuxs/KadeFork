@@ -26,6 +26,7 @@ class PlaySession {
 			misses: this.misses,
 			comboBreaks: this.comboBreaks,
 			accuracy: this.calculateAccuracy(),
+			system: Preferences.user.accuracySystem,
 			combo: this.combo,
 		}
 	}

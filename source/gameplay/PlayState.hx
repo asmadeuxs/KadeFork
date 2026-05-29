@@ -79,8 +79,10 @@ class PlayState extends MusicBeatState {
 	public var boyfriend:Character;
 
 	public var strumlines:FlxTypedSpriteGroup<Strumline>;
-	public var opponentStrums:Strumline;
+
 	public var playerStrums:Strumline;
+	// this is gonna be used for co-op later but for now it doesn't do anything noteworthy
+	public var playableStrums:Array<Strumline> = [];
 
 	public var notes:NoteRenderer;
 	public var scrollSpeed:Float = 2.5;
@@ -88,7 +90,6 @@ class PlayState extends MusicBeatState {
 	public var unspawnNotes:Array<NoteData> = [];
 	public var noteSpawnIndex:Int = 0;
 
-	public var perfectMode:Bool = false;
 	public var curStage:String = '';
 
 	public var comboDisplay:FlxSpriteGroup;
@@ -99,13 +100,18 @@ class PlayState extends MusicBeatState {
 	public var maxHealth:Float = 2.0;
 	public var minHealth:Float = 0.0;
 
+	public var camZooming:Bool = true;
+	public var hudZooming:Bool = true;
+
+	// modifiers
+	public var opponentMode:Bool = false;
+	// public var twoPlayers:Bool = false;
+	public var startAsBotplay:Bool = false;
+
 	var gameplayScripts:Array<Script> = [];
 
 	var events:Array<ChartEventArray> = [];
 	var eventPosition:Int = 0;
-
-	public var camZooming:Bool = true;
-	public var hudZooming:Bool = true;
 
 	var health(default, set):Float = 1;
 
@@ -137,7 +143,6 @@ class PlayState extends MusicBeatState {
 
 	var uiDimBackground:FlxSprite;
 	var inputQueue:Array<Array<Note>> = [];
-	var twoPlayerMode:Bool = false;
 	var inputMgr:InputManager;
 
 	// Used for some dynamic setting changes
@@ -239,6 +244,7 @@ class PlayState extends MusicBeatState {
 		boyfriend = new Character(0, 0, chartMetadata.player, PLAYER);
 
 		positionCharacters();
+
 		add(gf);
 		add(dad);
 		add(boyfriend);
@@ -271,12 +277,12 @@ class PlayState extends MusicBeatState {
 		var opponentNoteskin:String = getFirstVarInScripts("opponentNoteskin", currentChart.data.strumlines[1].skin ?? "default");
 		var playerNoteskin:String = getFirstVarInScripts("playerNoteskin", currentChart.data.strumlines[0].skin ?? "default");
 
-		opponentStrums = new Strumline(opponentNoteskin, currentChart.data.strumlines[1].keyCount ?? 4);
-		playerStrums = new Strumline(playerNoteskin, currentChart.data.strumlines[0].keyCount ?? 4);
+		strumlines.add(new Strumline(opponentNoteskin, currentChart.data.strumlines[1].keyCount ?? 4));
+		strumlines.add(new Strumline(playerNoteskin, currentChart.data.strumlines[0].keyCount ?? 4));
+		playerStrums = strumlines.members[opponentMode ? 0 : 1];
+		playerStrums.toggleBotplay(startAsBotplay);
+		playableStrums.push(playerStrums);
 		positionStrumlines();
-
-		strumlines.add(opponentStrums);
-		strumlines.add(playerStrums);
 
 		add(currentHUD);
 		add(strumlines);
@@ -408,12 +414,19 @@ class PlayState extends MusicBeatState {
 	}
 
 	public function positionStrumlines() {
-		opponentStrums.x = (FlxG.width - opponentStrums.width) * 0.05;
+		for (strumline in strumlines.members) {
+			// set visibility in case you have centerStrums on
+			strumline.visible = !Preferences.user.centerStrums;
+			if (strumline == playerStrums)
+				strumline.visible = true;
+		}
+		var leftSl:Strumline = strumlines.members[0];
+		var rightSl:Strumline = strumlines.members[1];
+		leftSl.x = (FlxG.width - leftSl.width) * 0.05;
+		rightSl.x = (FlxG.width - rightSl.width) * 0.8;
+		// only center the player's strums
 		if (Preferences.user.centerStrums)
 			playerStrums.x = (FlxG.width - playerStrums.width) * 0.5;
-		else
-			playerStrums.x = (FlxG.width - playerStrums.width) * 0.8;
-		opponentStrums.visible = !Preferences.user.centerStrums;
 	}
 
 	// For when the scroll option changes
@@ -529,33 +542,12 @@ class PlayState extends MusicBeatState {
 
 	function generateSong():Void {
 		Conductor.mapTimingPoints(currentChart);
-		Conductor.current.loadMusic(Paths.inst(PlayState.songName, PlayState.difficulty, util.Mods.currentMod));
 
-		// try to find per-player vocals
-		var p1 = null;
-		for (p1track in [chartMetadata.player, 'Player']) {
-			p1 = Paths.songAudio('Voices-$p1track', PlayState.songName, PlayState.difficulty, util.Mods.currentMod);
-			if (p1 != null)
-				break;
-		}
-		if (p1 != null) {
-			isMultiVocals = true;
-			Conductor.current.addTrack(p1);
-			var p2 = null;
-			for (p2track in [chartMetadata.opponent, 'Opponent']) {
-				p2 = Paths.songAudio('Voices-$p2track', PlayState.songName, PlayState.difficulty, util.Mods.currentMod);
-				if (p2 != null)
-					break;
-			}
-			if (p2 != null)
-				Conductor.current.addTrack(p2);
-		}
-		if (!isMultiVocals) {
-			// fallback to old system
-			var voices = Paths.voices(PlayState.songName, PlayState.difficulty, util.Mods.currentMod);
-			if (voices != null)
-				Conductor.current.addTrack(voices);
-		}
+		var tracks = Song.createTracks(chartMetadata, PlayState.songName, PlayState.difficulty, util.Mods.currentMod);
+		Conductor.current.loadMusic(tracks[0]);
+		isMultiVocals = tracks.length > 2;
+		for (i in 1...tracks.length)
+			Conductor.current.addTrack(tracks[i]);
 		playerVocals = Conductor.current.tracks[0];
 
 		songLength = Conductor.current.music.length;
@@ -720,8 +712,8 @@ class PlayState extends MusicBeatState {
 		#end
 		if (FlxG.keys.justPressed.F6) {
 			session.invalid = true;
-			perfectMode = !perfectMode;
-			perfectText.visible = perfectMode;
+			playerStrums.toggleBotplay(!playerStrums.botplay);
+			perfectText.visible = playerStrums.botplay;
 		}
 
 		tilNpsUpdate -= elapsed;
@@ -749,7 +741,8 @@ class PlayState extends MusicBeatState {
 			#if hxdiscord_rpc
 			DiscordClient.changePresence('${chartMetadata.name} (${difficulty.toUpperCase()})', 'Paused $detailsText', iconRPC);
 			#end
-			util.StateOverride.openSubState("menus.PauseSubstate", [boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y]);
+			var char:Character = opponentMode ? boyfriend : dad;
+			util.StateOverride.openSubState("menus.PauseSubstate", [char.getScreenPosition().x, char.getScreenPosition().y]);
 		}
 
 		if (startingSong && startedCountdown && Conductor.time >= 0)
@@ -765,10 +758,11 @@ class PlayState extends MusicBeatState {
 
 		if (health <= 0) {
 			pause(true);
-			boyfriend.stunned = true;
 			Conductor.current.stopMusic();
 			callFuncInScripts("playerDeath", []);
-			openSubState(new gameplay.GameOverSubstate(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
+			var char:Character = opponentMode ? boyfriend : dad;
+			char.stunned = true;
+			openSubState(new gameplay.GameOverSubstate(char.getScreenPosition().x, char.getScreenPosition().y));
 			#if hxdiscord_rpc
 			// Game Over doesn't get his own variable because it's only used here
 			DiscordClient.changePresence('${chartMetadata.name} (${difficulty.toUpperCase()})', 'Game Over!', iconRPC);
@@ -846,31 +840,33 @@ class PlayState extends MusicBeatState {
 
 	function noteUpdate(time:Float, elapsed:Float):Void {
 		for (daNote in notes.getActiveNotes()) {
+			var perfectMode:Bool = daNote.strumline.botplay;
+			var lastSl:Strumline = null;
 			var noteKill:Bool = false;
 
-			// Auto‑hit notes when perfectMode is on (or opponent notes)
-			if (!daNote.mustPress || (daNote.mustPress && perfectMode)) {
-				if (daNote.strumTime <= Conductor.time && !daNote.isFake) {
-					noteKill = false;
+			if (perfectMode && !daNote.isFake) {
+				if (!daNote.wasGoodHit && daNote.strumTime <= Conductor.time) {
+					if (lastSl != null && daNote.isSustain)
+						lastSl.playAnim(daNote.noteData, 'confirm');
+
 					if (daNote.mustPress && !daNote.wasGoodHit)
 						goodNoteHit(daNote);
 					else if (!daNote.mustPress) {
 						opponentNoteHit(daNote);
 						noteKill = !daNote.isSustain;
-						if (daNote.isSustain) {
-							daNote.isLocked = true;
-							daNote.sustainProgress -= elapsed * 1000.0;
-							if (daNote.sustainProgress <= 0)
-								noteKill = true;
-						}
 					}
+					lastSl = daNote.strumline;
+				}
+				if (daNote.wasGoodHit && daNote.isSustain) {
+					daNote.isLocked = true;
+					daNote.sustainProgress -= elapsed * 1000.0;
+					if (daNote.sustainProgress <= 0)
+						noteKill = true;
 				}
 			}
 
-			// Handle active hold notes (works for perfectMode as well)
-			if (daNote.mustPress && daNote.wasGoodHit && daNote.isSustain) {
-				var isHolding:Bool = perfectMode || holdInputs[daNote.noteData];
-				if (isHolding) {
+			if (daNote.wasGoodHit && daNote.isSustain) {
+				if (perfectMode || holdInputs[daNote.noteData]) {
 					if (daNote.holdReleased) { // not resetting the timer here, you had your chance
 						daNote.holdReleased = false;
 						daNote.alpha = daNote.baseHoldAlpha;
@@ -922,6 +918,8 @@ class PlayState extends MusicBeatState {
 			}
 
 			if (noteKill) {
+				if (lastSl != null)
+					lastSl.playAnim(daNote.noteData, 'static', true);
 				if (daNote.missed && playerVocals != null)
 					playerVocals.volume = 0;
 				notes.removeNote(daNote);
@@ -937,11 +935,10 @@ class PlayState extends MusicBeatState {
 			if (caller == ScriptLoader.STOP_FUNC)
 				return;
 		}
-		var altAnim:String = "";
-		// if (curSection != null && curSection.altAnim)
-		//	altAnim = '-alt';
-		dad.sing(note.noteData, altAnim, true);
-		dad.danceCooldown = dad.singDuration + note.sustainLength;
+		var char:Character = opponentMode ? boyfriend : dad;
+		char.sing(note.noteData, '', true);
+		char.danceCooldown = char.singDuration + note.sustainLength;
+
 		callFuncInScripts("opponentNoteHit", [note]);
 		if (playerVocals != null && !isMultiVocals)
 			playerVocals.volume = 1;
@@ -971,7 +968,7 @@ class PlayState extends MusicBeatState {
 	}
 
 	public function keyPressed(key:Int):Void {
-		var on:Bool = inputMgr != null && inputEnabled && !perfectMode;
+		var on:Bool = inputMgr != null && inputEnabled && !playerStrums.botplay;
 		if (!on || key == -1 || paused || inCutscene || !generatedMusic || endingSong)
 			return;
 
@@ -1010,7 +1007,7 @@ class PlayState extends MusicBeatState {
 	}
 
 	public function keyReleased(key:Int):Void {
-		var on:Bool = inputMgr != null && inputEnabled && !perfectMode;
+		var on:Bool = inputMgr != null && inputEnabled && !playerStrums.botplay;
 		if (!on || key == -1 || paused || inCutscene || !generatedMusic || endingSong)
 			return;
 		holdInputs[key] = false;
@@ -1224,8 +1221,11 @@ class PlayState extends MusicBeatState {
 		}
 
 		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
-		boyfriend.miss(direction, true);
-		boyfriend.danceCooldown = 1.0;
+		// TODO: figure out which character has hit/missed this
+		// this works for now but should def be changed to account for co-op etc
+		var char:Character = opponentMode ? dad : boyfriend;
+		char.miss(direction, true);
+		char.danceCooldown = 1.0;
 		if (currentHUD != null)
 			currentHUD.updateScoreText();
 
@@ -1250,8 +1250,10 @@ class PlayState extends MusicBeatState {
 
 		callFuncInScripts("goodNoteHit", [note]);
 
-		boyfriend.sing(note.noteData, null, true);
-		boyfriend.danceCooldown = boyfriend.singDuration + note.sustainLength;
+		var char:Character = opponentMode ? dad : boyfriend;
+		char.sing(note.noteData, null, true);
+		char.danceCooldown = char.singDuration + note.sustainLength;
+
 		note.wasGoodHit = true;
 		function scoreNote() {
 			session.scoreNote(note);
@@ -1271,7 +1273,7 @@ class PlayState extends MusicBeatState {
 			note.sustainProgress = note.sustainLength;
 			note.holdTimer = 0.0;
 			scoreNote();
-			// edge case just so holds hit too late shrimk properly
+			// edge case just so holds hit too late shrink properly
 			var lateThreshold:Float = 50.0;
 			if (note.hitDifference > lateThreshold) {
 				var maxWindow:Float = session.judgeMan.maxHitWindow ?? 180.0;

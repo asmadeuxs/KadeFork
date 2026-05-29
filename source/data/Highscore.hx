@@ -7,7 +7,8 @@ typedef ScoreSave = {
 	misses:Int,
 	comboBreaks:Int,
 	accuracy:Float,
-	combo:Int
+	combo:Int,
+	system:String
 }
 
 class Highscore {
@@ -34,12 +35,16 @@ class Highscore {
 	public static function getScore(song:String, diff:String):Int {
 		var daSong:String = formatSong(song, diff);
 		var existing:ScoreSave = songScores.get(daSong);
+		if (existing != null && (existing.system != Preferences.user.accuracySystem))
+			return 0;
 		return (existing != null) ? existing.score : 0;
 	}
 
 	public static function getCampaignScore(levelID:String, diff:String):Int {
 		var level:String = formatSong('level-$levelID', diff);
 		var existing:ScoreSave = levelScores.get(level);
+		if (existing != null && (existing.system != Preferences.user.accuracySystem))
+			return 0;
 		return (existing != null) ? existing.score : 0;
 	}
 

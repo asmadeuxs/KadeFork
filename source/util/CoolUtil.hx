@@ -115,7 +115,7 @@ class CoolUtil {
 		var colorsToDiscard:Map<Int, Bool> = null;
 
 		if (ignoreColors != null && ignoreColors.length > 0) {
-			colorsToDiscard = [];
+			colorsToDiscard = new Map<Int, Bool>();
 			for (col in ignoreColors)
 				colorsToDiscard[col] = true;
 		}
@@ -134,9 +134,11 @@ class CoolUtil {
 			}
 		}
 
-		colorsToDiscard.clear();
+		if (colorsToDiscard != null) {
+			colorsToDiscard.clear();
+			colorsToDiscard = null;
+		}
 		ignoreColors.resize(0);
-		colorsToDiscard = null;
 		ignoreColors = null;
 
 		if (mapLen <= 0)

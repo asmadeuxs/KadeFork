@@ -10,6 +10,7 @@ import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
 import gameplay.PlayState;
 import registry.LevelRegistry;
 import ui.FunkinSprite;
@@ -26,6 +27,9 @@ class StoryMenuState extends GenericMenuState {
 
 	var levelData:Array<LevelData> = null;
 	var lastDifficultyArray:Array<String> = null;
+
+	var bgTween:FlxTween;
+	var defaultBgColor:FlxColor = 0xFFF9CF51;
 
 	var scoreText:FlxText;
 	var taglineText:FlxText;
@@ -56,7 +60,7 @@ class StoryMenuState extends GenericMenuState {
 
 		add(new FlxSprite().makeScaledGraphic(FlxG.width, FlxG.height, 0xFF000000));
 
-		mainBG = new FlxSprite(0, 56).makeScaledGraphic(FlxG.width, FlxG.height / 1.8, 0xFFF9CF51);
+		mainBG = new FlxSprite(0, 56).makeScaledGraphic(FlxG.width, FlxG.height / 1.8, defaultBgColor);
 		add(lvlLabels = new FlxTypedSpriteGroup<FunkinSprite>(0, -5000));
 		add(mainBG);
 		// black bar above the main (yellow) bg
@@ -183,6 +187,18 @@ class StoryMenuState extends GenericMenuState {
 	override function onVerticalChanged(index:Int):Void {
 		updateTexts();
 		refreshDifficulties();
+
+		var l = levelData[curVertical];
+		var notDefault:Bool = Math.abs(defaultBgColor - mainBG.color) < 0.0001;
+		if (notDefault || (l != null && l.colorTweenInStoryMode == true)) {
+			if (bgTween != null)
+				bgTween.cancel();
+			var nextColor:FlxColor = defaultBgColor;
+			if (!notDefault)
+				nextColor = FlxColor.fromString(l.color);
+			bgTween = FlxTween.color(mainBG, 0.8, mainBG.color, nextColor);
+		}
+
 		FlxG.sound.play(util.Mods.menuSound("scrollMenu"));
 		maxHorizontals = lastDifficultyArray.length - 1;
 		var bullShit:Int = 0;

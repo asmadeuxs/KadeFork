@@ -45,8 +45,20 @@ class Classic extends BaseHUD {
 			updateSongPosition();
 		}
 
+		var red:FlxColor = 0xFFFF0000;
+		var lime:FlxColor = 0xFF66FF33;
+		var col1:FlxColor = red;
+		var col2:FlxColor = lime;
+
+		var dir:FlxBarFillDirection = RIGHT_TO_LEFT;
+		if (PlayState.current != null && PlayState.current.opponentMode) {
+			dir = LEFT_TO_RIGHT;
+			col2 = lime;
+			col1 = red;
+		}
+
 		healthBarBG = new FlxSprite(0, 0).loadGraphic(Paths.image('gameplay/ui/healthBar'));
-		healthBar = new FlxBar(0, 0, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), PlayState.current, 'health', 0, 2);
+		healthBar = new FlxBar(0, 0, dir, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), PlayState.current, 'health', 0, 2);
 		iconP1 = new HealthIcon(HealthIcon.getPlayerIcon(), true);
 		iconP2 = new HealthIcon(HealthIcon.getOpponentIcon(), false);
 		scoreTxt = new FlxText(0, healthBarBG.y + 50, 0, "", 20);
@@ -57,7 +69,7 @@ class Classic extends BaseHUD {
 			judgesTxt.antialiasing = true;
 		}
 
-		healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
+		healthBar.createFilledBar(col1, col2);
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
 		healthBarBG.antialiasing = true;
 		healthBar.antialiasing = true;
@@ -122,7 +134,9 @@ class Classic extends BaseHUD {
 			songPos = Conductor.time;
 		// icon
 		var iconOffset:Int = 26;
-		var hpCenter:Float = healthBar.x + healthBar.width * (1 - healthBar.percent * 0.01);
+		var hpCenter:Float = healthBar.x + healthBar.width * healthBar.percent * 0.01;
+		if (healthBar.fillDirection == FlxBarFillDirection.RIGHT_TO_LEFT)
+			hpCenter = healthBar.x + healthBar.width * (1 - healthBar.percent * 0.01);
 		if (iconP1 != null) {
 			// TODO: restore this
 			/*if (FlxG.keys.justPressed.NINE) {
@@ -141,17 +155,24 @@ class Classic extends BaseHUD {
 			iconP2.updateHitbox();
 		}
 		if (iconP1 != null && iconP2 != null) {
+			var p1:HealthIcon = iconP1;
+			var p2:HealthIcon = iconP2;
+			if (healthBar.fillDirection == FlxBarFillDirection.LEFT_TO_RIGHT) {
+				// flip if bar is "flipped" (from its usual mode anyway)
+				p1 = iconP2;
+				p2 = iconP1;
+			}
 			if (healthBar.percent < 20) {
-				iconP1.switchState("losing");
-				iconP2.switchState("winning");
+				p1.switchState("losing");
+				p2.switchState("winning");
 			}
 			else if (healthBar.percent > 80) {
-				iconP1.switchState("winning");
-				iconP2.switchState("losing");
+				p1.switchState("winning");
+				p2.switchState("losing");
 			}
 			else {
-				iconP1.switchState("idle");
-				iconP2.switchState("idle");
+				p1.switchState("idle");
+				p2.switchState("idle");
 			}
 		}
 		updateSongPosition();
