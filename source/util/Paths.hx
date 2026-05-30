@@ -67,7 +67,21 @@ class Paths {
 		FlxG.bitmap.remove(graphic);
 	});
 
-	static private var soundRegistry = new AssetRegistry<Sound>((key, sound) -> openfl.utils.Assets.cache.clear(key));
+	static private var atlasRegistry = new AssetRegistry<FlxAtlasFrames>((key, atlas) -> {
+		if (atlas != null) {
+			if (atlas.parent != null) {
+				if (textureRegistry != null && textureRegistry.has(key))
+					textureRegistry.unregister(key);
+				@:privateAccess atlas.parent.bitmap.__texture.dispose();
+				FlxG.bitmap.remove(atlas.parent);
+			}
+			atlas.destroy();
+		}
+	});
+
+	static private var soundRegistry = new AssetRegistry<Sound>((key, sound) -> {
+		openfl.utils.Assets.cache.clear(key);
+	});
 
 	static public function getAssetOrigin(?mod:String = null):String {
 		#if FEATURE_MODS
@@ -166,55 +180,77 @@ class Paths {
 						start += ".ttf";
 				}
 				return start;
-			// these 2 functions make me genuinely insane for a few hours
+			// these 2 functions made me genuinely insane for a few hours
 			// that's why they have all that error throwing -asmadeuxs
 			case SPARROW_ATLAS:
-				var pngPath = resolveAssetPath(file + '.png', mod);
-				var xmlPath = resolveAssetPath(file + '.xml', mod);
-				if (pngPath == null || xmlPath == null) {
-					FlxG.log.warn('Missing atlas files for $file');
-					return null;
-				}
-				var graphic = getGraphic(cacheKey, pngPath);
-				if (graphic == null)
-					return null;
-				var xmlString = Paths.getText(xmlPath);
-				if (xmlString == null) {
-					FlxG.log.warn('Failed to read XML: $xmlPath');
-					return null;
+				var atlas = null;
+				if (atlasRegistry.has(cacheKey))
+					atlas = atlasRegistry.get(cacheKey);
+				if (atlas == null) {
+					var pngPath = resolveAssetPath(file + '.png', mod);
+					if (pngPath == null) {
+						FlxG.log.warn('Missing sparrow atlas texture for $file');
+						return null;
+					}
+					var xmlPath = resolveAssetPath(file + '.xml', mod);
+					if (xmlPath == null) {
+						FlxG.log.warn('Missing sparrow atlas file for $file');
+						return null;
+					}
+					var xmlString = Paths.getText(xmlPath);
+					if (xmlString == null) {
+						FlxG.log.warn('Failed to read XML: $xmlPath');
+						return null;
+					}
+					atlas = FlxAtlasFrames.fromSparrow(getGraphic(cacheKey, pngPath), xmlString);
 				}
 				trackAsset(cacheKey);
-				return FlxAtlasFrames.fromSparrow(graphic, xmlString);
+				return atlas;
 			case PACKER_ATLAS:
-				var pngPath = resolveAssetPath(file + '.png', mod);
-				var txtPath = resolveAssetPath(file + '.txt', mod);
-				if (pngPath == null || txtPath == null) {
-					FlxG.log.warn('Missing atlas files for $file');
-					return null;
+				var atlas = null;
+				if (atlasRegistry.has(cacheKey))
+					atlas = atlasRegistry.get(cacheKey);
+				if (atlas == null) {
+					var pngPath = resolveAssetPath(file + '.png', mod);
+					if (pngPath == null) {
+						FlxG.log.warn('Missing packer atlas texture for $file');
+						return null;
+					}
+					var txtPath = resolveAssetPath(file + '.txt', mod);
+					if (txtPath == null) {
+						FlxG.log.warn('Missing packer atlas file for $file');
+						return null;
+					}
+					var txtString = Paths.getText(txtPath);
+					if (txtString == null) {
+						FlxG.log.warn('Failed to read TXT: $txtPath');
+						return null;
+					}
+					atlas = FlxAtlasFrames.fromSpriteSheetPacker(getGraphic(cacheKey, pngPath), txtString);
+					trackAsset(cacheKey);
 				}
-				var graphic = getGraphic(cacheKey, pngPath);
-				if (graphic == null)
-					return null;
-				var txtString = Paths.getText(txtPath);
-				if (txtString == null) {
-					FlxG.log.warn('Failed to read TXT: $txtPath');
-					return null;
+				return atlas;
+			case ANIMATE_ATLAS:
+				var atlas = null;
+				if (atlasRegistry.has(cacheKey))
+					atlas = atlasRegistry.get(cacheKey);
+				if (atlas == null) {
+					var assetPath = resolveAssetPath(file, mod);
+					atlas = FlxAnimateFrames.fromAnimate(assetPath, null, null, cacheKey, true, null);
+					if (atlas != null) {
+						var graphic:FlxGraphic = atlas.parent;
+						if (graphic != null) {
+							graphic.destroyOnNoUse = false;
+							graphic.persist = true;
+						}
+						else
+							FlxG.log.warn('Missing animate atlas texture for $file');
+					}
+					else
+						FlxG.log.warn('Cannot load animate atlas for $file');
 				}
 				trackAsset(cacheKey);
-				return FlxAtlasFrames.fromSparrow(graphic, txtString);
-			case ANIMATE_ATLAS:
-				var assetPath = resolveAssetPath(file, mod);
-				var atlas = FlxAnimateFrames.fromAnimate(assetPath, null, null, cacheKey, true, null);
-				if (atlas != null) {
-					var graphic:FlxGraphic = atlas.parent;
-					graphic.persist = true;
-					graphic.destroyOnNoUse = false;
-					textureRegistry.register(cacheKey, graphic);
-					trackAsset(cacheKey);
-					return atlas;
-				}
-				FlxG.log.warn('Missing atlas for $file');
-				return null;
+				return atlas;
 			case MUSIC, SOUND:
 				var assetPath = resolveAssetPath(file, mod);
 				if (assetPath == null) {
@@ -310,17 +346,27 @@ class Paths {
 		return sys.FileSystem.readDirectory(dir);
 
 	static private function getGraphic(cacheKey:String, assetPath:String):FlxGraphic {
-		if (!textureRegistry.has(cacheKey)) {
-			if (!Paths.fileExists(assetPath)) {
-				FlxG.log.warn('Texture not found at "$assetPath"');
-				return null;
+		if (textureRegistry.has(cacheKey))
+			return textureRegistry.get(cacheKey);
+		if (atlasRegistry.has(cacheKey)) {
+			var atlas = atlasRegistry.get(cacheKey);
+			if (atlas != null && atlas.parent != null) {
+				var graphic = atlas.parent;
+				graphic.destroyOnNoUse = false;
+				graphic.persist = true;
+				textureRegistry.register(cacheKey, graphic);
+				return graphic;
 			}
-			var graphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(assetPath), false, cacheKey);
-			graphic.destroyOnNoUse = false;
-			graphic.persist = true;
-			textureRegistry.register(cacheKey, graphic);
 		}
-		return textureRegistry.get(cacheKey);
+		if (!Paths.fileExists(assetPath)) {
+			FlxG.log.warn('Texture not found at "$assetPath"');
+			return null;
+		}
+		var graphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(assetPath), false, cacheKey);
+		graphic.destroyOnNoUse = false;
+		graphic.persist = true;
+		textureRegistry.register(cacheKey, graphic);
+		return graphic;
 	}
 
 	static private function getSound(cacheKey:String, assetPath:String):Sound {
