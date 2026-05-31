@@ -3,12 +3,24 @@ package data;
 import data.AccuracyAlgorithm.Simple;
 import data.AccuracyAlgorithm.Wife3;
 import data.Highscore;
+import data.JudgementManager.Judgement;
 import data.JudgementManager;
 import gameplay.note.Note;
 
 class PlaySession {
 	public var score:Int = 0;
-	public var misses:Int = 0;
+	public var misses(get, never):Int;
+
+	inline function get_misses():Int {
+		var i:Int = 0;
+		if (judgeMan != null) {
+			var miss:Judgement = judgeMan.getMiss();
+			if (miss != null)
+				i = miss.hits;
+		}
+		return i;
+	}
+
 	public var comboBreaks:Int = 0;
 	public var invalid:Bool = false;
 	public var combo:Int = 0;
@@ -45,7 +57,6 @@ class PlaySession {
 		else
 			accuracy.reset();
 		comboBreaks = 0;
-		misses = 0;
 		score = 0;
 		combo = 0;
 	}
@@ -54,8 +65,8 @@ class PlaySession {
 		if (daNote.judgement == null) {
 			daNote.hitDifference = daNote.strumTime - Conductor.time;
 			daNote.judgement = judgeMan.judgeTime(Math.abs(daNote.hitDifference));
-			daNote.judgement.hits++;
 		}
+		daNote.judgement.hits++;
 		score += Math.round(daNote.judgement.score);
 		switch (daNote.judgement.comboBehavior) {
 			case INCREASE:
