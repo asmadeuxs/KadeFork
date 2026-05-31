@@ -962,9 +962,10 @@ class PlayState extends MusicBeatState {
 		holdInputs[lane] = true;
 
 		var queue:Array<Note> = inputQueue[lane];
-		var next:Note = queue.shift();
+		var next:Note = queue != null && queue[0] != null ? queue[0] : null;
 
 		if (next != null && next.canBeHit) {
+			queue.shift();
 			for (battat in queue) {
 				// if the note is too old then we don't bother
 				if (Math.abs(next.strumTime - battat.strumTime) > 0.00001)
