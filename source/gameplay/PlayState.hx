@@ -583,20 +583,6 @@ class PlayState extends MusicBeatState {
 		}
 		unspawnNotes.sort(sortByShit);
 
-		var uniqueNotes:Array<NoteData> = [];
-		for (i in 0...unspawnNotes.length) {
-			if (i == 0) {
-				uniqueNotes.push(unspawnNotes[i]);
-				continue;
-			}
-			var prev = uniqueNotes[uniqueNotes.length - 1];
-			var curr = unspawnNotes[i];
-			if (Math.abs(curr.time - prev.time) < 0.00001 && prev.lane == curr.lane && prev.owner == curr.owner)
-				continue;
-			uniqueNotes.push(curr);
-		}
-		unspawnNotes = uniqueNotes;
-
 		events = currentChart.data.events;
 
 		// preload scripts
@@ -973,12 +959,24 @@ class PlayState extends MusicBeatState {
 			return;
 
 		var lane:Int = key;
-		var queue:Array<Note> = inputQueue[lane];
-		var next:Note = (queue.length != 0) ? queue[0] : null;
 		holdInputs[lane] = true;
 
+		var queue:Array<Note> = inputQueue[lane];
+		var next:Note = queue.shift();
+
 		if (next != null && next.canBeHit) {
-			queue.shift();
+			for (battat in queue) {
+				// if the note is too old then we don't bother
+				if (Math.abs(next.strumTime - battat.strumTime) > 0.00001)
+					break;
+				// we PRETEND that's THE exact note we want to hit
+				// this is because it can hurt us if we leave it unhit
+				battat.wasGoodHit = true;
+				// and then we kill it, leaving zero traces behind
+				battat.kill();
+				// this bullshit function was sponsored by miketwt
+				queue.shift();
+			}
 			if (next.isSustain)
 				next.holdTimer = 1.0;
 			goodNoteHit(next);
@@ -1253,6 +1251,9 @@ class PlayState extends MusicBeatState {
 	var tilNpsUpdate:Float = 1;
 
 	public function goodNoteHit(note:Note):Void {
+		if (note.wasGoodHit || note.missed)
+			return;
+
 		if (note.noteScript != null) {
 			var caller = note.noteScript.callFunc('onNoteHit', [note]).value;
 			if (caller == ScriptLoader.STOP_FUNC)

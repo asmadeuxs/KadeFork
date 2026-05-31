@@ -101,7 +101,7 @@ class Character extends ui.FunkinSprite {
 
 	public function danceCheck():Void {
 		var interval:Float = beatsToDance / danceSpeed;
-		if (placeholder || !debugMode && !stunned || isSinging() || interval <= 0)
+		if (placeholder || debugMode || stunned || isSinging() || interval <= 0)
 			return;
 
 		if (_nextDanceBeat < 0)
