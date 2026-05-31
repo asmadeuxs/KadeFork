@@ -86,8 +86,11 @@ class Paths {
 	static public function getAssetOrigin(?mod:String = null):String {
 		#if FEATURE_MODS
 		if (mod.contains("/")) {
+			var nameIndex:Int = 0;
 			// this is a path so we need to extract the mod id
-			mod = mod.split("/")[0];
+			if (mod.startsWith('${util.Mods.modRoot}/'))
+				nameIndex = 1;
+			mod = mod.split("/")[nameIndex];
 			if (mod.contains("/"))
 				mod = "core";
 		}

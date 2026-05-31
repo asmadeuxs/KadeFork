@@ -76,7 +76,7 @@ class Song {
 
 		if (!isMultiVocals) {
 			// fallback to old system
-			var voicesFile:String = Paths.resolveSongPath('Inst', songName, difficulty, mod);
+			var voicesFile:String = Paths.resolveSongPath('Voices', songName, difficulty, mod);
 			if (!isVariation || (isVariation && voicesFile.endsWith(variationSuf)))
 				Conductor.current.addTrack(Paths.getPath(voicesFile, MUSIC, mod));
 		}
