@@ -760,7 +760,7 @@ class PlayState extends MusicBeatState {
 			pause(true);
 			Conductor.current.stopMusic();
 			callFuncInScripts("playerDeath", []);
-			var char:Character = opponentMode ? boyfriend : dad;
+			var char:Character = opponentMode ? dad : boyfriend;
 			char.stunned = true;
 			openSubState(new gameplay.GameOverSubstate(char.getScreenPosition().x, char.getScreenPosition().y));
 			#if hxdiscord_rpc
