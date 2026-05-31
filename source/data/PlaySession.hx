@@ -85,12 +85,13 @@ class PlaySession {
 		return combo;
 	}
 
-	public function breakCombo():Void {
+	public function breakCombo():Int {
 		comboBreaks++;
 		if (combo > 0)
 			combo = 0;
 		else
 			combo--;
+		return combo;
 	}
 
 	public function calculateAccuracy():Float {

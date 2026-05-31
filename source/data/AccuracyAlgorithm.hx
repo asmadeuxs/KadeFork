@@ -74,7 +74,7 @@ class Wife3 extends AccuracyAlgorithm {
 	}
 
 	override public function ghostMiss(_:PlaySession):Void {
-		totalNotesHit += 1;
+		totalNotesHit += 2;
 	}
 
 	public function toString():String

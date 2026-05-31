@@ -897,8 +897,8 @@ class PlayState extends MusicBeatState {
 					daNote.holdTimer -= elapsed;
 					daNote.alpha = Math.max(0, daNote.holdTimer / grace);
 					if (daNote.holdTimer <= 0 && !daNote.wasGoodHit && !daNote.missed) {
-						noteMiss(daNote.noteData, daNote);
 						daNote.missed = true;
+						noteMiss(daNote.noteData, daNote);
 						noteKill = true;
 					}
 				}
@@ -1091,6 +1091,18 @@ class PlayState extends MusicBeatState {
 		popUpMillisecondDisplay(FlxMath.roundDecimal(noteDiff, 3), daNote.judgement);
 	}
 
+	public function popUpMiss(missJudge:Judgement):Void {
+		var scriptHUD:ScriptHUD = null;
+		if (currentHUD != null && currentHUD is ScriptHUD) {
+			scriptHUD = cast currentHUD;
+			var ret = scriptHUD.callFunc("popUpMiss", [missJudge]);
+			if (ret != null && ret.value == ScriptLoader.STOP_FUNC)
+				return;
+		}
+		popUpRating(missJudge.image);
+		popUpCombo(session.combo, missJudge);
+	}
+
 	public function popUpRating(image:String):Void {
 		var position:Float = FlxG.width * 0.55;
 		var rating:FlxSprite = new FlxSprite().loadGraphic(Paths.image('gameplay/ui/score/$image'));
@@ -1112,7 +1124,7 @@ class PlayState extends MusicBeatState {
 		});
 	}
 
-	public function popUpCombo(combo:Int, ?judgement:Judgement = null):Void {
+	public function popUpCombo(counter:Int, ?judgement:Judgement = null):Void {
 		var comboSprScale:Float = 0.65;
 		var color:FlxColor = judgement.color ?? FlxColor.WHITE;
 		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image('gameplay/ui/score/combo'));
@@ -1130,7 +1142,7 @@ class PlayState extends MusicBeatState {
 			comboDisplay.add(comboSpr);
 
 		var numScoreScale:Float = 0.5;
-		var seperatedScore:Array<String> = Std.string(combo).split('');
+		var seperatedScore:Array<String> = Std.string(counter).split('');
 		for (daLoop => i in seperatedScore) {
 			var numScore:FlxSprite = new FlxSprite(0, comboSpr.y + 30).loadGraphic(Paths.image('gameplay/ui/score/num$i'));
 			numScore.setGraphicSize(Std.int(numScore.width * numScoreScale));
@@ -1194,10 +1206,8 @@ class PlayState extends MusicBeatState {
 			if (caller == ScriptLoader.STOP_FUNC)
 				return;
 		}
-		session.score -= 10;
 		if (session.combo > 5 && gf.animOffsets.exists('sad'))
 			gf.playAnim('sad');
-		session.breakCombo();
 
 		callFuncInScripts("noteMiss", [direction, daNote]);
 
@@ -1205,19 +1215,24 @@ class PlayState extends MusicBeatState {
 		if (missJudge != null) {
 			var prevHitCount:Int = missJudge.hits;
 			health += session.judgeMan.getHealthBonus(missJudge, health);
+
 			if (daNote != null) {
 				daNote.judgement = missJudge;
 				session.scoreNote(daNote);
 			}
 			else {
 				missJudge.hits++;
+				session.score += missJudge.score;
+				session.breakCombo();
 				if (session.accuracy != null)
 					session.accuracy.ghostMiss(session);
 			}
-			if (missJudge.hits > prevHitCount && Preferences.user.showMissPopups) {
-				popUpRating(missJudge.image);
-				popUpCombo(session.combo, missJudge);
-			}
+			if (missJudge.hits > prevHitCount && Preferences.user.showMissPopups)
+				popUpMiss(missJudge);
+		}
+		else {
+			session.score -= 10;
+			session.breakCombo();
 		}
 
 		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
@@ -1226,6 +1241,7 @@ class PlayState extends MusicBeatState {
 		var char:Character = opponentMode ? dad : boyfriend;
 		char.miss(direction, true);
 		char.danceCooldown = 1.0;
+
 		if (currentHUD != null)
 			currentHUD.updateScoreText();
 
@@ -1248,31 +1264,27 @@ class PlayState extends MusicBeatState {
 			return;
 		}
 
-		callFuncInScripts("goodNoteHit", [note]);
-
-		var char:Character = opponentMode ? dad : boyfriend;
-		char.sing(note.noteData, null, true);
-		char.danceCooldown = char.singDuration + note.sustainLength;
-
-		note.wasGoodHit = true;
-		function scoreNote() {
+		if (!note.wasGoodHit) {
 			session.scoreNote(note);
 			health += session.judgeMan.getHealthBonus(note.judgement, health);
 			if (Preferences.user.noteSplashes && note.judgement.splash)
 				playerStrums.spawnSplash(note.noteData);
 			notesHitArray.push(Date.now());
 			popUpScore(note);
+			note.wasGoodHit = true;
 		}
-		if (!note.isSustain) {
-			scoreNote();
-			notes.removeNote(note);
-		}
-		else {
+
+		callFuncInScripts("goodNoteHit", [note]);
+
+		var char:Character = opponentMode ? dad : boyfriend;
+		char.sing(note.noteData, null, true);
+		char.danceCooldown = char.singDuration + note.sustainLength;
+
+		if (note.isSustain) {
 			note.isLocked = true;
 			note.holdReleased = false;
 			note.sustainProgress = note.sustainLength;
 			note.holdTimer = 0.0;
-			scoreNote();
 			// edge case just so holds hit too late shrink properly
 			var lateThreshold:Float = 50.0;
 			if (note.hitDifference > lateThreshold) {
@@ -1283,6 +1295,9 @@ class PlayState extends MusicBeatState {
 				note.sustainProgress *= shrinkFactor;
 			}
 		}
+		else
+			notes.removeNote(note);
+
 		if (playerVocals != null)
 			playerVocals.volume = 1;
 		if (currentHUD != null)
