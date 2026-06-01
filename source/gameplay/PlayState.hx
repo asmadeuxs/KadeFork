@@ -540,6 +540,8 @@ class PlayState extends MusicBeatState {
 		Conductor.current.music.onComplete = endSong;
 	}
 
+	@:unreflective var smallThreshold:Float = 0.0001;
+
 	function generateSong():Void {
 		Conductor.mapTimingPoints(currentChart);
 
@@ -556,6 +558,7 @@ class PlayState extends MusicBeatState {
 		unspawnNotes.resize(0);
 		var noteTypes:Array<String> = [];
 
+		var chartNotes:Array<NoteData> = [];
 		for (note in currentChart.data.notes) {
 			var daStrumTime:Float = note.time;
 			if (daStrumTime < 0)
@@ -577,9 +580,21 @@ class PlayState extends MusicBeatState {
 						prevNote.length = Math.max(0, currStart - prevNote.time - 5);
 				}
 			}
-			unspawnNotes.push(swagNote);
+			chartNotes.push(swagNote);
 			if (swagNote.type != null && !noteTypes.contains(swagNote.type))
 				noteTypes.push(swagNote.type);
+		}
+
+		for (i in 0...chartNotes.length) {
+			if (i == 0) {
+				unspawnNotes.push(chartNotes[i]);
+				continue;
+			}
+			var prev = unspawnNotes[unspawnNotes.length - 1];
+			var curr = unspawnNotes[i];
+			if (Math.abs(curr.time - prev.time) < smallThreshold && prev.lane == curr.lane && prev.owner == curr.owner)
+				continue;
+			unspawnNotes.push(curr);
 		}
 		unspawnNotes.sort(sortByShit);
 
@@ -773,7 +788,7 @@ class PlayState extends MusicBeatState {
 			eventPosition++;
 			return;
 		}
-		if (scheduled.time - time > 0.00001)
+		if (scheduled.time - time > smallThreshold)
 			return;
 		for (event in scheduled.timeline)
 			processEvent(event);
@@ -966,9 +981,10 @@ class PlayState extends MusicBeatState {
 
 		if (next != null && next.canBeHit) {
 			queue.shift();
+			// this check is just here in case the ghost notes check on chart parsing failed earlier
 			for (battat in queue) {
 				// if the note is too old then we don't bother
-				if (Math.abs(next.strumTime - battat.strumTime) > 0.00001)
+				if (Math.abs(next.strumTime - battat.strumTime) > smallThreshold)
 					break;
 				// we PRETEND that's THE exact note we want to hit
 				// this is because it can hurt us if we leave it unhit
