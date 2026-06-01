@@ -590,13 +590,15 @@ class PlayState extends MusicBeatState {
 				unspawnNotes.push(chartNotes[i]);
 				continue;
 			}
-			var prev = unspawnNotes[unspawnNotes.length - 1];
-			var curr = unspawnNotes[i];
+			var prev = chartNotes[chartNotes.length - 1];
+			var curr = chartNotes[i];
 			if (Math.abs(curr.time - prev.time) < smallThreshold && prev.lane == curr.lane && prev.owner == curr.owner)
 				continue;
 			unspawnNotes.push(curr);
 		}
 		unspawnNotes.sort(sortByShit);
+		chartNotes.resize(0);
+		chartNotes = null;
 
 		events = currentChart.data.events;
 
