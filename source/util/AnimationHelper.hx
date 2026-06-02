@@ -6,6 +6,7 @@ import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxPoint;
 import flixel.util.typeLimit.OneOfTwo;
+import gameplay.DancerSprite;
 import ui.FunkinSprite;
 
 class AnimationHelper {
@@ -24,6 +25,7 @@ class AnimationHelper {
 			var indices:Array<Int> = null;
 			var frameRate:Int = defaultFramerate;
 			var offset:FlxPoint = FlxPoint.get(0, 0);
+			var animCooldown:Null<Float> = null;
 			var looped:Bool = false;
 
 			if (Std.isOfType(def, String))
@@ -40,6 +42,8 @@ class AnimationHelper {
 				looped = obj.looped == true;
 				if (obj.offset != null)
 					offset = FlxPoint.get(obj.offset.x ?? 0, obj.offset.y ?? 0);
+				if (obj.cooldown != null)
+					animCooldown = obj.cooldown;
 			}
 
 			if (prefix == null)
@@ -59,6 +63,11 @@ class AnimationHelper {
 					sprite.animation.addByIndices(animName, prefix, indices, "", frameRate, looped);
 				else
 					sprite.animation.addByPrefix(animName, prefix, frameRate, looped);
+			}
+			if (Std.isOfType(sprite, DancerSprite)) {
+				var ds:DancerSprite = cast sprite;
+				if (animCooldown != null)
+					ds.animDuration.set(animName, animCooldown);
 			}
 			if (onAddAnim != null)
 				onAddAnim(animName);

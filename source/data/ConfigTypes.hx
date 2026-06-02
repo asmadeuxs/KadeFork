@@ -84,6 +84,11 @@ typedef JsonAnimation = {
 	?offset:JsonOffsetField,
 	?frameRate:Int,
 	?looped:Bool,
+	// -- SPECIAL FIELDS --
+	/**
+	 * This is so DancerSprite(s) can have specific animation cooldowns
+	**/
+	?cooldown:Null<Float>,
 }
 
 typedef AnimationDef = OneOfTwo<String, JsonAnimation>;
@@ -133,7 +138,7 @@ typedef CharacterConfig = {
 	?facesLeft:Bool,
 
 	// animations
-	animations:Dynamic, // temporary
+	animations:Dynamic, // temporary (?)
 	?singDuration:Null<Float>,
 	?beatsToDance:Null<Float>,
 	?idleAnimations:Array<String>,

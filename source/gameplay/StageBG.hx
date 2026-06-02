@@ -249,9 +249,13 @@ class StageBG extends FlxBasic {
 						sprite.scale.set(data.scale ?? 0.0, data.scale ?? 0.0);
 					sprite.updateHitbox();
 				}
+				var lq:Bool = Preferences.user.lowQualityMode;
+				var story:Bool = PlayState.playlist?.isStory() ?? false;
 				sprite.visible = switch Std.string(data.visible) {
-					case "lowQualityMode": Preferences.user.lowQualityMode;
-					case "highQualityMode": !Preferences.user.lowQualityMode;
+					case "storyHighQuality", "shq": !lq && story;
+					case "storyLowQuality", "slq": lq && story;
+					case "highQualityMode", "hq": !lq;
+					case "lowQualityMode", "lq": lq;
 					case _: data.visible != "false";
 				}
 				sprite.antialiasing = data.antialiasing ?? stageData.defaultAntialiasing ?? true;

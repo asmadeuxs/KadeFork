@@ -765,7 +765,7 @@ class PlayState extends MusicBeatState {
 			callFuncInScripts("playerDeath", []);
 			var char:Character = opponentMode ? dad : boyfriend;
 			char.stunned = true;
-			openSubState(new gameplay.GameOverSubstate(char.getScreenPosition().x, char.getScreenPosition().y));
+			openSubState(new gameplay.GameOverSubstate(char));
 			#if hxdiscord_rpc
 			// Game Over doesn't get his own variable because it's only used here
 			DiscordClient.changePresence('${chartMetadata.name} (${difficulty.toUpperCase()})', 'Game Over!', iconRPC);
@@ -844,39 +844,41 @@ class PlayState extends MusicBeatState {
 	function noteUpdate(time:Float, elapsed:Float):Void {
 		for (daNote in notes.getActiveNotes()) {
 			var perfectMode:Bool = daNote.strumline.botplay;
-			var lastSl:Strumline = null;
 			var noteKill:Bool = false;
 
 			if (perfectMode && !daNote.isFake) {
 				if (!daNote.wasGoodHit && daNote.strumTime <= Conductor.time) {
-					if (lastSl != null && daNote.isSustain)
-						lastSl.playAnim(daNote.noteData, 'confirm');
-
+					var strum = daNote.strumline.getStrum(daNote.noteData);
+					if (strum != null) {
+						daNote.strumline.playAnim(daNote.noteData, 'confirm');
+						strum.resetAnimTimer = 0.25 + (daNote.sustainLength * 0.001);
+					}
 					if (daNote.mustPress && !daNote.wasGoodHit)
 						goodNoteHit(daNote);
 					else if (!daNote.mustPress) {
 						opponentNoteHit(daNote);
 						noteKill = !daNote.isSustain;
 					}
-					lastSl = daNote.strumline;
-				}
-				if (daNote.wasGoodHit && daNote.isSustain) {
-					daNote.isLocked = true;
-					daNote.sustainProgress -= elapsed * 1000.0;
-					if (daNote.sustainProgress <= 0)
-						noteKill = true;
 				}
 			}
 
 			if (daNote.wasGoodHit && daNote.isSustain) {
 				if (perfectMode || holdInputs[daNote.noteData]) {
+					if (!daNote.isLocked)
+						daNote.isLocked = true;
 					if (daNote.holdReleased) { // not resetting the timer here, you had your chance
 						daNote.holdReleased = false;
 						daNote.alpha = daNote.baseHoldAlpha;
 					}
 					daNote.sustainProgress -= elapsed * 1000.0;
+
 					if (daNote.sustainProgress <= 0) {
-						daNote.strumline.playAnim(daNote.noteData, "pressed");
+						var strum = daNote.strumline.getStrum(daNote.noteData);
+						if (strum != null) {
+							daNote.strumline.playAnim(daNote.noteData, 'pressed');
+							if (perfectMode)
+								strum.resetAnimTimer = 0.15;
+						}
 						noteKill = true;
 					}
 					else {
@@ -921,8 +923,6 @@ class PlayState extends MusicBeatState {
 			}
 
 			if (noteKill) {
-				if (lastSl != null)
-					lastSl.playAnim(daNote.noteData, 'static', true);
 				if (daNote.missed && playerVocals != null)
 					playerVocals.volume = 0;
 				notes.removeNote(daNote);
@@ -939,8 +939,9 @@ class PlayState extends MusicBeatState {
 				return;
 		}
 		var char:Character = opponentMode ? boyfriend : dad;
+		var dur:Float = char.getAnimDuration();
 		char.sing(note.noteData, '', true);
-		char.danceCooldown = char.singDuration + note.sustainLength;
+		char.danceCooldown = dur + (note.sustainLength * 0.001);
 
 		callFuncInScripts("opponentNoteHit", [note]);
 		if (playerVocals != null && !isMultiVocals)
@@ -1297,8 +1298,9 @@ class PlayState extends MusicBeatState {
 		callFuncInScripts("goodNoteHit", [note]);
 
 		var char:Character = opponentMode ? dad : boyfriend;
+		var dur:Float = char.getAnimDuration();
 		char.sing(note.noteData, null, true);
-		char.danceCooldown = char.singDuration + note.sustainLength;
+		char.danceCooldown = dur + (note.sustainLength * 0.001);
 
 		if (note.isSustain) {
 			note.isLocked = true;

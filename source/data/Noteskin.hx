@@ -1,15 +1,18 @@
 package data;
 
 import data.ConfigTypes;
+import data.hscript.Script;
+import data.hscript.ScriptLoader;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.typeLimit.OneOfTwo;
-import ui.FunkinSprite;
 import gameplay.note.Note;
+import gameplay.note.Strumline.StrumNote;
 import haxe.Json5;
+import ui.FunkinSprite;
 import util.AnimationHelper;
 
 // i hate this file in specific -asmadeuxs
@@ -84,6 +87,8 @@ class Noteskin {
 	};
 
 	public var resolvedPath:String = null;
+	public var file:NoteskinFile;
+	//public var script:Script;
 
 	private var graphicKeys:Array<String> = [];
 
@@ -107,8 +112,6 @@ class Noteskin {
 	private var holdBodyAnimNames:Array<String>;
 	private var holdEndAnimNames:Array<String>;
 	private var splashAnimNames:Array<Array<String>>;
-
-	public var file:NoteskinFile;
 
 	public function new(file:NoteskinFile) {
 		this.file = file;
@@ -219,8 +222,8 @@ class Noteskin {
 	private inline function getFromArray(arr:Array<String>, noteData:Int):String
 		return arr.length == 0 ? "" : arr[noteData % arr.length];
 
-	public function generateStrum(noteData:Int):FunkinSprite {
-		var strum = new FunkinSprite();
+	public function generateStrum(noteData:Int):StrumNote {
+		var strum = new StrumNote();
 		noteData = FlxMath.wrap(noteData, 0, keyCount - 1);
 		var frames = getAtlas("strums");
 

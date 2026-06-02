@@ -1,8 +1,6 @@
 package gameplay.note;
 
 import data.Noteskin;
-import data.hscript.Script;
-import data.hscript.ScriptLoader;
 import flixel.FlxG;
 import flixel.group.FlxSpriteGroup;
 import ui.FunkinSprite;
@@ -10,13 +8,37 @@ import util.ObjectPool;
 
 using util.CoolUtil;
 
+class StrumNote extends FunkinSprite {
+	public var resetAnimation:String = 'static';
+	public var resetAnimTimer:Float = 0.0;
+	public var downscroll:Bool = false;
+	public var speed:Float = 1.0;
+
+	override function update(elapsed:Float):Void {
+		super.update(elapsed);
+		if (resetAnimTimer > 0.0) {
+			resetAnimTimer -= elapsed;
+			if (resetAnimTimer <= 0.0) {
+				playAnim(resetAnimation, true);
+				resetAnimTimer = 0.0;
+			}
+		}
+	}
+
+	override public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void {
+		super.playAnim(AnimName, Force, Reversed, Frame);
+		this.centerOrigin();
+		this.centerOffsets();
+	}
+}
+
 @:access(gameplay.Note)
 class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 	public var keyCount:Int = 4;
 	public var noteskin:Noteskin;
 
 	public var scrollSpeed:Null<Float> = null;
-	public var strums:Array<FunkinSprite> = [];
+	public var strums:Array<StrumNote> = [];
 	public var botplay:Bool = true;
 
 	var splashPool:ObjectPool<FunkinSprite>;
@@ -39,7 +61,7 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 		if (splash != null) {
 			splash.alpha = 0.6;
 			splash.setPosition(0, 0);
-			var strum = getStrum(noteData);
+			var strum:StrumNote = getStrum(noteData);
 			if (strum != null)
 				splash.objectCenter(strum, XY);
 			splash.x += x;
@@ -67,7 +89,7 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 		return splash != null;
 	}
 
-	public function getStrum(noteData:Int)
+	public function getStrum(noteData:Int):StrumNote
 		return strums[noteData];
 
 	public function getScrollSpeed(noteData:Int):Null<Float>
@@ -90,7 +112,7 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 		speeds.resize(this.keyCount);
 		downscroll.resize(this.keyCount);
 		for (i in 0...this.keyCount) {
-			var strum:FunkinSprite = noteskin.generateStrum(i);
+			var strum:StrumNote = noteskin.generateStrum(i);
 			strums.push(strum);
 			// strum.updateHitbox();
 			changeScrollDirection(i, Preferences.user.scrollType);
@@ -100,7 +122,7 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 
 	public function repositionStrum(noteData:Int):Void {
 		var i:Int = noteData % strums.length;
-		var strum:FunkinSprite = strums[i];
+		var strum:StrumNote = strums[i];
 		if (strum != null) {
 			strum.x = (strumSpacing * strum.scale.x) * i;
 			strum.y = (downscroll[i] == -1) ? FlxG.height - 185 : 30;
@@ -125,11 +147,8 @@ class Strumline extends FlxTypedSpriteGroup<FunkinSprite> {
 	}
 
 	public function playAnim(direction:Int = 0, animName:String, force:Bool = false, reversed:Bool = false, frame:Int = 0):Void {
-		var strum:FunkinSprite = getStrum(direction);
-		if (strum != null) {
+		var strum:StrumNote = getStrum(direction);
+		if (strum != null)
 			strum.playAnim(animName, force, reversed, frame);
-			strum.centerOrigin();
-			strum.centerOffsets();
-		}
 	}
 }

@@ -11,22 +11,23 @@ import gameplay.PlayState;
 class GameOverSubstate extends MusicBeatSubstate {
 	var bf:Character;
 	var camFollow:FlxObject;
+	var dier:Character;
 
-	var stageSuffix:String = "";
-
-	public function new(x:Float, y:Float) {
+	public function new(dier:Character) {
 		Conductor.current.active = false;
-		stageSuffix = PlayState.current.boyfriend.gameOverSuffix;
-
+		this.dier = dier;
 		super();
 
 		Conductor.bpm = 100;
 		Conductor.setTime(0.0);
 
-		add(bf = new Character(x, y, PlayState.current.boyfriend.deathCharacter, PLAYER));
+		var x:Float = dier.getScreenPosition().x;
+		var y:Float = dier.getScreenPosition().y;
+
+		add(bf = new Character(x, y, dier.deathCharacter, PLAYER));
 		add(camFollow = new FlxObject(bf.getGraphicMidpoint().x, bf.getGraphicMidpoint().y, 1, 1));
 
-		FlxG.sound.play(Paths.sound('fnf_loss_sfx$stageSuffix'));
+		FlxG.sound.play(Paths.sound(dier.deathCrackSfx));
 
 		// FlxG.camera.followLerp = 1;
 		// FlxG.camera.focusOn(FlxPoint.get(FlxG.width * 0.5, FlxG.height * 0.5));
@@ -54,7 +55,7 @@ class GameOverSubstate extends MusicBeatSubstate {
 			FlxG.camera.follow(camFollow, LOCKON, 0.01);
 
 		if (bf.animation.curAnim.name == 'firstDeath' && bf.animation.curAnim.finished) {
-			FlxG.sound.playMusic(Paths.music('gameOver' + stageSuffix));
+			FlxG.sound.playMusic(Paths.music(dier.gameOverMusic));
 			Conductor.current.active = true;
 		}
 	}
@@ -71,7 +72,7 @@ class GameOverSubstate extends MusicBeatSubstate {
 			isEnding = true;
 			bf.playAnim('deathConfirm', true);
 			FlxG.sound.music.stop();
-			FlxG.sound.play(Paths.music('gameOverEnd' + stageSuffix));
+			FlxG.sound.play(Paths.music(dier.deathConfirmSfx));
 			new FlxTimer().start(0.7, function(tmr:FlxTimer) {
 				FlxG.camera.fade(FlxColor.BLACK, 2, false, function() {
 					FlxG.switchState(new gameplay.PlayState());

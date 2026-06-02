@@ -19,10 +19,9 @@ enum abstract CharacterType(String) from String to String {
 }
 
 @:allow(editor.CharacterEditor)
-class Character extends ui.FunkinSprite {
+class Character extends DancerSprite {
 	public static final DEFAULT_CHARACTER:String = "bf";
 
-	public static final DEFAULT_IDLE_ANIMATIONS:Array<String> = ["idle"];
 	public static final DEFAULT_SING_ANIMATIONS:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
 	public static final DEFAULT_MISS_ANIMATIONS:Array<String> = ["singLEFTmiss", "singDOWNmiss", "singUPmiss", "singRIGHTmiss"];
 
@@ -32,25 +31,21 @@ class Character extends ui.FunkinSprite {
 	public var characterId:String = DEFAULT_CHARACTER;
 	public var healthIconPath:String;
 
-	public var singDuration:Float = 1.0;
-	public var animationTimer:Float = 0.0;
-
-	public var beatsToDance:Float = 2;
-	public var danceSpeed:Float = 1;
-
-	public var danceCooldown:Float = 0.0;
 	public var charType:String = CharacterType.OPPONENT;
 	public var stunned:Bool = false;
 
-	public var idleAnimations:Array<String> = DEFAULT_IDLE_ANIMATIONS;
+	public var idleSuffix:String = '';
+
 	public var missAnimations:Array<String> = DEFAULT_SING_ANIMATIONS;
 	public var singAnimations:Array<String> = DEFAULT_MISS_ANIMATIONS;
 
 	public var cameraOffset:FlxPoint = new FlxPoint(0, 0);
 
-	public var idleSuffix:String = "";
+	// game over stuff
 	public var deathCharacter:String = 'bf';
-	public var gameOverSuffix:String = '';
+	public var deathCrackSfx:String = 'fnf_loss_sfx';
+	public var gameOverMusic:String = 'gameOver';
+	public var deathConfirmSfx:String = 'gameOverEnd';
 
 	/**
 	 * This scuffed ass variable is used specifically when the character parsing fails
@@ -67,7 +62,6 @@ class Character extends ui.FunkinSprite {
 	private var filePath:String = null;
 
 	private var characterScript:Script;
-	private var currentDance:Int = 0;
 
 	public var isPlayer(get, never):Bool;
 
@@ -81,44 +75,29 @@ class Character extends ui.FunkinSprite {
 		loadCharacter(character);
 	}
 
-	override function update(elapsed:Float):Void {
+	override public function update(elapsed:Float):Void {
 		super.update(elapsed);
 		if (placeholder)
 			return;
-		if (!debugMode && !stunned) {
-			danceCheck();
-			if (isSinging()) {
-				danceCooldown -= elapsed / singDuration;
-				if (danceCooldown <= 0.0)
-					dance(true);
+
+		var v = scriptFuncCall('preUpdate', [this, elapsed]);
+		if (v == null || v.value != ScriptLoader.STOP_FUNC) {
+			// I would put these up there, but,
+			// just in case you have a script that also affects the character editor
+			// or the game over screen
+			if (!stunned && !debugMode) {
+				if (!isSinging())
+					danceBeatCheck();
+				if (danceCooldown > 0.0)
+					danceCooldownCheck(elapsed);
 			}
 		}
 		scriptFuncCall('update', [this, elapsed]);
 	}
 
-	var _nextDanceBeat:Float = -1.0;
-	var _lastInterval:Float = -1.0;
-
-	public function danceCheck():Void {
-		var interval:Float = beatsToDance / danceSpeed;
-		if (placeholder || debugMode || stunned || isSinging() || interval <= 0)
-			return;
-
-		if (_nextDanceBeat < 0)
-			_nextDanceBeat = Conductor.currentBeat + interval;
-
-		if (Conductor.currentBeat >= _nextDanceBeat) {
-			dance(true);
-			_nextDanceBeat += interval;
-			if (Conductor.currentBeat > _nextDanceBeat + interval)
-				_nextDanceBeat = Conductor.currentBeat + interval;
-		}
-	}
-
-	public function dance(?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
+	override public function dance(?force:Bool = false, ?reversed:Bool = false, ?frame:Int = 0) {
 		if (placeholder)
 			return;
-
 		var v = scriptFuncCall('preDance', [this, force, reversed, frame]);
 		if (v == null || v.value != ScriptLoader.STOP_FUNC) {
 			playAnim(idleAnimations[currentDance] + idleSuffix, force, reversed, frame);
@@ -225,7 +204,7 @@ class Character extends ui.FunkinSprite {
 					filePath = file;
 
 					var file:CharacterConfig = haxe.Json5.parse(Paths.getText(file));
-					this.idleAnimations = file.idleAnimations ?? DEFAULT_IDLE_ANIMATIONS;
+					this.idleAnimations = file.idleAnimations ?? DancerSprite.DEFAULT_IDLE_ANIMATIONS;
 					this.singAnimations = file.singAnimations ?? DEFAULT_SING_ANIMATIONS;
 					this.missAnimations = file.missAnimations ?? DEFAULT_MISS_ANIMATIONS;
 					if (file.beatsToDance != null)
@@ -234,7 +213,7 @@ class Character extends ui.FunkinSprite {
 						this.beatsToDance = idleAnimations.length >= 2 ? 1 : 2;
 
 					var fileFlipX:Bool = file.flipX ?? false;
-					this.singDuration = file.singDuration ?? 4.0;
+					this.animDuration.set('default', file.singDuration ?? 1.0);
 					this.antialiasing = file.antialiasing ?? DEFAULT_ANTIALIASING;
 					this.displayName = file.name ?? "idk";
 					this.facesLeft = file.facesLeft;
