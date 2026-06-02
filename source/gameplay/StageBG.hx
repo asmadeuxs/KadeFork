@@ -256,6 +256,7 @@ class StageBG extends FlxBasic {
 					case "storyLowQuality", "slq": lq && story;
 					case "highQualityMode", "hq": !lq;
 					case "lowQualityMode", "lq": lq;
+					case "storyMode", "story": story;
 					case _: data.visible != "false";
 				}
 				sprite.antialiasing = data.antialiasing ?? stageData.defaultAntialiasing ?? true;
