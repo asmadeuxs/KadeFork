@@ -58,8 +58,8 @@ class DancerSprite extends ui.FunkinSprite {
 	 * @param anim String (leave unspecified to get from the current animation or the default cooldown)
 	**/
 	public function getAnimDuration(?anim:Null<String>):Float {
-		if (anim == null)
-			anim = animation.curAnim.name;
+		if (anim == null && animation != null && animation.curAnim != null)
+			anim = animation?.curAnim?.name;
 		var f:Float = 1.0;
 		if (animDuration.exists(anim))
 			f = animDuration.get(anim);
