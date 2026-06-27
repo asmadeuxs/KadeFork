@@ -21,13 +21,21 @@ class ScriptLoader {
 	private static function setDefaultVariables(interp:InterpType, ?mod:String = null) {
 		#if FEATURE_HSCRIPT
 		// script global
+		interp.variables.set("_MODNAME", mod);
 		interp.variables.set("STOP", STOP_FUNC);
 		interp.variables.set("CONTINUE", CONTINUE_FUNC);
 		interp.variables.set("KILL", KILL_SCRIPT);
 		if (mod != null) {
-			interp.variables.set("setSetting", (name:String, value:Dynamic) -> return Preferences.setModOption(mod, name, value));
-			interp.variables.set("getSetting", (name:String) -> return Preferences.getModOption(mod, name));
-			interp.variables.set("_MODNAME", mod);
+			interp.variables.set("setSetting", (name:String, value:Dynamic, ?fromMod:Null<String> = null) -> {
+				if (fromMod == null)
+					fromMod = mod;
+				return Preferences.setModOption(fromMod, name, value)
+			});
+			interp.variables.set("getSetting", (name:String, ?fromMod:Null<String> = null) -> {
+				if (fromMod == null)
+					fromMod = mod;
+				return Preferences.getModOption(fromMod, name));
+			});
 		}
 		// standard library
 		interp.variables.set("Math", Math);

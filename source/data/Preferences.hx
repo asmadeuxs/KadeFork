@@ -1,13 +1,14 @@
 package data;
 
-import Controls.ActionMap;
+import input.KeyboardDevice;
 import flixel.FlxG;
-import flixel.input.keyboard.FlxKey;
+import input.Controls;
+import input.KeyboardDevice;
 import util.Mods;
 
 @:publicFields class Save {
 	// General Gameplay
-	var keybinds:ActionMap = Controls.defaultActions.copy();
+	var keybinds:KeyboardActionMap = null;
 	var frameRate:Int = 120; // How many frames per second the game runs at
 	var scrollType:Int = 0; // Changes where the notes scroll to
 	var centerStrums:Bool = false; // Centers your strums and hides the opponent's
@@ -77,18 +78,17 @@ class Preferences {
 		FlxG.save.bind('$appName/$saveName', company);
 
 		for (_ => pref in Reflect.fields(user)) {
-			var value:Dynamic = Reflect.field(Preferences.user, pref);
+			var value:Dynamic = Reflect.field(user, pref);
 			if (value == null)
-				value = Reflect.field(Preferences.deft, pref);
+				value = Reflect.field(deft, pref);
 			Reflect.setField(FlxG.save.data, pref, value);
 		}
 
 		var saveModOptions:Dynamic = {};
 		for (mod => options in modOptions) {
 			var modObj:Dynamic = {};
-			for (opt => val in options) {
+			for (opt => val in options)
 				Reflect.setField(modObj, opt, val);
-			}
 			Reflect.setField(saveModOptions, mod, modObj);
 		}
 		FlxG.save.data.modOptions = saveModOptions;
@@ -143,12 +143,18 @@ class Preferences {
 	}
 
 	public static function loadKeybinds():Void {
-		for (action in Preferences.user.keybinds.keys()) {
-			var userKeys = Preferences.user.keybinds.get(action);
-			if (!Controls.current.actions.exists(action))
-				Controls.current.actions.set(action, []);
+		if (deft.keybinds == null)
+			deft.keybinds = KeyboardDevice.defaultActions.copy();
+		if (user.keybinds == null)
+			user.keybinds = deft.keybinds.copy();
+
+		for (action in user.keybinds.keys()) {
+			var userKeys = user.keybinds.get(action);
+			var keyboard:KeyboardDevice = cast Controls.devices[0];
+			if (!keyboard.actions.exists(action))
+				keyboard.actions.set(action, []);
 			for (i in 0...userKeys.length)
-				Controls.current.actions.get(action)[i] = userKeys[i];
+				keyboard.actions.get(action)[i] = userKeys[i];
 		}
 	}
 

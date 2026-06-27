@@ -161,7 +161,6 @@ class PlayState extends MusicBeatState {
 
 		Conductor.current.active = false;
 		Conductor.setTime(-Conductor.crotchet * 16);
-
 		super.create();
 		current = this;
 		Conductor.current.active = false;
@@ -177,14 +176,14 @@ class PlayState extends MusicBeatState {
 		initialJudgeDiff = Preferences.user.judgeDifficulty;
 		currentScrollType = Preferences.user.scrollType;
 
-		inputMgr = new InputManager(keyPressed, keyReleased);
+		inputMgr = new InputManager(inputPressed, inputReleased);
 		inputQueue.resize(noteActions.length);
 		holdInputs.resize(noteActions.length);
 		for (i in 0...inputQueue.length) {
 			inputQueue[i] = [];
 			holdInputs[i] = false;
 		}
-		setupKeybinds();
+		setupNoteInputs();
 		inputMgr.init(); // NEED to do this
 
 		#if hxdiscord_rpc
@@ -339,17 +338,17 @@ class PlayState extends MusicBeatState {
 		// else
 		// session.scoreMultiplier = currentSave.judgeDifficulty;
 		setupUnderlay();
-		setupKeybinds();
 		if (currentHUD != null)
 			currentHUD.onSettingsChanged();
 	}
 
-	public function setupKeybinds() {
+	public function setupNoteInputs() {
 		for (noteData in 0...noteActions.length) {
 			var action = noteActions[noteData];
-			var keys:Array<FlxKey> = controls.actions[action];
-			for (key in keys)
-				inputMgr.remapKeyCode(key, noteData);
+			var keys:Array<FlxKey> = Preferences.user.keybinds.get(action);
+			if (keys != null)
+				for (key in keys)
+					inputMgr.remapKeyCode(key, noteData);
 		}
 	}
 
@@ -368,8 +367,8 @@ class PlayState extends MusicBeatState {
 			}
 			else if (Preferences.user.strumUnderlayType == 1) {
 				uiDimBackground.scale.x = FlxG.width;
-				insert(members.indexOf(stage), uiDimBackground);
 				uiDimBackground.screenCenter(X);
+				insert(members.indexOf(stage), uiDimBackground);
 			}
 			// just making sure
 			uiDimBackground.y = 0;
@@ -738,7 +737,7 @@ class PlayState extends MusicBeatState {
 		if (ret != null && ret.value == ScriptLoader.STOP_FUNC)
 			return;
 
-		if (FlxG.keys.justPressed.ENTER && startedCountdown && canPause) {
+		if (controls.PAUSE_P && startedCountdown && canPause) {
 			pause();
 			Conductor.current.stopMusic();
 			#if hxdiscord_rpc
@@ -971,8 +970,8 @@ class PlayState extends MusicBeatState {
 			placeInQ.splice(i, 1);
 	}
 
-	public function keyPressed(key:Int):Void {
-		var on:Bool = inputMgr != null && inputEnabled && !playerStrums.botplay;
+	public function inputPressed(key:Int):Void {
+		var on:Bool = inputEnabled && !playerStrums.botplay;
 		if (!on || key == -1 || paused || inCutscene || !generatedMusic || endingSong)
 			return;
 
@@ -1024,8 +1023,8 @@ class PlayState extends MusicBeatState {
 		}
 	}
 
-	public function keyReleased(key:Int):Void {
-		var on:Bool = inputMgr != null && inputEnabled && !playerStrums.botplay;
+	public function inputReleased(key:Int):Void {
+		var on:Bool = inputEnabled && !playerStrums.botplay;
 		if (!on || key == -1 || paused || inCutscene || !generatedMusic || endingSong)
 			return;
 		holdInputs[key] = false;

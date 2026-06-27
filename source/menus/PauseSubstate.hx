@@ -129,17 +129,14 @@ class PauseSubstate extends MusicBeatSubstate {
 		add(grpMenuShit);
 
 		reloadMenu();
-		canInput = true;
-
-		camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 	}
 
 	override function update(elapsed:Float) {
 		if (pauseMusic.volume < 0.5)
 			pauseMusic.volume += 0.01 * elapsed;
 		super.update(elapsed);
-		var upP:Bool = controls.UP_P;
 		if (canInput) {
+			var upP:Bool = controls.UP_P;
 			if (controls.DOWN_P || upP)
 				changeSelection(upP ? -1 : 1);
 			if (controls.ACCEPT && menuItems[curSelected] != null && menuItems[curSelected].func != null)
@@ -176,5 +173,6 @@ class PauseSubstate extends MusicBeatSubstate {
 		}
 		changeSelection(curSelected);
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+		canInput = true;
 	}
 }

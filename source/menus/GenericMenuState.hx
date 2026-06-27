@@ -1,6 +1,7 @@
 package menus;
 
 import flixel.FlxG;
+import input.Controls;
 import util.Mods;
 
 typedef SimpleMenuButton = {
@@ -45,11 +46,8 @@ class GenericMenuState extends MusicBeatState {
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
-		if (canInput) {
-			if (verticalKeyRepeat || horizontalKeyRepeat)
-				Controls.current.update(elapsed);
+		if (canInput)
 			handleInput();
-		}
 	}
 
 	public function handleInput():Void {

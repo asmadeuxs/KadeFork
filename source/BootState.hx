@@ -8,6 +8,7 @@ import flixel.graphics.FlxGraphic;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.util.FlxColor;
+import input.*;
 
 class BootState extends flixel.FlxState {
 	function setupTransition() {
@@ -36,8 +37,11 @@ class BootState extends flixel.FlxState {
 		lime.app.Application.current.onExit.add(function(exitCode) DiscordClient.shutdown());
 		#end
 
-		// init user settings and scores
-		new Controls(Controls.defaultActions.copy());
+		var controls = new Controls();
+		Controls.connectDevice(new KeyboardDevice(KeyboardDevice.defaultActions.copy()));
+		Controls.connectDevice(new GamepadDevice(GamepadDevice.defaultActions.copy()));
+
+		// user settings and scores
 		data.Preferences.load();
 		data.Highscore.load();
 		util.Mods.loadMods();
@@ -49,6 +53,12 @@ class BootState extends flixel.FlxState {
 		for (id in util.Mods.getEnabled())
 			levelRegistry.loadLevels(id);
 		levelRegistry = null;
+
+		FlxG.signals.preUpdate.add(function() {
+			for (controller in Controls.connected)
+				controller.update(FlxG.elapsed);
+		});
+
 		lime.app.Application.current.onExit.add(function(e:Int) {
 			data.Preferences.save();
 			util.Mods.saveMods();

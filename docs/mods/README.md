@@ -7,7 +7,7 @@ You can add your own files or override existing ones
 ## Folder naming
 
 - Mods folder **cannot** contain forward slashes in their names
-	- Internally, this is used to distinguish a mod name from a path
+	- Internally, slashes are used to distinguish a mod name from a path
 		If your mod folder has a forward slash in its name, the assets system gets confused
 		and will likely think its a path and not a mod, that's why it may fail to get the asset from your mod.
 
@@ -20,12 +20,10 @@ Due to the nature of non-Windows systems, This modding system purposefully *disa
 All your files *must* be named and accessed with the correct case, so you can't call
 
 ```haxe
-Paths.image('menu/Background')
+Paths.image('menu/Background') // fails because the file name is "background.png" not "Background.png"
 ```
 
-While the actual file is named `background.png` - this will fail.
-
-So, name your files properly, access them with their actual names, case included.
+Name your files properly, access them with their actual names, case included.
 
 I do **not** plan on fixing this! -asmadeuxs
 
@@ -64,6 +62,4 @@ You can also provide a range of versions the mod is able to run on
 ```
 
 The good news is that if you don't set the version, it just assumes its meant to work in the latest version
-
-The bad news is that if you don't set the version, it **assumes** its meant to work in the latest version
-	If your mod uses deprecated functions/files or some characteristics added in a later version, it may be buggy for the player
+	If your mod uses deprecated functions/files or some characteristics added/removed in a later version, bugs may appear for the player, but the engine will attempt to warn about versioning mismatches

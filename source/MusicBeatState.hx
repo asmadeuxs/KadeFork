@@ -7,6 +7,7 @@ import flixel.math.FlxRect;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import input.Controls;
 import openfl.Lib;
 import util.CoolUtil;
 

@@ -1,6 +1,7 @@
 package data;
 
 import flixel.math.FlxMath.wrap;
+import input.*;
 
 using StringTools;
 
@@ -32,7 +33,9 @@ using StringTools;
 			case "checkmark": value == true ? "ON" : "OFF";
 			case "number": Std.string(value);
 			case "choice": (value is Int) ? choices[value] : Std.string(value);
-			case "keybind": Std.string(Controls.current.actions.get(this.variable)[0]);
+			case "keybind":
+				var keyboard:KeyboardDevice = cast Controls.devices[0];
+				Std.string(keyboard.actions.get(this.variable)[0]);
 			case "substate": "[OPEN]";
 			case _: Std.string(value);
 		};
@@ -69,15 +72,13 @@ using StringTools;
 		if (this.fromMod != null) {
 			value = Preferences.getModOption(this.fromMod, this.variable);
 			if (value == null) {
-				if (defaultValue != null)
-					value = defaultValue;
-				else
-					value = switch validateType(this.type) {
-						case "choice": choices[0];
-						case "number": 0.0;
-						case "bool": false;
-						case _: defaultValue;
-					}
+				value = if (defaultValue == null) switch validateType(this.type) {
+					case "choice": choices[0];
+					case "number": 0.0;
+					case "bool": false;
+					case _: defaultValue;
+				}
+				else defaultValue;
 			}
 		}
 		else

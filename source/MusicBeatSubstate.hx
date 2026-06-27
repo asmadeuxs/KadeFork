@@ -1,6 +1,7 @@
 package;
 
 import flixel.FlxG;
+import input.Controls;
 
 class MusicBeatSubstate extends flixel.FlxSubState implements IBeatSynched {
 	private var controls(get, never):Controls;

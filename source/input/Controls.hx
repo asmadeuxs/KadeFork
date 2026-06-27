@@ -1,133 +1,134 @@
-package;
+package input;
 
 import flixel.FlxG;
 import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
 
-typedef ActionMap = Map<String, Array<FlxKey>>;
+interface IInputDevice {
+	function update(elapsed:Float):Void;
+	function isPressed(action:String):Bool;
+	function getActions():Array<String>;
+}
 
 class Controls {
-	public static final defaultActions:ActionMap = [
-		// Gameplay
-		"note_left" => [FlxKey.D, FlxKey.LEFT],
-		"note_down" => [FlxKey.F, FlxKey.DOWN],
-		"note_up" => [FlxKey.J, FlxKey.UP],
-		"note_right" => [FlxKey.K, FlxKey.RIGHT],
-		"reset" => [FlxKey.R],
-		// UI
-		"ui_left" => [FlxKey.A, FlxKey.LEFT],
-		"ui_down" => [FlxKey.S, FlxKey.DOWN],
-		"ui_up" => [FlxKey.W, FlxKey.UP],
-		"ui_right" => [FlxKey.D, FlxKey.RIGHT],
-		"ui_pause" => [FlxKey.ENTER],
-		"ui_accept" => [FlxKey.ENTER],
-		"ui_back" => [FlxKey.ESCAPE, FlxKey.BACKSPACE],
-	];
-
 	public static var current:Controls = null;
 	public static var connected:Array<Controls> = [];
 
-	// instance stuff
-	public var actions:ActionMap;
+	public static var devices:Array<IInputDevice> = [];
 
+	public static function connectDevice(device:IInputDevice):IInputDevice {
+		devices.push(device);
+		return device;
+	}
+
+	public static function disconnectDevice(device:IInputDevice):Bool {
+		for (i in devices.length...0) {
+			if (devices[i] == device) {
+				devices.remove(device);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// instance stuff
 	public var repeatDelay:Float = 0.25;
 	public var repeatInterval:Float = 0.05;
 
+	public var disabled:Bool = false;
+
 	private var _time:Float = 0.0;
 
-	// TODO: controller support
-
-	public function new(actions:ActionMap):Void {
-		Controls.connected.push(this);
+	public function new():Void {
+		if (!Controls.connected.contains(this))
+			Controls.connected.push(this);
 		if (Controls.current == null)
 			Controls.current = Controls.connected[0];
-		this.actions = actions;
 	}
+
+	// action states
+	private var _pressed:Map<String, Bool> = new Map<String, Bool>();
+	private var _justPressed:Map<String, Bool> = new Map<String, Bool>();
+	private var _justReleased:Map<String, Bool> = new Map<String, Bool>();
+	private var _justRepeated:Map<String, Bool> = new Map<String, Bool>();
 
 	// key repetition code
 	// so your actions trigger several times when you hold down a key
 	private var _jPressedQueue:Map<String, Bool> = new Map<String, Bool>();
-	private var _justRepeated:Map<String, Bool> = new Map<String, Bool>();
-
 	private var _lastRepeats:Map<String, Float> = new Map<String, Float>();
 	private var _repeatTimers:Map<String, Float> = new Map<String, Float>();
 
 	public function update(elapsed:Float):Void {
+		if (disabled)
+			return;
 		for (key in _justRepeated.keys())
 			_justRepeated[key] = false;
 
 		_time += elapsed;
 
-		for (action in actions.keys()) {
-			var isPressedNow:Bool = pressed(action);
-			if (isPressedNow) {
+		for (dev in devices)
+			dev.update(elapsed);
+
+		var allActions:Array<String> = [];
+		for (dev in devices) {
+			var actions = dev.getActions();
+			for (action in actions) {
+				if (allActions.indexOf(action) == -1)
+					allActions.push(action);
+			}
+		}
+
+		for (action in allActions) {
+			var nowPressed:Bool = false;
+			for (dev in devices) {
+				if (dev.isPressed(action)) {
+					nowPressed = true;
+					break;
+				}
+			}
+
+			var wasPressed:Bool = _pressed[action] == true;
+			_justPressed[action] = nowPressed && !wasPressed;
+			_justReleased[action] = !nowPressed && wasPressed;
+			_pressed[action] = nowPressed;
+
+			if (nowPressed) {
 				if (_repeatTimers[action] == null) {
 					_repeatTimers[action] = _time;
 					_lastRepeats[action] = null;
 				}
-				var holdTime:Float = _time - _repeatTimers[action];
+				var holdTime = _time - _repeatTimers[action];
 				if (holdTime >= repeatDelay) {
-					var lastRepeatTime:Null<Float> = _lastRepeats[action];
-					if (lastRepeatTime == null || (_time - lastRepeatTime) >= repeatInterval) {
+					var lastRepeat = _lastRepeats[action];
+					if (lastRepeat == null || (_time - lastRepeat) >= repeatInterval) {
 						_justRepeated[action] = true;
 						_lastRepeats[action] = _time;
 					}
+					else
+						_justRepeated[action] = false;
 				}
+				else
+					_justRepeated[action] = false;
 			}
 			else {
 				_repeatTimers.remove(action);
 				_lastRepeats.remove(action);
-				_jPressedQueue.remove(action);
+				_justRepeated[action] = false;
 			}
 		}
 	}
 
-	public function justPressed(action:String):Bool {
-		var state:Bool = false;
-		if (actions.exists(action)) {
-			var actions:Array<FlxKey> = actions[action];
-			for (i => key in actions) {
-				if (FlxG.keys.checkStatus(key, JUST_PRESSED)) {
-					_jPressedQueue[action] = true;
-					state = true;
-					break;
-				}
-			}
-		}
-		return state;
-	}
+	public function justPressed(action:String):Bool
+		return _justPressed[action] == true;
 
-	public function pressed(action:String):Bool {
-		var state:Bool = false;
-		if (actions.exists(action)) {
-			var actions:Array<FlxKey> = actions[action];
-			for (i => key in actions) {
-				if (FlxG.keys.checkStatus(key, PRESSED)) {
-					state = true;
-					break;
-				}
-			}
-		}
-		return state;
-	}
+	public function pressed(action:String):Bool
+		return _pressed[action] == true;
+
+	public function justReleased(action:String):Bool
+		return _justReleased[action] == true;
 
 	public function justRepeated(action:String):Bool
 		return _justRepeated[action] == true;
-
-	public function justReleased(action:String):Bool {
-		var state:Bool = false;
-		if (actions.exists(action)) {
-			var actions:Array<FlxKey> = actions[action];
-			for (i => key in actions) {
-				if (FlxG.keys.checkStatus(key, JUST_RELEASED)) {
-					_jPressedQueue[action] = false;
-					state = true;
-					break;
-				}
-			}
-		}
-		return state;
-	}
 
 	// @formatter:off
 

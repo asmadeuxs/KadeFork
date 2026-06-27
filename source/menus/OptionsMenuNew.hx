@@ -27,7 +27,7 @@ class OptionsMenuNew extends flixel.FlxSubState {
 	public var data:OptionRegistry = new OptionRegistry();
 
 	public var curOptions:Array<Option> = null;
-	public var cats:Array<String> = [];
+	public var cats:Array<String> = null;
 
 	public function new():Void {
 		cats = [for (i in data.keys()) i];
@@ -88,21 +88,25 @@ class OptionsMenuNew extends flixel.FlxSubState {
 	}
 
 	public function changeCat(newCat:Int = 0):Void {
-		cat = wrap(cat + newCat, 0, cats.length - 1);
+		var length:Int = 1;
+		if (cats != null && cats.length > 0)
+			length = cats.length - 1;
+		cat = wrap(cat + newCat, 0, length);
 	}
 
 	public function reloadCategory() {
 		while (optionsGroup.members.length > 0)
 			optionsGroup.members.pop().destroy();
 		curOptions = data.getFromIndex(cat).options;
-		if (curOptions == null)
+
+		if (curOptions != null)
 			return;
 
 		for (i => option in curOptions) {
 			var optionName:String = option.name;
 			#if FEATURE_TRANSLATIONS
 			var prefix:String = option.translationPrefix != null ? option.translationPrefix : "";
-			optionName = Translator.translateString('options', prefix + 'option_${option.variable}');
+			optionName = Translator.translateString('options', prefix + 'option_' + option.variable);
 			#end
 			var nameText:FlxText = new FlxText(0, 0, 0, optionName, 24);
 			var valueText:FlxText = new FlxText(0, 0, 0, option.valueString(), 24);

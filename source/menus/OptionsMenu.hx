@@ -10,6 +10,7 @@ import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 import flixel.input.keyboard.FlxKey;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
+import input.*;
 import openfl.events.KeyboardEvent;
 import registry.OptionRegistry;
 import ui.FunkinCamera;
@@ -113,7 +114,6 @@ class OptionsMenu extends MusicBeatSubstate {
 			bindTimer -= 0.1;
 		if (binding)
 			return;
-		Controls.current.update(elapsed);
 		var up:Bool = controls.UP_P;
 		var uprpt:Bool = controls.UP_RPT;
 		if (up || uprpt || controls.DOWN_P || controls.DOWN_RPT) {
@@ -194,10 +194,11 @@ class OptionsMenu extends MusicBeatSubstate {
 			return;
 		}
 		var curOption:Option = curCatOptions[curSelected];
-		if (!controls.actions.exists(curOption.variable))
-			controls.actions.set(curOption.variable, []);
+		var keyboard:KeyboardDevice = cast Controls.devices[0];
+		if (!keyboard.actions.exists(curOption.variable))
+			keyboard.actions.set(curOption.variable, []);
 		Preferences.user.keybinds.get(curOption.variable)[0] = key.keyCode;
-		controls.actions.get(curOption.variable)[0] = key.keyCode;
+		keyboard.actions.get(curOption.variable)[0] = key.keyCode;
 		catOptions.members[curSelected * 2 + 1].text = curOption.valueString();
 		changeOption();
 		binding = false;

@@ -41,15 +41,14 @@ _FORKVERSION = Main.versions.FORK;
 // Negative values will be ignored
 _priority = -1;
 
-// These are return values for functins
+// These are return values for functions
 STOP = "#HSCRIPT_STOP_FUNC"; // Stops the *original* hardcoded function so you can make your own logic
 CONTINUE = "#HSCRIPT_CONTINUE_FUNC"; // Default return value for hscript functions, here for consistency, you can probably find a usage for it
 KILL = "#HSCRIPT_KILL_SCRIPT"; // This lets the hardcoded function run, but *immediately* deactivates the current script
 _MODNAME = "???" // This saves the name of the mod that the script was found at, useful for Paths mainly
 
-// These two are useful if you want to get/set settings for your own mod
-// keep in mind, these can only get settings from the *current* mod (at least for now)
-// So if you're playing songs from "Mod A", you won't be able to get settings at "Mod B"
-function getSetting(name:String):Dynamic;
-function setSetting(name:String, value:Dynamic):Void;
+// These two are useful if you want to get/set settings a mod
+// you can leave `fromMod` blank or undeclared to get the setting from the mod the script initialises from.
+function getSetting(name:String, ?fromMod:String):Dynamic;
+function setSetting(name:String, value:Dynamic, ?fromMod:String):Void;
 ```

@@ -146,7 +146,8 @@ class TitleState extends MusicBeatState {
 	var transitionTmr:FlxTimer = new FlxTimer();
 
 	override function update(elapsed:Float) {
-		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER;
+		super.update(elapsed);
+		var pressedEnter:Bool = controls.ACCEPT_P;
 		if (transitioning && pressedEnter) {
 			if (!transitionTmr.finished) {
 				if (spamming >= 3) {
@@ -158,26 +159,6 @@ class TitleState extends MusicBeatState {
 			}
 		}
 
-		#if mobile
-		for (touch in FlxG.touches.list) {
-			if (touch.justPressed) {
-				pressedEnter = true;
-			}
-		}
-		#end
-
-		var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
-
-		if (gamepad != null) {
-			if (gamepad.justPressed.START)
-				pressedEnter = true;
-
-			#if switch
-			if (gamepad.justPressed.B)
-				pressedEnter = true;
-			#end
-		}
-
 		if (pressedEnter && !transitioning && skippedIntro) {
 			titleText.animation.play('press');
 			transitioning = true;
@@ -186,11 +167,8 @@ class TitleState extends MusicBeatState {
 			transitionTmr.start(2, function(tmr:FlxTimer) util.StateOverride.switchState("menus.MainMenuState"));
 		}
 
-		if (pressedEnter && !skippedIntro) {
+		if (pressedEnter && !skippedIntro)
 			skipIntro();
-		}
-
-		super.update(elapsed);
 	}
 
 	function createCoolText(textArray:Array<String>) {
